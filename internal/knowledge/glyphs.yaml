@@ -1,0 +1,277 @@
+# glyphs.yaml - Glyph/Script pattern mappings
+# Maps letter/shape patterns to concept targets.
+# All glyph knowledge lives here, not in Go code.
+
+# Latin glyph patterns
+latin:
+  # Bigram patterns - maps common bigrams to targets
+  bigrams:
+    - pattern: "in"
+      concept: inward
+      confidence: plausible
+      weight: 0.4
+      
+    - pattern: "un"
+      concept: inward
+      confidence: plausible
+      weight: 0.4
+      
+    - pattern: "en"
+      concept: inward
+      confidence: plausible
+      weight: 0.4
+      
+    - pattern: "on"
+      concept: inward
+      confidence: plausible
+      weight: 0.4
+      
+    - pattern: "er"
+      concept: being
+      confidence: speculative
+      weight: 0.3
+      
+    - pattern: "or"
+      concept: being
+      confidence: speculative
+      weight: 0.3
+      
+    - pattern: "ar"
+      concept: being
+      confidence: speculative
+      weight: 0.3
+
+  # Prefix patterns
+  prefixes:
+    - pattern: "ins"
+      concept: inward
+      confidence: verified
+      weight: 0.5
+      
+    - pattern: "inh"
+      concept: inward
+      confidence: verified
+      weight: 0.5
+      
+    - pattern: "inb"
+      concept: inward
+      confidence: verified
+      weight: 0.5
+
+  # Suffix patterns
+  suffixes:
+    - pattern: "ly"
+      concept: action
+      confidence: speculative
+      weight: 0.3
+      
+    - pattern: "ty"
+      concept: action
+      confidence: speculative
+      weight: 0.3
+      
+    - pattern: "ry"
+      concept: action
+      confidence: speculative
+      weight: 0.3
+      
+    - pattern: "gy"
+      concept: action
+      confidence: speculative
+      weight: 0.3
+
+  # Vowel structure targets
+  vowel_structure:
+    heavy:
+      concept: breath
+      confidence: speculative
+      weight: 0.2
+    light:
+      concept: ground
+      confidence: speculative
+      weight: 0.2
+
+# Hebrew letter associations (Unicode codepoints)
+hebrew:
+  letters:
+    - rune: 0x05D0  # Aleph
+      name: aleph
+      concept: one
+      
+    - rune: 0x05D1  # Bet
+      name: bet
+      concept: container
+      
+    - rune: 0x05D2  # Gimel
+      name: gimel
+      concept: camel
+      
+    - rune: 0x05D3  # Dalet
+      name: dalet
+      concept: door
+      
+    - rune: 0x05D4  # He
+      name: he
+      concept: window
+      
+    - rune: 0x05D5  # Vav
+      name: vav
+      concept: connection
+      
+    - rune: 0x05D6  # Zayin
+      name: zayin
+      concept: weapon
+      
+    - rune: 0x05D7  # Chet
+      name: chet
+      concept: fence
+      
+    - rune: 0x05D8  # Tet
+      name: tet
+      concept: serpent
+      
+    - rune: 0x05D9  # Yod
+      name: yod
+      concept: seed
+      
+    - rune: 0x05DA  # Kaf
+      name: kaf
+      concept: palm
+      
+    - rune: 0x05DB  # Kaf (final)
+      name: kaf-final
+      concept: palm
+      
+    - rune: 0x05DC  # Lamed
+      name: lamed
+      concept: goad
+      
+    - rune: 0x05DD  # Mem
+      name: mem
+      concept: water
+      
+    - rune: 0x05DE  # Mem (final)
+      name: mem-final
+      concept: water
+      
+    - rune: 0x05DF  # Nun
+      name: nun
+      concept: life
+      
+    - rune: 0x05E0  # Nun (final)
+      name: nun-final
+      concept: life
+      
+    - rune: 0x05E1  # Samech
+      name: samech
+      concept: support
+      
+    - rune: 0x05E2  # Ayin
+      name: ayin
+      concept: eye
+      
+    - rune: 0x05E3  # Pe
+      name: pe
+      concept: mouth
+      
+    - rune: 0x05E4  # Pe (final)
+      name: pe-final
+      concept: mouth
+      
+    - rune: 0x05E5  # Tzadi
+      name: tzadi
+      concept: hunt
+      
+    - rune: 0x05E6  # Tzadi (final)
+      name: tzadi-final
+      concept: hunt
+      
+    - rune: 0x05E7  # Qof
+      name: qof
+      concept: back-of-head
+      
+    - rune: 0x05E8  # Resh
+      name: resh
+      concept: head
+      
+    - rune: 0x05E9  # Shin
+      name: shin
+      concept: tooth
+      
+    - rune: 0x05EA  # Tav
+      name: tav
+      concept: mark
+
+# Devanagari patterns
+devanagari:
+  special_chars:
+    - rune: 0x0950  # Om
+      name: om
+      concept: sacred-sound
+      confidence: verified
+      weight: 0.9
+      
+    - rune: 0x0902  # Anusvara
+      name: anusvara
+      concept: nasalization
+      confidence: plausible
+      weight: 0.3
+      
+    - rune: 0x0903  # Visarga
+      name: visarga
+      concept: exhalation
+      confidence: plausible
+      weight: 0.3
+
+# Han character mappings
+han:
+  characters:
+    - rune: 0x6C14  # 气 (simplified qi)
+      readings: [qi, breath, air]
+      confidence: verified
+      weight: 0.7
+      
+    - rune: 0x6C23  # 氣 (traditional qi)
+      readings: [qi, breath, air]
+      confidence: verified
+      weight: 0.7
+      
+    - rune: 0x9053  # 道 (dao/way)
+      readings: [dao, way, path]
+      confidence: verified
+      weight: 0.7
+      
+    - rune: 0x6C49  # 汉 (han/chinese)
+      readings: [han, chinese]
+      confidence: verified
+      weight: 0.7
+      
+    - rune: 0x4EBA  # 人 (ren/person)
+      readings: [ren, person, human]
+      confidence: verified
+      weight: 0.7
+      
+    - rune: 0x4E16  # 世 (shi/world)
+      readings: [shi, world]
+      confidence: verified
+      weight: 0.7
+      
+    - rune: 0x597D  # 好 (hao/good)
+      readings: [hao, good]
+      confidence: verified
+      weight: 0.7
+      
+    - rune: 0x751F  # 生 (sheng/life)
+      readings: [sheng, life, birth]
+      confidence: verified
+      weight: 0.7
+      
+    - rune: 0x8000  # 老 (lao/old)
+      readings: [lao, old]
+      confidence: verified
+      weight: 0.7
+      
+    - rune: 0x6D77  # 海 (hai/sea)
+      readings: [hai, sea]
+      confidence: verified
+      weight: 0.7

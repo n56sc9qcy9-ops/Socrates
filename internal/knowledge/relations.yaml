@@ -1,0 +1,269 @@
+# relations.yaml - Concept relation graph
+# Defines connections between concepts for activation propagation.
+# Each relation has a type, weight, and direction.
+
+relations:
+  # Core existential relations
+  - from: one
+    to: being
+    type: generates
+    weight: 0.8
+    
+  - from: one
+    to: source
+    type: leads_to
+    weight: 0.7
+    
+  - from: being
+    to: life
+    type: manifests
+    weight: 0.8
+    
+  - from: being
+    to: truth
+    type: contains
+    weight: 0.7
+    
+  - from: life
+    to: breath
+    type: requires
+    weight: 0.9
+    
+  - from: life
+    to: spirit
+    type: expresses
+    weight: 0.8
+    
+  - from: life
+    to: creation
+    type: produces
+    weight: 0.7
+    
+  # Breath/spirit relations
+  - from: breath
+    to: spirit
+    type: embodies
+    weight: 0.8
+    
+  - from: breath
+    to: sound
+    type: creates
+    weight: 0.7
+    
+  - from: breath
+    to: life
+    type: sustains
+    weight: 0.9
+    
+  # Word relations
+  - from: word
+    to: truth
+    type: reveals
+    weight: 0.8
+    
+  - from: word
+    to: name
+    type: bestows
+    weight: 0.7
+    
+  - from: word
+    to: sound
+    type: manifests_as
+    weight: 0.8
+    
+  - from: word
+    to: source
+    type: proceeds_from
+    weight: 0.7
+    
+  # Name relations
+  - from: name
+    to: word
+    type: expressed_as
+    weight: 0.7
+    
+  - from: name
+    to: truth
+    type: reveals
+    weight: 0.6
+    
+  # Truth relations
+  - from: truth
+    to: light
+    type: manifests_as
+    weight: 0.8
+    
+  - from: truth
+    to: word
+    type: expressed_in
+    weight: 0.7
+    
+  - from: truth
+    to: being
+    type: grounds
+    weight: 0.6
+    
+  # Light relations
+  - from: light
+    to: fire
+    type: connects_to
+    weight: 0.7
+    
+  - from: light
+    to: source
+    type: proceeds_from
+    weight: 0.8
+    
+  # Love relations
+  - from: love
+    to: heart
+    type: inhabits
+    weight: 0.8
+    
+  - from: love
+    to: truth
+    type: aligned_with
+    weight: 0.7
+    
+  # Give relations
+  - from: give
+    to: source
+    type: from
+    weight: 0.8
+    
+  - from: give
+    to: life
+    type: sustains
+    weight: 0.7
+    
+  # Path relations
+  - from: path
+    to: word
+    type: expressed_through
+    weight: 0.6
+    
+  - from: path
+    to: source
+    type: leads_to
+    weight: 0.7
+    
+  # Heart relations
+  - from: heart
+    to: love
+    type: source_of
+    weight: 0.8
+    
+  - from: heart
+    to: mind
+    type: connects_to
+    weight: 0.7
+    
+  - from: heart
+    to: life
+    type: sustains
+    weight: 0.6
+    
+  # Mind relations
+  - from: mind
+    to: spirit
+    type: manifests
+    weight: 0.7
+    
+  - from: mind
+    to: word
+    type: produces
+    weight: 0.6
+    
+  - from: mind
+    to: being
+    type: grounds
+    weight: 0.6
+    
+  # Sound relations
+  - from: sound
+    to: word
+    type: expresses
+    weight: 0.7
+    
+  - from: sound
+    to: breath
+    type: requires
+    weight: 0.6
+    
+  - from: sound
+    to: being
+    type: reveals
+    weight: 0.5
+    
+  # Elemental relations
+  - from: fire
+    to: truth
+    type: reveals
+    weight: 0.6
+    
+  - from: fire
+    to: source
+    type: emanates_from
+    weight: 0.7
+    
+  - from: water
+    to: life
+    type: sustains
+    weight: 0.8
+    
+  - from: water
+    to: source
+    type: flows_from
+    weight: 0.7
+    
+  - from: air
+    to: breath
+    type: provides
+    weight: 0.8
+    
+  - from: air
+    to: life
+    type: sustains
+    weight: 0.7
+    
+  - from: earth
+    to: source
+    type: grounds_in
+    weight: 0.6
+    
+  - from: earth
+    to: being
+    type: supports
+    weight: 0.6
+    
+  # Source relations
+  - from: source
+    to: light
+    type: emanates
+    weight: 0.8
+    
+  - from: source
+    to: truth
+    type: reveals
+    weight: 0.7
+    
+  - from: source
+    to: one
+    type: contains
+    weight: 0.6
+    
+  # Creation relations
+  - from: creation
+    to: life
+    type: bestows
+    weight: 0.7
+    
+  - from: creation
+    to: source
+    type: from
+    weight: 0.8
+    
+  - from: creation
+    to: word
+    type: through
+    weight: 0.6

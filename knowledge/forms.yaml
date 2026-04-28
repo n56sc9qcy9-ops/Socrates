@@ -1,0 +1,550 @@
+# forms.yaml - Form-to-concept mappings
+# Maps lexical forms (words, fragments, scripts) to concept targets.
+# All linguistic knowledge lives here, not in Go code.
+
+# Fragment forms - reusable pattern fragments
+fragments:
+  # English/Latin fragments
+  - form: "in"
+    concept: inward
+    lens: english
+    confidence: verified
+    weight: 0.6
+    
+  - form: "in"
+    concept: into
+    lens: english
+    confidence: verified
+    weight: 0.6
+    
+  - form: "in"
+    concept: one
+    lens: sound
+    confidence: plausible
+    weight: 0.4
+    
+  - form: "spire"
+    concept: spirit
+    lens: english
+    confidence: plausible
+    weight: 0.5
+    
+  - form: "spire"
+    concept: breath
+    lens: sound
+    confidence: speculative
+    weight: 0.3
+    
+  - form: "spirit"
+    concept: spirit
+    lens: latin
+    confidence: verified
+    weight: 0.7
+    
+  - form: "spirit"
+    concept: breath
+    lens: etymology
+    confidence: verified
+    weight: 0.6
+    
+  - form: "en"
+    concept: in
+    lens: english
+    confidence: verified
+    weight: 0.6
+    
+  - form: "en"
+    concept: one
+    lens: norwegian
+    confidence: plausible
+    weight: 0.4
+    
+  - form: "er"
+    concept: is_are
+    lens: norwegian
+    confidence: verified
+    weight: 0.6
+    
+  - form: "gi"
+    concept: give
+    lens: norwegian
+    confidence: verified
+    weight: 0.6
+    
+  - form: "gi"
+    concept: life-force
+    lens: sound
+    confidence: speculative
+    weight: 0.3
+    
+  - form: "chi"
+    concept: life-force
+    lens: chinese
+    confidence: verified
+    weight: 0.7
+    
+  - form: "chi"
+    concept: chi
+    lens: greek
+    confidence: plausible
+    weight: 0.5
+    
+  - form: "chi"
+    concept: christos
+    lens: symbolic
+    confidence: speculative
+    weight: 0.3
+    
+  - form: "qi"
+    concept: life-force
+    lens: chinese
+    confidence: verified
+    weight: 0.7
+    
+  - form: "qi"
+    concept: breath
+    lens: chinese
+    confidence: verified
+    weight: 0.6
+    
+  - form: "skall"
+    concept: shell
+    lens: norwegian
+    confidence: verified
+    weight: 0.7
+    
+  - form: "skall"
+    concept: skull
+    lens: norwegian
+    confidence: verified
+    weight: 0.6
+    
+  - form: "shell"
+    concept: shell
+    lens: english
+    confidence: verified
+    weight: 0.7
+    
+  - form: "shell"
+    concept: scale
+    lens: english
+    confidence: plausible
+    weight: 0.5
+    
+  - form: "one"
+    concept: one
+    lens: english
+    confidence: verified
+    weight: 0.7
+    
+  - form: "one"
+    concept: unity
+    lens: symbolic
+    confidence: plausible
+    weight: 0.5
+    
+  - form: "all"
+    concept: totality
+    lens: english
+    confidence: verified
+    weight: 0.6
+    
+  - form: "all"
+    concept: whole
+    lens: symbolic
+    confidence: plausible
+    weight: 0.4
+    
+  - form: "life"
+    concept: life
+    lens: english
+    confidence: verified
+    weight: 0.7
+    
+  - form: "life"
+    concept: liv
+    lens: norwegian
+    confidence: verified
+    weight: 0.6
+    
+  # Norwegian fragments
+  - form: "liv"
+    concept: life
+    lens: norwegian
+    confidence: verified
+    weight: 0.6
+    
+  - form: "ånd"
+    concept: spirit
+    lens: norwegian
+    confidence: verified
+    weight: 0.6
+    
+  - form: "ånd"
+    concept: breath
+    lens: etymology
+    confidence: plausible
+    weight: 0.4
+    
+  - form: "lys"
+    concept: light
+    lens: norwegian
+    confidence: verified
+    weight: 0.6
+    
+  - form: "ord"
+    concept: word
+    lens: norwegian
+    confidence: verified
+    weight: 0.6
+    
+  - form: "vei"
+    concept: way
+    lens: norwegian
+    confidence: verified
+    weight: 0.6
+    
+  - form: "vei"
+    concept: path
+    lens: symbolic
+    confidence: plausible
+    weight: 0.4
+    
+  # Hebrew transliteration fragments
+  - form: "ruach"
+    concept: breath
+    lens: hebrew
+    confidence: verified
+    weight: 0.7
+    
+  - form: "ruach"
+    concept: wind
+    lens: hebrew
+    confidence: verified
+    weight: 0.6
+    
+  - form: "ruach"
+    concept: spirit
+    lens: hebrew
+    confidence: verified
+    weight: 0.6
+    
+  - form: "davar"
+    concept: word
+    lens: hebrew
+    confidence: verified
+    weight: 0.7
+    
+  - form: "davar"
+    concept: thing
+    lens: hebrew
+    confidence: verified
+    weight: 0.5
+    
+  - form: "emet"
+    concept: truth
+    lens: hebrew
+    confidence: verified
+    weight: 0.7
+    
+  - form: "or"
+    concept: light
+    lens: hebrew
+    confidence: verified
+    weight: 0.6
+    
+  - form: "shem"
+    concept: name
+    lens: hebrew
+    confidence: verified
+    weight: 0.6
+    
+  - form: "lev"
+    concept: heart
+    lens: hebrew
+    confidence: verified
+    weight: 0.6
+    
+  - form: "echad"
+    concept: one
+    lens: hebrew
+    confidence: verified
+    weight: 0.7
+    
+  - form: "ahavah"
+    concept: love
+    lens: hebrew
+    confidence: verified
+    weight: 0.7
+    
+  # Sanskrit fragments
+  - form: "prana"
+    concept: breath
+    lens: sanskrit
+    confidence: verified
+    weight: 0.7
+    
+  - form: "prana"
+    concept: life-force
+    lens: sanskrit
+    confidence: verified
+    weight: 0.7
+    
+  - form: "atman"
+    concept: self
+    lens: sanskrit
+    confidence: verified
+    weight: 0.6
+    
+  - form: "atman"
+    concept: soul
+    lens: sanskrit
+    confidence: verified
+    weight: 0.6
+    
+  - form: "om"
+    concept: sacred-sound
+    lens: sanskrit
+    confidence: verified
+    weight: 0.8
+    
+  - form: "om"
+    concept: totality
+    lens: symbolic
+    confidence: plausible
+    weight: 0.5
+    
+  - form: "mantra"
+    concept: sacred-utterance
+    lens: sanskrit
+    confidence: verified
+    weight: 0.7
+    
+  - form: "mantra"
+    concept: instrument-of-thought
+    lens: etymology
+    confidence: verified
+    weight: 0.6
+    
+  - form: "ananda"
+    concept: bliss
+    lens: sanskrit
+    confidence: verified
+    weight: 0.7
+    
+  # Chinese fragments
+  - form: "dao"
+    concept: way
+    lens: chinese
+    confidence: verified
+    weight: 0.7
+    
+  - form: "dao"
+    concept: path
+    lens: chinese
+    confidence: verified
+    weight: 0.7
+    
+  - form: "de"
+    concept: virtue
+    lens: chinese
+    confidence: verified
+    weight: 0.6
+    
+  - form: "de"
+    concept: power
+    lens: chinese
+    confidence: plausible
+    weight: 0.5
+    
+  - form: "xin"
+    concept: heart-mind
+    lens: chinese
+    confidence: verified
+    weight: 0.6
+    
+  - form: "yi"
+    concept: one
+    lens: chinese
+    confidence: verified
+    weight: 0.7
+    
+  # Greek fragments
+  - form: "logos"
+    concept: word
+    lens: greek
+    confidence: verified
+    weight: 0.7
+    
+  - form: "logos"
+    concept: reason
+    lens: greek
+    confidence: verified
+    weight: 0.6
+    
+  - form: "logos"
+    concept: account
+    lens: etymology
+    confidence: plausible
+    weight: 0.4
+    
+  - form: "pneuma"
+    concept: breath
+    lens: greek
+    confidence: verified
+    weight: 0.7
+    
+  - form: "pneuma"
+    concept: spirit
+    lens: greek
+    confidence: verified
+    weight: 0.6
+    
+  - form: "psyche"
+    concept: soul
+    lens: greek
+    confidence: verified
+    weight: 0.6
+    
+  - form: "psyche"
+    concept: mind
+    lens: greek
+    confidence: verified
+    weight: 0.6
+    
+  - form: "theos"
+    concept: god
+    lens: greek
+    confidence: verified
+    weight: 0.6
+
+# Script words - exact whole-word matches for non-Latin scripts
+script_words:
+  # Hebrew (Unicode codepoints)
+  - script: hebrew
+    word: "רוח"
+    runes: [0x05E8, 0x05D5, 0x05D7]
+    meanings: [breath, wind, spirit]
+    confidence: verified
+    weight: 0.8
+    
+  - script: hebrew
+    word: "אמת"
+    runes: [0x05D0, 0x05DE, 0x05EA]
+    meanings: [truth]
+    confidence: verified
+    weight: 0.8
+    
+  - script: hebrew
+    word: "אור"
+    runes: [0x05D0, 0x05D5, 0x05E8]
+    meanings: [light]
+    confidence: verified
+    weight: 0.8
+    
+  - script: hebrew
+    word: "דבר"
+    runes: [0x05D3, 0x05D1, 0x05E8]
+    meanings: [word, thing]
+    confidence: verified
+    weight: 0.8
+    
+  - script: hebrew
+    word: "שם"
+    runes: [0x05E9, 0x05DD]
+    meanings: [name]
+    confidence: verified
+    weight: 0.7
+    
+  - script: hebrew
+    word: "לב"
+    runes: [0x05DC, 0x05D1]
+    meanings: [heart]
+    confidence: verified
+    weight: 0.7
+    
+  - script: hebrew
+    word: "חיים"
+    runes: [0x05D7, 0x05D9, 0x05DD]
+    meanings: [life]
+    confidence: verified
+    weight: 0.8
+    
+  # Sanskrit/Devanagari
+  - script: devanagari
+    word: "प्राण"
+    runes: [0x092A, 0x094D, 0x0930, 0x093E, 0x0923]
+    meanings: [breath, life-force, prana]
+    confidence: verified
+    weight: 0.9
+    
+  - script: devanagari
+    word: "आत्मन्"
+    runes: [0x0906, 0x0924, 0x094D, 0x092E]
+    meanings: [self, soul, atman]
+    confidence: verified
+    weight: 0.8
+    
+  - script: devanagari
+    word: "ॐ"
+    runes: [0x0950]
+    meanings: [sacred-sound, totality, om]
+    confidence: verified
+    weight: 0.9
+    
+  - script: devanagari
+    word: "मंत्र"
+    runes: [0x092E, 0x0902, 0x0924, 0x094D, 0x0930]
+    meanings: [mantra, sacred-utterance]
+    confidence: verified
+    weight: 0.8
+    
+  - script: devanagari
+    word: "अनंद"
+    runes: [0x0905, 0x0928, 0x0902, 0x0926]
+    meanings: [bliss, ananda]
+    confidence: verified
+    weight: 0.8
+    
+  # Chinese (Han)
+  - script: han
+    word: "道"
+    runes: [0x9053]
+    meanings: [way, path, dao]
+    confidence: verified
+    weight: 0.9
+    
+  - script: han
+    word: "气"
+    runes: [0x6C14]
+    meanings: [breath, air, qi]
+    confidence: verified
+    weight: 0.8
+    
+  - script: han
+    word: "氣"
+    runes: [0x6C23]
+    meanings: [breath, air, qi]
+    confidence: verified
+    weight: 0.8
+    
+  - script: han
+    word: "生"
+    runes: [0x751F]
+    meanings: [life, birth, sheng]
+    confidence: verified
+    weight: 0.8
+    
+  - script: han
+    word: "人"
+    runes: [0x4EBA]
+    meanings: [person, human, ren]
+    confidence: verified
+    weight: 0.8
+    
+  - script: han
+    word: "心"
+    runes: [0x5FC3]
+    meanings: [heart, xin]
+    confidence: verified
+    weight: 0.8

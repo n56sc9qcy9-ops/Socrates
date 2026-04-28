@@ -1,0 +1,108 @@
+# concepts.yaml - Core symbolic/conceptual anchors
+# These are NOT final word readings. They are reusable resonance basis.
+
+concepts:
+  - id: one
+    name: one
+    aliases: [one, unity, single, first, alone]
+    neighbors: [being, source]
+    
+  - id: being
+    name: being
+    aliases: [being, existence, essence, self]
+    neighbors: [life, truth]
+    
+  - id: life
+    name: life
+    aliases: [life, living, vitality, force]
+    neighbors: [breath, spirit, creation]
+    
+  - id: breath
+    name: breath
+    aliases: [breath, wind, air, spirit, prana, ruach, qi]
+    neighbors: [life, spirit, sound]
+    
+  - id: spirit
+    name: spirit
+    aliases: [spirit, soul, essence, wind]
+    neighbors: [breath, life, mind]
+    
+  - id: word
+    name: word
+    aliases: [word, speech, logos, utterance, dabar]
+    neighbors: [truth, name, sound]
+    
+  - id: name
+    name: name
+    aliases: [name, designation, identity]
+    neighbors: [word, truth]
+    
+  - id: truth
+    name: truth
+    aliases: [truth, real, genuine, emet]
+    neighbors: [light, word, being]
+    
+  - id: light
+    name: light
+    aliases: [light, illumination, glow, or]
+    neighbors: [truth, fire, source]
+    
+  - id: love
+    name: love
+    aliases: [love, affection, ahavah]
+    neighbors: [heart, truth]
+    
+  - id: give
+    name: give
+    aliases: [give, gift, grant, offer]
+    neighbors: [source, life]
+    
+  - id: path
+    name: path
+    aliases: [path, way, road, dao]
+    neighbors: [word, source]
+    
+  - id: heart
+    name: heart
+    aliases: [heart, center, core, lev]
+    neighbors: [love, mind, life]
+    
+  - id: mind
+    name: mind
+    aliases: [mind, thought, consciousness, manas]
+    neighbors: [spirit, word, being]
+    
+  - id: sound
+    name: sound
+    aliases: [sound, voice, vibration, om]
+    neighbors: [word, breath, being]
+    
+  - id: fire
+    name: fire
+    aliases: [fire, flame, agni]
+    neighbors: [light, truth, source]
+    
+  - id: water
+    name: water
+    aliases: [water, flow, life]
+    neighbors: [life, source]
+    
+  - id: air
+    name: air
+    aliases: [air, atmosphere, wind]
+    neighbors: [breath, life]
+    
+  - id: earth
+    name: earth
+    aliases: [earth, ground, land]
+    neighbors: [source, being]
+    
+  - id: source
+    name: source
+    aliases: [source, origin, beginning, genesis]
+    neighbors: [one, light, truth]
+    
+  - id: creation
+    name: creation
+    aliases: [creation, making, birth]
+    neighbors: [life, source, word]

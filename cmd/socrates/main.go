@@ -1,33 +1,81 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"os"
 
-	"socrates/internal/resonance"
+	"socrates/internal/decipher"
 )
 
 func main() {
-	// Init
-	space := resonance.NewFrequencySpace()
-	engine := resonance.NewResonanceEngine(space)
+	// Define command flags
+	decipherCmd := flag.NewFlagSet("decipher", flag.ExitOnError)
+	_ = decipherCmd.Bool("descifer", false, "alias for decipher")
 
-	// Demos
-	queries := []string{
-		"truth", // EN
-		"真理",    // CN truth
-		"dog",   // EN
-		"狗",     // CN dog
-		"lie",   // Dissonant trigger
+	flag.Usage = func() {
+		fmt.Println("Socrates Language-Resonance Engine")
+		fmt.Println()
+		fmt.Println("Usage:")
+		fmt.Println("  socrates decipher <word|phrase>")
+		fmt.Println("  socrates descifer <word|phrase>  (alias)")
+		fmt.Println()
+		fmt.Println("Examples:")
+		fmt.Println("  socrates decipher inspired")
+		fmt.Println("  socrates decipher energy")
+		fmt.Println("  socrates decipher \"in the beginning was the word\"")
+		fmt.Println("  socrates decipher רוח")
+		fmt.Println("  socrates decipher प्राण")
+		fmt.Println("  socrates decipher 道")
+		fmt.Println()
+		fmt.Println("Flags:")
+		flag.PrintDefaults()
 	}
 
-	for _, q := range queries {
-		resp, valid := engine.FullQuery(q)
-		status := "VALID"
-		if !valid {
-			status = "DISSONANT"
+	if len(os.Args) < 2 {
+		flag.Usage()
+		os.Exit(1)
+	}
+
+	command := os.Args[1]
+
+	switch command {
+	case "decipher", "descifer":
+		decipherCmd.Parse(os.Args[2:])
+		args := decipherCmd.Args()
+
+		if len(args) < 1 {
+			fmt.Println("Error: please provide an input word or phrase")
+			fmt.Println()
+			flag.Usage()
+			os.Exit(1)
 		}
-		fmt.Printf("Query: '%s'\nResponse: %s (%s)\n\n", q, resp, status)
-	}
 
-	fmt.Println("Socrates Resonance Demo Complete. Frequencies resonate mathematically!")
+		input := args[0]
+
+		// Run the engine
+		engine, err := decipher.NewEngine()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to initialize engine: %v\n", err)
+			os.Exit(1)
+		}
+		reading := engine.Analyze(input)
+
+		// Render the output
+		output := decipher.RenderReading(reading)
+		fmt.Print(output)
+
+	case "help", "-h", "--help":
+		flag.Usage()
+
+	case "version", "-v", "--version":
+		fmt.Println("Socrates Language-Resonance Engine v0.1.0")
+		fmt.Println("A pattern engine for exploring word resonance across languages.")
+
+	default:
+		fmt.Printf("Unknown command: %s\n", command)
+		fmt.Println()
+		flag.Usage()
+		os.Exit(1)
+	}
 }
