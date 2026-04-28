@@ -1,6 +1,17 @@
 # TODO: Socrates Active Work
 
-This is the only active checklist. Completed phases live in `docs/TODO_ARCHIVE.md`.
+This is the only active instruction and checklist file for the Architect and Coder. Completed phases live in `docs/TODO_ARCHIVE.md`.
+
+## Instruction Authority
+
+The Architect must read this file first and give the Coder one narrow task from the current next task only.
+
+- `TODO.md` is the only active authority.
+- A separate task file is active only when this file explicitly links to it.
+- Unlinked `.md` files are background, archive, or historical context.
+- If another `.md` file claims to be active but is not linked here, ignore that claim and follow `TODO.md`.
+- Do not mark checklist items complete unless the listed acceptance criteria are actually met.
+- Do not skip to later phases while the current next task has unmet acceptance criteria.
 
 Markers:
 
@@ -10,6 +21,63 @@ Markers:
 [x] complete
 [!] blocked / needs review
 ```
+
+## Current Next Task
+
+Task:
+Finish the remaining Phase 3A cleanup blockers before starting activation-energy scoring work.
+
+Context:
+Phase 3A is mostly complete, but it is not finished. The code still contains hardcoded cross-language semantic maps, semantic alias normalization in Go, and root artifact files. These conflict with the data-driven architecture. Do not begin the Activation-Energy Discipline Gate until these blockers are resolved or explicitly justified.
+
+Files:
+- `internal/decipher/engine.go`
+- `internal/decipher/channel_cross_language.go`
+- `internal/decipher/cleanup_regression_test.go`
+- `internal/decipher/engine_test.go`
+- `internal/knowledge/forms.yaml`
+- `internal/knowledge/concepts.yaml`
+- `internal/knowledge/relations.yaml`
+- `internal/knowledge/loader.go`
+- `internal/knowledge/knowledge.go`
+- root files `socrates` and `skal`
+
+Instructions:
+1. Inspect the hardcoded maps in `channel_cross_language.go`.
+2. Move cross-language echo/root knowledge into YAML data, or remove the channel if existing generic form matching already covers it.
+3. Remove semantic alias normalization from `engine.go`, or move the alias data into the knowledge layer.
+4. Add or update regression tests so hardcoded semantic/cross-language maps cannot return to production Go.
+5. Confirm whether root files `socrates` and `skal` are build artifacts. Remove them if they are not source files.
+6. Run `go test ./...`.
+7. Update checklist markers only for acceptance criteria that are actually satisfied.
+
+Constraints:
+- No hardcoded semantic word lists in production Go.
+- No direct behavior for specific words like `skal`, `energy`, `truth`, or `light`.
+- No concept-to-frequency, pitch, music, harmonic, or audio mappings.
+- No global mutable knowledge state.
+- Do not change scoring semantics in this task unless required by tests.
+- Do not implement debug rendering in this task.
+- Knowledge and confidence assumptions must stay data-driven.
+
+Tests:
+- Production Go search must not find hardcoded cross-language semantic maps.
+- Production Go search must not find semantic alias normalization maps.
+- Existing architecture regression tests must still scan the current production files.
+- Add targeted regression coverage for the moved/removed cross-language knowledge path.
+
+Acceptance Criteria:
+- No production Go file contains hardcoded cross-language or semantic alias maps.
+- Root artifact files are removed or explicitly justified.
+- The Phase 3A acceptance list below is true.
+- `go test ./...` passes.
+
+Do Not:
+- Do not implement harmonic/audio rendering.
+- Do not add production Go branches for specific words like `skal`, `energy`, `truth`, or `light`.
+- Do not add new semantic alias maps in Go.
+- Do not start the Activation-Energy Discipline Gate yet.
+- Do not broaden this into the legacy `internal/resonance` frequency cleanup.
 
 ## North Star
 
@@ -50,6 +118,8 @@ Resonance is not evidence volume. Resonance is coherent activation: independent,
 Do not add exact word meanings to Go code. Add or change knowledge only in YAML.
 
 Do not build audio yet. Harmonic rendering comes after the activation-energy core is bounded, deduplicated, data-driven, and evidence-first.
+
+The Architect should assign only one narrow coder task at a time. The current task is Phase 3A cleanup, not scoring or audio.
 
 ## Phase 3A: Architecture Cleanup Gate
 

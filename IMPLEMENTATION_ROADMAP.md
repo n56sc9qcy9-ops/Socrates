@@ -18,6 +18,28 @@ The code must not contain semantic keyword maps. Meanings, known forms, concepts
 
 The base model is coherent activation energy first. Harmonic or audio output is a later rendering layer; it should consume the activation graph after the core can produce bounded, deduplicated, evidence-first fields.
 
+## Long-Term Goals Preserved
+
+The long-term vision is still present, but it is intentionally sequenced after the core engine is trustworthy.
+
+Preserved future goals:
+
+- coherent activation energy as the base resonance model
+- data-driven linguistic, symbolic, cross-language, harmonic, and musical knowledge
+- human curation of proposed knowledge changes
+- optional AI assistance as a hypothesis generator only
+- harmonic/audio rendering of activation fields as listenable music
+- possible later storage, UI, light, or hardware interfaces
+
+Not active yet:
+
+- literal claims that meaning is scientifically proven to be frequency
+- audio synthesis before evidence paths are clean
+- concept-to-frequency mappings in Go
+- AI silently writing active knowledge
+
+Older visionary language about truth, love, wisdom, source, and frequency should be treated as philosophical background unless converted into data-backed concepts, relations, tests, or documented future rendering requirements.
+
 ## Phase 1: Remove Shortcut Semantics
 
 Goal: delete prototype shortcuts from production code.

@@ -1,8 +1,13 @@
-# CLEANUP: Active Pi Task
+# CLEANUP: Historical Coder Task
 
-This is the only active instruction file for Pi.
+This file is historical context only. It is not an active instruction file unless `TODO.md` explicitly links to it.
 
-Do not edit `TODO.md` for this task.
+The Architect and Coder must follow `TODO.md` as the active authority.
+
+The cleanup task below has been superseded as an active handoff by the current task listed in `TODO.md`.
+
+Status note:
+The channel split described below has already been performed. This file remains only to preserve the old handoff. The current remaining Phase 3A blockers are listed in `TODO.md`.
 
 Task:
 Split `internal/decipher/channels.go` into focused channel files without changing behavior.
@@ -63,7 +68,6 @@ Constraints:
 - Do not change behavior.
 - Do not change public function names.
 - Do not change exported type names.
-- Do not edit `TODO.md`.
 - Do not refactor algorithms while moving code.
 - Do not move hardcoded semantic maps into YAML in this task; leave that for a separate task after the split.
 - Do not remove root artifacts.
@@ -83,7 +87,6 @@ Acceptance Criteria:
 - `go test ./...` passes.
 
 Do Not:
-- Do not edit `TODO.md`.
 - Do not remove `skal` or `socrates`.
 - Do not migrate hardcoded cross-language data in this task.
 - Do not combine this with `engine.go` cleanup.
