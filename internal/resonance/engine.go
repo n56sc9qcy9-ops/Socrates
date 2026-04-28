@@ -21,8 +21,13 @@ func (re *ResonanceEngine) Query(inputIdea string) []Frequency {
 	return resonating
 }
 
-// ValidateResponse ensures internal consistency.
+// ValidateResponse ensures internal consistency and meaningful resonance.
 func (re *ResonanceEngine) ValidateResponse(res []Frequency) bool {
+	// Empty response means no resonance found - invalid
+	if len(res) == 0 {
+		return false
+	}
+	// Check internal consistency
 	return IsValidResponse(res)
 }
 
