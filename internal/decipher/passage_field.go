@@ -33,11 +33,9 @@ func (pf PassageFields) Merge(other PassageFields) PassageFields {
 	// Merge other fields
 	for _, otherField := range other {
 		if existing, exists := fieldMap[otherField.Concept]; exists {
-			// Merge: combine strength, keep highest confidence
+			// Merge: combine strength, keep higher confidence
 			existing.Strength += otherField.Strength
-			if isHigherConfidence(otherField.Confidence, existing.Confidence) {
-				existing.Confidence = otherField.Confidence
-			}
+			existing.Confidence = keepHigherConfidence(existing.Confidence, otherField.Confidence)
 			// Merge token sources without duplicates
 			existing.TokenSources = mergeStringSlices(existing.TokenSources, otherField.TokenSources)
 			// Merge evidence paths without duplicates
@@ -272,13 +270,26 @@ func containsString(slice []string, s string) bool {
 	return false
 }
 
-// isHigherConfidence returns true if b is higher priority than a.
-func isHigherConfidence(a, b string) bool {
-	if b == ConfidenceVerified && a != ConfidenceVerified {
-		return true
+// confidencePriority returns numeric priority for confidence levels.
+// Higher number = higher priority.
+func confidencePriority(conf string) int {
+	switch conf {
+	case ConfidenceVerified:
+		return 3
+	case ConfidencePlausible:
+		return 2
+	case ConfidenceSpeculative:
+		return 1
+	default:
+		return 0
 	}
-	if b == ConfidencePlausible && a == ConfidenceSpeculative {
-		return true
+}
+
+// keepHigherConfidence returns the higher of two confidences.
+// This is the correct function for merging: keep the better confidence.
+func keepHigherConfidence(a, b string) string {
+	if confidencePriority(a) > confidencePriority(b) {
+		return a
 	}
-	return false
+	return b
 }
