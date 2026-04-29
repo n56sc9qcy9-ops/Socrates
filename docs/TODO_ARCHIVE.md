@@ -244,3 +244,32 @@ Architect review notes for next task:
 Local commit:
 
 - `79963d4 Phase 5: Activation Graph layer with bounded scores and deduplication`
+
+### Phase 5/6 Graph Hardening And First Passage Field Slice
+
+Completed:
+
+- Replaced global graph propagation `Visited` state with path-local visited tracking.
+- Distinguished direct and graph-expanded nodes by depth.
+- Deduplicated graph edges by `(from, to, relationType)`.
+- Fixed glyph repetition so whitespace and punctuation are not counted as repeated-letter evidence.
+- Added a first `PassageField` API and passage tokenization/analysis tests.
+
+Recorded verification from Pi:
+
+```text
+go test ./...
+PASS
+```
+
+Architect review notes for next task:
+
+- Passage fields exist but are not yet returned on `Reading`.
+- Original passage-token provenance needs to be made stricter.
+- `PassageField.RelationPaths` exists but is not populated.
+- Some tests are permissive and should become strict regressions.
+- Graph propagation is currently documented as single-pass because repeated propagation accumulates strength; the contract should be guarded or made idempotent.
+
+Local commit:
+
+- `67031be Phase 5/6: graph hardening and passage field analysis`
