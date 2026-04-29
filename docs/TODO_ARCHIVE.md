@@ -132,3 +132,58 @@ Verification rechecked by Codex:
 
 - Forbidden hardcoded knowledge names now appear only in the regression test guard.
 - No legacy fallback comment remains in production Go.
+
+## Completed Work: 2026-04-29
+
+The active TODO was shortened again after the Activation-Energy Discipline Gate was mostly completed. Detailed implementation history is in local git commits.
+
+### Phase 3A Architecture Cleanup
+
+Completed:
+
+- Split discovery and channel files by responsibility.
+- Moved hardcoded glyph/script/cross-language mappings into YAML data or removed the hardcoded path.
+- Removed global mutable knowledge dependency.
+- Removed root artifacts such as `socrates` and `skal`.
+- Added regression coverage against hardcoded semantic/cross-language maps returning.
+
+Recorded verification:
+
+- `go test ./...` passed.
+- Local commit: `3576aaf harden bounded decipher work`.
+
+### Bounded Candidate And Fuzzy Work
+
+Completed:
+
+- Bounded candidate generation for long inputs and tight custom caps.
+- Preserved core normalized/skeleton/phonetic candidates before speculative candidates.
+- Bounded fuzzy comparisons with deterministic ordering.
+- Exposed discarded candidate and comparison counts on structured readings.
+- Added tests for bounds, discarded counts, and exact/high-confidence priority.
+
+Recorded verification from Pi:
+
+- 53 decipher tests, 9 knowledge tests, and 5 resonance tests passed.
+
+### Default/Debug Output Split
+
+Completed:
+
+- Added render modes/options.
+- Kept default output concise and evidence-first.
+- Moved full generated forms, candidate lists, fuzzy matches, and detailed internals to debug output.
+- Added `--debug` CLI support.
+- Added render-mode tests for default concision, debug details, evidence paths, and bounded-work summaries.
+
+Recorded verification from Pi:
+
+```text
+ok  socrates/internal/decipher   0.600s
+ok  socrates/internal/knowledge  (cached)
+ok  socrates/internal/resonance  (cached)
+```
+
+Local commit:
+
+- `f0e129e Split default output from debug output`
