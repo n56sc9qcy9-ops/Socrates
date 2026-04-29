@@ -45,6 +45,24 @@ func renderDefault(r Reading) string {
 		}
 	}
 
+	// Show top passage fields if available (summary, evidence-first)
+	if len(r.PassageFields) > 0 {
+		topFields := r.PassageFields.TopFields(3)
+		if len(topFields) > 0 {
+			sb.WriteString("  Top fields:\n")
+			for _, field := range topFields {
+				// Show field with strength, tokens, and a hint of evidence
+				if len(field.TokenSources) > 0 {
+					sb.WriteString(fmt.Sprintf("    - %s [%.0f%%, via: %s]\n",
+						field.Concept, field.Strength*100, strings.Join(field.TokenSources, ", ")))
+				} else {
+					sb.WriteString(fmt.Sprintf("    - %s [%.0f%%]\n",
+						field.Concept, field.Strength*100))
+				}
+			}
+		}
+	}
+
 	// Show relation paths if available (evidence of graph connections)
 	if len(r.Convergence.RelationPaths) > 0 {
 		sb.WriteString("  Paths:\n")
@@ -251,6 +269,34 @@ func renderDebug(r Reading) string {
 			sb.WriteString("  Relation Paths:\n")
 			for _, path := range r.Convergence.RelationPaths {
 				sb.WriteString(fmt.Sprintf("    - %s\n", path))
+			}
+		}
+		sb.WriteString("\n")
+	}
+
+	// Phase E: Passage Fields (full detail)
+	if len(r.PassageFields) > 0 {
+		sb.WriteString(fmt.Sprintf("Passage Fields (%d total):\n", len(r.PassageFields)))
+		for _, field := range r.PassageFields {
+			depthStr := "direct"
+			if field.Depth > 0 {
+				depthStr = fmt.Sprintf("depth-%d", field.Depth)
+			}
+			if len(field.TokenSources) > 0 {
+				sb.WriteString(fmt.Sprintf("  - %s [strength: %.2f, %s, via: %s]\n",
+					field.Concept, field.Strength, depthStr, strings.Join(field.TokenSources, ", ")))
+			} else {
+				sb.WriteString(fmt.Sprintf("  - %s [strength: %.2f, %s]\n",
+					field.Concept, field.Strength, depthStr))
+			}
+			// Show evidence paths
+			for _, ev := range field.EvidencePaths {
+				sb.WriteString(fmt.Sprintf("    - evidence: %s [%s, %.2f]\n",
+						ev.SourceToken, ev.SourceType, ev.Weight))
+			}
+			// Show relation paths
+			for _, path := range field.RelationPaths {
+				sb.WriteString(fmt.Sprintf("    - path: %s\n", path))
 			}
 		}
 		sb.WriteString("\n")

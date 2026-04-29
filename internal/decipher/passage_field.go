@@ -10,35 +10,46 @@ type PassageField struct {
 	Concept       string
 	Strength      float64
 	Confidence    string
-	TokenSources  []string
-	Depth         int
-	RelationPaths []string
+	Depth         int             // 0 = direct, 1+ = graph-expanded
+	TokenSources  []string       // Original tokens that activated this field
+	EvidencePaths []EvidencePath // Evidence paths explaining this field
+	RelationPaths []string       // Relation paths through the activation graph
 }
 
 // PassageFields is a collection of PassageField instances.
 type PassageFields []*PassageField
 
 // Merge merges another PassageFields collection into this one.
+// Duplicate fields (same concept) are merged, not duplicated.
+// Evidence paths are deduplicated by EvidenceID().
 func (pf PassageFields) Merge(other PassageFields) PassageFields {
 	fieldMap := make(map[string]*PassageField)
 
+	// Add existing fields
 	for _, field := range pf {
 		fieldMap[field.Concept] = field
 	}
 
+	// Merge other fields
 	for _, otherField := range other {
 		if existing, exists := fieldMap[otherField.Concept]; exists {
+			// Merge: combine strength, keep highest confidence
 			existing.Strength += otherField.Strength
-			if otherField.Strength > existing.Strength {
+			if isHigherConfidence(otherField.Confidence, existing.Confidence) {
 				existing.Confidence = otherField.Confidence
 			}
+			// Merge token sources without duplicates
 			existing.TokenSources = mergeStringSlices(existing.TokenSources, otherField.TokenSources)
+			// Merge evidence paths without duplicates
+			existing.EvidencePaths = mergeEvidencePaths(existing.EvidencePaths, otherField.EvidencePaths)
+			// Merge relation paths without duplicates
 			existing.RelationPaths = mergeStringSlices(existing.RelationPaths, otherField.RelationPaths)
 		} else {
 			fieldMap[otherField.Concept] = otherField
 		}
 	}
 
+	// Convert map back to slice
 	result := make(PassageFields, 0, len(fieldMap))
 	for _, field := range fieldMap {
 		result = append(result, field)
@@ -75,6 +86,7 @@ func (pf PassageFields) TopFields(n int) PassageFields {
 }
 
 // BuildPassageFieldsFromGraph constructs PassageFields from an activation graph.
+// Populates token sources and evidence paths from graph nodes.
 func BuildPassageFieldsFromGraph(graph *ActivationGraph) PassageFields {
 	fields := make(PassageFields, 0, len(graph.Nodes))
 
@@ -83,11 +95,13 @@ func BuildPassageFieldsFromGraph(graph *ActivationGraph) PassageFields {
 			Concept:       node.Concept,
 			Strength:      node.Strength,
 			Confidence:    node.Confidence,
-			TokenSources:  []string{},
 			Depth:         node.Depth,
+			TokenSources:  []string{},
+			EvidencePaths: make([]EvidencePath, 0),
 			RelationPaths: []string{},
 		}
 
+		// Collect token sources from evidence
 		tokenSet := make(map[string]bool)
 		for _, evidence := range node.Evidence {
 			if evidence.SourceToken != "" {
@@ -98,17 +112,36 @@ func BuildPassageFieldsFromGraph(graph *ActivationGraph) PassageFields {
 			field.TokenSources = append(field.TokenSources, token)
 		}
 
+		// Copy evidence paths from graph node
+		field.EvidencePaths = append(field.EvidencePaths, node.Evidence...)
+
+		// Collect relation paths from edges
+		for _, edge := range graph.Edges {
+			if edge.From == node.Concept || edge.To == node.Concept {
+				path := formatRelationPath(edge)
+				if !containsString(field.RelationPaths, path) {
+					field.RelationPaths = append(field.RelationPaths, path)
+				}
+			}
+		}
+
 		fields = append(fields, field)
 	}
 
 	return fields
 }
 
-// AnalyzePassage analyzes a multi-token passage through existing channels.
-func AnalyzePassage(passage string, engine *Engine) (PassageFields, error) {
-	tokens := tokenizePassage(passage)
+// formatRelationPath formats an edge as a human-readable relation path.
+func formatRelationPath(edge *ActivationEdge) string {
+	return edge.From + " ->(" + edge.RelationType + ") " + edge.To
+}
+
+// AnalyzePassageFromTokens analyzes a list of tokens through the activation graph.
+// This is the internal version that avoids circular calls.
+// For external use, call Engine.Analyze with a multi-token passage instead.
+func AnalyzePassageFromTokens(tokens []string, kb *knowledge.Knowledge) PassageFields {
 	if len(tokens) == 0 {
-		return nil, nil
+		return nil
 	}
 
 	var allChannels []ChannelResult
@@ -116,34 +149,57 @@ func AnalyzePassage(passage string, engine *Engine) (PassageFields, error) {
 	conceptExpansions := make(map[string][]knowledge.DecipherConceptRelation)
 
 	for _, token := range tokens {
-		reading := engine.Analyze(token)
+		// Generate forms for single token
+		forms := GenerateForms(token)
 
-		allChannels = append(allChannels, reading.Channels...)
+		// Run channels for this token
+		channels := RunAllChannels(forms, kb)
+		allChannels = append(allChannels, channels...)
 
-		for _, sig := range reading.Convergence.ActivatedConcepts {
-			for _, source := range sig.Sources {
-				allPassageSignals = append(allPassageSignals, PassageSignal{
-					Token:      source,
-					Concept:    sig.Concept,
-					Weight:     sig.Strength,
-					Confidence: sig.Confidence,
-					MatchForm:  token,
-					MatchScore: 1.0,
-				})
-			}
+		// Analyze passage tokens for this single token
+		signals := AnalyzePassageTokens(forms.Tokens, kb)
+
+		// Mark signals with original token as source
+		for _, sig := range signals {
+			allPassageSignals = append(allPassageSignals, PassageSignal{
+				Token:      token, // Original token from passage
+				Concept:    sig.Concept,
+				Weight:     sig.Weight,
+				Confidence: sig.Confidence,
+				MatchForm:  token,
+				MatchScore: 1.0,
+			})
 		}
 
-		for concept, expansions := range reading.ConceptExpansions {
-			conceptExpansions[concept] = expansions
+		// Expand concepts for this token
+		directConcepts := extractDirectConcepts(channels)
+		expansions := ExpandConcepts(directConcepts, 0.4, kb)
+		for concept, exps := range expansions {
+			conceptExpansions[concept] = exps
 		}
 	}
 
-	graph := BuildGraphFromEvidence(allChannels, allPassageSignals, nil, conceptExpansions, engine.Knowledge)
+	// Build activation graph from collected data
+	graph := BuildGraphFromEvidence(allChannels, allPassageSignals, nil, conceptExpansions, kb)
 	graph.PropagateActivation()
 
+	// Build passage fields from graph
 	passageFields := BuildPassageFieldsFromGraph(graph)
 
-	return passageFields, nil
+	return passageFields
+}
+
+// AnalyzePassage analyzes a multi-token passage through existing channels.
+// WARNING: This function calls engine.Analyze internally which may cause issues
+// with multi-token inputs. For internal use, prefer AnalyzePassageFromTokens.
+func AnalyzePassage(passage string, engine *Engine) (PassageFields, error) {
+	tokens := tokenizePassage(passage)
+	if len(tokens) == 0 {
+		return nil, nil
+	}
+
+	// Use the internal function to avoid circular recursion
+	return AnalyzePassageFromTokens(tokens, engine.Knowledge), nil
 }
 
 // tokenizePassage splits a passage into tokens.
@@ -185,12 +241,44 @@ func mergeStringSlices(a, b []string) []string {
 	return result
 }
 
+// mergeEvidencePaths merges evidence paths without duplicates.
+func mergeEvidencePaths(a, b []EvidencePath) []EvidencePath {
+	seen := make(map[string]bool)
+	result := make([]EvidencePath, 0, len(a)+len(b))
+	for _, e := range a {
+		id := e.EvidenceID()
+		if !seen[id] {
+			seen[id] = true
+			result = append(result, e)
+		}
+	}
+	for _, e := range b {
+		id := e.EvidenceID()
+		if !seen[id] {
+			seen[id] = true
+			result = append(result, e)
+		}
+	}
+	return result
+}
+
 // containsString checks if a slice contains a string.
 func containsString(slice []string, s string) bool {
 	for _, v := range slice {
 		if v == s {
 			return true
 		}
+	}
+	return false
+}
+
+// isHigherConfidence returns true if b is higher priority than a.
+func isHigherConfidence(a, b string) bool {
+	if b == ConfidenceVerified && a != ConfidenceVerified {
+		return true
+	}
+	if b == ConfidencePlausible && a == ConfidenceSpeculative {
+		return true
 	}
 	return false
 }

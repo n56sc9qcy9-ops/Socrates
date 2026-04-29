@@ -148,6 +148,7 @@ type Reading struct {
 	ConceptExpansions  map[string][]knowledge.DecipherConceptRelation // Phase D: Concept graph expansions
 	PassageSignals     []PassageSignal                                // Phase E: Passage-level signals
 	Convergence        ConvergenceResult                              // Phase E: Convergence via generic activation
+	PassageFields      PassageFields                                  // Phase E: Passage fields via activation graph
 	Channels           []ChannelResult
 	ConvergingPatterns []Pattern
 	WeakSignals        []Pattern
@@ -155,7 +156,7 @@ type Reading struct {
 	ConciseReading     string
 	Warnings           []string
 	// Discarded counts for bounded work
-	DiscardedCandidates int `json:"discardedCandidates,omitempty"` // Candidates skipped due to bounds
+	DiscardedCandidates  int `json:"discardedCandidates,omitempty"`  // Candidates skipped due to bounds
 	DiscardedComparisons int `json:"discardedComparisons,omitempty"` // Fuzzy comparisons skipped due to bounds
 }
 

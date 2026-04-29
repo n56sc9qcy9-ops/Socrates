@@ -60,6 +60,16 @@ func (e *Engine) Analyze(input string) Reading {
 	activationGraph.PropagateActivation()
 	convergence := activationGraph.ToConvergenceResult()
 
+	// Build passage fields - for multi-token input, use internal function; for single, use graph
+	var passageFields PassageFields
+	if len(forms.Tokens) > 1 {
+		// Multi-token: use internal function to avoid circular recursion
+		passageFields = AnalyzePassageFromTokens(forms.Tokens, e.Knowledge)
+	} else {
+		// Single-token: build fields directly from activation graph
+		passageFields = BuildPassageFieldsFromGraph(activationGraph)
+	}
+
 	// Collect all signals and deduplicate before scoring
 	allSignals := collectAllSignals(channels)
 	allSignals = DeduplicateSignals(allSignals)
@@ -90,6 +100,7 @@ func (e *Engine) Analyze(input string) Reading {
 		ConceptExpansions:   conceptExpansions,
 		PassageSignals:      passageSignals,
 		Convergence:         convergence,
+		PassageFields:       passageFields,
 		Channels:            channels,
 		ConvergingPatterns: converging,
 		WeakSignals:         weakSignals,

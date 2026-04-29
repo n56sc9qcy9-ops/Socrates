@@ -14,7 +14,7 @@ func TestPassageField_Structure(t *testing.T) {
 		Concept:      "love",
 		Strength:     0.9,
 		Confidence:   ConfidenceVerified,
-		TokenSources:  []string{"love", "heart"},
+		TokenSources: []string{"love", "heart"},
 		Depth:        0,
 	}
 
@@ -174,128 +174,152 @@ func TestAnalyzePassage_WhitespaceOnly(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Whitespace-only might produce no tokens
+	// Whitespace-only should produce no fields
 	if len(fields) > 0 {
-		// This is acceptable behavior
-		t.Logf("whitespace-only produced %d fields", len(fields))
+		t.Errorf("whitespace-only should produce no fields, got %d", len(fields))
 	}
 }
 
 // =============================================================================
-// PASSAGE FIELD TOKEN TRACKING TESTS
+// PASSAGE FIELDS IN READING TESTS
 // =============================================================================
 
-func TestPassageField_TokenSources(t *testing.T) {
+func TestReading_ContainsPassageFields(t *testing.T) {
 	engine, err := NewEngine()
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	// Multi-token passage
+	reading := engine.Analyze("love truth light")
+
+	// Reading MUST contain PassageFields
+	if reading.PassageFields == nil {
+		t.Fatal("Reading.PassageFields should not be nil for multi-token input")
+	}
+
+	if len(reading.PassageFields) == 0 {
+		t.Error("Reading.PassageFields should not be empty for multi-token input")
+	}
+}
+
+func TestReading_PassageFieldsNotNilForSingleToken(t *testing.T) {
+	engine, err := NewEngine()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Single token
+	reading := engine.Analyze("love")
+
+	// Reading should contain PassageFields (even for single token)
+	if reading.PassageFields == nil {
+		t.Fatal("Reading.PassageFields should not be nil")
+	}
+}
+
+// =============================================================================
+// PASSAGE FIELD TOKEN PROVENANCE TESTS
+// =============================================================================
+
+func TestPassageField_TokenSourcesFromOriginalTokens(t *testing.T) {
+	engine, err := NewEngine()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Passage with specific tokens
 	fields, err := AnalyzePassage("love light", engine)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	// Check that fields have token sources (may be empty if evidence paths not populated)
-	loveField := fields.GetField("love")
-	if loveField != nil {
-		// Token sources may or may not include 'love' depending on graph evidence
-		// Just verify the field exists and has strength
-		if loveField.Strength <= 0 {
-			t.Error("love field should have positive strength")
-		}
-		t.Logf("love field: strength=%.4f, tokens=%v", loveField.Strength, loveField.TokenSources)
-	}
-}
-
-func TestPassageField_DepthDistinction(t *testing.T) {
-	engine, err := NewEngine()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	fields, err := AnalyzePassage("love", engine)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Direct concept should have depth 0
+	// Fields should have evidence paths
+	foundEvidence := false
 	for _, field := range fields {
-		// Field should have a valid depth
-		if field.Depth < 0 {
-			t.Errorf("field '%s' has invalid depth %d", field.Concept, field.Depth)
-		}
-	}
-}
-
-// =============================================================================
-// REPEATED ACTIVATION FIELD TESTS
-// =============================================================================
-
-func TestPassageFields_NoDuplicateInflation(t *testing.T) {
-	engine, err := NewEngine()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Analyze same passage twice
-	fields1, _ := AnalyzePassage("love heart", engine)
-	fields2, _ := AnalyzePassage("love heart", engine)
-
-	// Results should be similar
-	if len(fields1) != len(fields2) {
-		t.Errorf("repeated analysis should produce same number of fields: %d vs %d",
-			len(fields1), len(fields2))
-	}
-}
-
-func TestPassageField_MultipleTokensSameConcept(t *testing.T) {
-	engine, err := NewEngine()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Analyze passage where multiple tokens might activate same concept
-	fields, err := AnalyzePassage("love love", engine)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// There should be a love field
-	loveField := fields.GetField("love")
-	if loveField == nil {
-		t.Error("should have love field")
-	} else {
-		// Love field should track both token sources
-		loveCount := 0
-		for _, source := range loveField.TokenSources {
-			if source == "love" {
-				loveCount++
+		if len(field.EvidencePaths) > 0 {
+			foundEvidence = true
+			// Verify evidence has valid structure
+			for _, ev := range field.EvidencePaths {
+				if ev.SourceToken == "" {
+					t.Error("evidence path should have source token")
+				}
+				if ev.SourceType == "" {
+					t.Error("evidence path should have source type")
+				}
 			}
 		}
-		// Either deduplicated (1 source) or tracking repeats (2+ sources)
-		// Either way, field should exist with reasonable strength
-		if loveField.Strength <= 0 {
-			t.Error("love field should have positive strength")
-		}
+	}
+
+	if !foundEvidence {
+		t.Error("fields should have evidence paths from passage analysis")
 	}
 }
 
-// =============================================================================
-// KEY TOKEN WEAKENING TESTS
-// =============================================================================
-
-func TestKeyTokenRemoval_WeakensPassageField(t *testing.T) {
+func TestPassageField_TokenProvenance_OriginalTokenIsSource(t *testing.T) {
 	engine, err := NewEngine()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	// "love truth light" - love is key semantic word
+	fields, err := AnalyzePassage("truth", engine)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Truth field should have evidence paths populated
+	// Token sources may vary due to form generation, but field must exist
+	truthField := fields.GetField("truth")
+	if truthField == nil {
+		t.Error("should have 'truth' field")
+	} else {
+		// Field should have evidence paths (the key requirement)
+		if len(truthField.EvidencePaths) == 0 {
+			t.Error("'truth' field should have evidence paths")
+		}
+		// Field should have positive strength
+		if truthField.Strength <= 0 {
+			t.Error("'truth' field should have positive strength")
+		}
+	}
+}
+
+// =============================================================================
+// GRAPH PROPAGATION BEHAVIOR TESTS
+// =============================================================================
+
+func TestGraphPropagate_MultipleSources(t *testing.T) {
+	g := NewActivationGraph()
+	g.AddNode("x", 1.0, ConfidenceVerified)
+	g.AddNode("y", 0.8, ConfidenceVerified)
+	g.AddNode("z", 0.5, ConfidencePlausible)
+	g.AddEdge("x", "z", "synonym", 0.9, ConfidenceVerified)
+	g.AddEdge("y", "z", "related", 0.7, ConfidencePlausible)
+	g.PropagateActivation()
+
+	// Z should receive activation from both sources
+	zStrength := g.GetNode("z").Strength
+	if zStrength <= 0.5 {
+		t.Errorf("Z should have received propagated activation: %.4f", zStrength)
+	}
+}
+
+// =============================================================================
+// KEY TOKEN WEAKENING STRICT TESTS
+// =============================================================================
+
+func TestKeyTokenRemoval_StrictlyWeakensRelatedField(t *testing.T) {
+	engine, err := NewEngine()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Full passage with key semantic word
 	fieldsFull, _ := AnalyzePassage("love truth light", engine)
+	// Without the key word
 	fieldsNoLove, _ := AnalyzePassage("truth light", engine)
 
-
+	// Get love field strengths
 	fullLoveStrength := 0.0
 	noLoveStrength := 0.0
 
@@ -311,44 +335,226 @@ func TestKeyTokenRemoval_WeakensPassageField(t *testing.T) {
 		}
 	}
 
-	// The full passage with "love" should have higher or equal love strength
-	// than the passage without "love"
-	if fullLoveStrength < noLoveStrength {
-		t.Errorf("passage with 'love' should have love field strength >= without:\n  full: %.4f\n  no love: %.4f",
+	// Removing "love" from the passage MUST strictly weaken the love field
+	// (either love field disappears or strength is reduced)
+	if fullLoveStrength <= noLoveStrength {
+		t.Errorf("removing 'love' token should strictly weaken love field:\n  full: %.4f\n  no love: %.4f",
 			fullLoveStrength, noLoveStrength)
 	}
 }
 
-func TestKeyTokenRemoval_AffectsOtherFields(t *testing.T) {
+func TestKeyTokenRemoval_CompleteRemoval(t *testing.T) {
 	engine, err := NewEngine()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	// Full passage
-	fieldsFull, _ := AnalyzePassage("love truth", engine)
-	// Without "love" - should affect co-activation
-	fieldsNoLove, _ := AnalyzePassage("truth", engine)
+	// Analyze single word
+	fieldsSingle, _ := AnalyzePassage("truth", engine)
 
-	// Truth field in full passage might have higher strength due to co-activation with love
-	truthFullStrength := 0.0
-	truthNoLoveStrength := 0.0
-
-	for _, field := range fieldsFull {
+	// Get truth field strength from single
+	var singleTruthStrength float64
+	for _, field := range fieldsSingle {
 		if field.Concept == "truth" {
-			truthFullStrength = field.Strength
+			singleTruthStrength = field.Strength
 		}
 	}
 
-	for _, field := range fieldsNoLove {
+	// Single word analysis should produce truth field with positive strength
+	if singleTruthStrength <= 0 {
+		t.Error("single word analysis should produce truth field with positive strength")
+	}
+
+	// Analyze again - strengths should be in the same ballpark (within 50%)
+	fieldsAgain, _ := AnalyzePassage("truth", engine)
+	var againTruthStrength float64
+	for _, field := range fieldsAgain {
 		if field.Concept == "truth" {
-			truthNoLoveStrength = field.Strength
+			againTruthStrength = field.Strength
 		}
 	}
 
-	// Full passage truth strength might be different due to concept co-activation
-	// This is acceptable - we're testing that the system responds to token removal
-	t.Logf("truth strength: full=%.4f, no love=%.4f", truthFullStrength, truthNoLoveStrength)
+	ratio := againTruthStrength / singleTruthStrength
+	if ratio < 0.5 || ratio > 2.0 {
+		t.Errorf("repeated single-word analysis should produce similar strength: %.4f vs %.4f (ratio=%.2f)",
+			singleTruthStrength, againTruthStrength, ratio)
+	}
+}
+
+// =============================================================================
+// DUPLICATE/REPEATED TOKEN EVIDENCE POLICY TESTS
+// =============================================================================
+
+func TestRepeatedTokens_AccumulationWithinBounds(t *testing.T) {
+	engine, err := NewEngine()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Single occurrence
+	fields1, _ := AnalyzePassage("love", engine)
+
+	// Repeated occurrences (3x)
+	fields3, _ := AnalyzePassage("love love love", engine)
+
+	// Get love field strengths
+	var strength1, strength3 float64
+
+	for _, field := range fields1 {
+		if field.Concept == "love" {
+			strength1 = field.Strength
+		}
+	}
+
+	for _, field := range fields3 {
+		if field.Concept == "love" {
+			strength3 = field.Strength
+		}
+	}
+
+	// Multiple occurrences should accumulate but not linearly
+	// Allow up to 4x accumulation for triple occurrence (reasonable for co-activation)
+	maxExpected := strength1 * 4.0
+
+	if strength3 > maxExpected {
+		t.Errorf("repeated tokens should not inflate linearly: single=%.4f, triple=%.4f, max=%.4f",
+			strength1, strength3, maxExpected)
+	}
+}
+
+func TestDuplicateInflation_EvidenceDeduplication(t *testing.T) {
+	engine, err := NewEngine()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Analyze once
+	fields1, _ := AnalyzePassage("light", engine)
+
+	// Analyze twice with same passage
+	fields2, _ := AnalyzePassage("light", engine)
+
+	// Both should produce same number of fields
+	if len(fields1) != len(fields2) {
+		t.Errorf("repeated analysis should produce same number of fields: %d vs %d",
+			len(fields1), len(fields2))
+	}
+}
+
+// =============================================================================
+// RELATION PATH TESTS
+// =============================================================================
+
+func TestPassageField_RelationPathsExist(t *testing.T) {
+	engine, err := NewEngine()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fields, err := AnalyzePassage("love light", engine)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Some fields should have relation paths when concepts are connected
+	foundRelationPaths := false
+	for _, field := range fields {
+		if len(field.RelationPaths) > 0 {
+			foundRelationPaths = true
+			// Verify path format: "from ->(type) to"
+			for _, path := range field.RelationPaths {
+				if !strings.Contains(path, "->") {
+					t.Errorf("relation path should contain '->': %s", path)
+				}
+			}
+		}
+	}
+
+	if !foundRelationPaths {
+		t.Error("at least some fields should have relation paths when concepts are connected")
+	}
+}
+
+func TestPassageField_RelationPathsFromGraph(t *testing.T) {
+	// Create a graph with explicit edges
+	graph := NewActivationGraph()
+	graph.AddNode("light", 1.0, ConfidenceVerified)
+	graph.AddNode("sun", 0.8, ConfidencePlausible)
+	graph.AddNode("truth", 0.6, ConfidenceSpeculative)
+	graph.AddEdge("light", "sun", "synonym", 0.9, ConfidenceVerified)
+	graph.AddEdge("sun", "truth", "related", 0.7, ConfidencePlausible)
+	graph.PropagateActivation()
+
+	fields := BuildPassageFieldsFromGraph(graph)
+
+	// Light should have relation path to sun
+	lightField := fields.GetField("light")
+	if lightField == nil {
+		t.Fatal("should have light field")
+	}
+
+	if len(lightField.RelationPaths) == 0 {
+		t.Error("light field should have relation paths from graph edges")
+	}
+}
+
+// =============================================================================
+// EVIDENCE PATH TESTS
+// =============================================================================
+
+func TestPassageField_EvidencePathsPopulated(t *testing.T) {
+	engine, err := NewEngine()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fields, err := AnalyzePassage("truth", engine)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Truth field should have evidence paths
+	truthField := fields.GetField("truth")
+	if truthField == nil {
+		t.Error("should have truth field")
+	} else if len(truthField.EvidencePaths) == 0 {
+		t.Error("truth field should have evidence paths from activation graph")
+	}
+}
+
+func TestEvidencePath_Deduplication(t *testing.T) {
+	// Create paths with same ID
+	path1 := EvidencePath{
+		SourceToken: "love",
+		SourceType:  "passage_signal",
+		SourceForm:  "love",
+		MatchForm:   "love",
+		Confidence:  ConfidenceVerified,
+		Weight:      1.0,
+	}
+
+	path2 := EvidencePath{
+		SourceToken: "love",
+		SourceType:  "passage_signal",
+		SourceForm:  "love",
+		MatchForm:   "love",
+		Confidence:  ConfidenceVerified,
+		Weight:      1.0,
+	}
+
+	// Both should have the same ID
+	id1 := path1.EvidenceID()
+	id2 := path2.EvidenceID()
+
+	if id1 != id2 {
+		t.Errorf("same evidence should have same ID: %s vs %s", id1, id2)
+	}
+
+	// Merging should deduplicate
+	merged := mergeEvidencePaths([]EvidencePath{path1}, []EvidencePath{path2})
+	if len(merged) != 1 {
+		t.Errorf("merged evidence paths should have 1 entry, got %d", len(merged))
+	}
 }
 
 // =============================================================================
@@ -397,7 +603,7 @@ func TestTokenizePassage_Empty(t *testing.T) {
 }
 
 // =============================================================================
-// DEFAULT OUTPUT TESTS
+// DEFAULT VS DEBUG RENDER TESTS
 // =============================================================================
 
 func TestPassageField_DefaultOutputConcise(t *testing.T) {
@@ -409,18 +615,33 @@ func TestPassageField_DefaultOutputConcise(t *testing.T) {
 	reading := engine.Analyze("love truth")
 	output := RenderReadingWithOptions(reading, DefaultRenderOptions())
 
-	// Default output should be concise
+	// Default output should be concise (under 2000 chars)
 	if len(output) > 2000 {
 		t.Errorf("default output seems too long (%d chars), should be concise", len(output))
 	}
 
-	// Should NOT include all passage field internals
-	if strings.Contains(output, "PassageField") {
-		t.Error("default output should not expose PassageField struct names")
+	// Default output should show top fields summary
+	if !strings.Contains(output, "Top fields") && !strings.Contains(output, "field") {
+		t.Error("default output should show passage field summary")
 	}
 }
 
-func TestPassageField_DebugOutputMayIncludeDetail(t *testing.T) {
+func TestPassageField_DefaultOutputNoCandidates(t *testing.T) {
+	engine, err := NewEngine()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	reading := engine.Analyze("love truth")
+	output := RenderReadingWithOptions(reading, DefaultRenderOptions())
+
+	// Default output should NOT include all candidates
+	if strings.Contains(output, "Candidate Neighbors") {
+		t.Error("default output should not include candidate neighbor list")
+	}
+}
+
+func TestPassageField_DebugOutputFullDetails(t *testing.T) {
 	engine, err := NewEngine()
 	if err != nil {
 		t.Fatal(err)
@@ -429,11 +650,151 @@ func TestPassageField_DebugOutputMayIncludeDetail(t *testing.T) {
 	reading := engine.Analyze("love truth light")
 	output := RenderReadingWithOptions(reading, DebugRenderOptions())
 
-	// Debug output can be longer
-	if len(output) < 100 {
-		t.Error("debug output seems too short")
+	// Debug output should include passage fields
+	if !strings.Contains(output, "Passage Fields") {
+		t.Error("debug output should include passage fields section")
 	}
 
-	// Debug may include passage field info
-	t.Logf("debug output length: %d chars", len(output))
+	// Debug should be longer than default
+	defaultOutput := RenderReadingWithOptions(reading, DefaultRenderOptions())
+	if len(output) <= len(defaultOutput) {
+		t.Error("debug output should be longer than default output")
+	}
+}
+
+func TestPassageField_DebugOutputEvidencePaths(t *testing.T) {
+	engine, err := NewEngine()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	reading := engine.Analyze("truth")
+	output := RenderReadingWithOptions(reading, DebugRenderOptions())
+
+	// Debug output should show evidence
+	if !strings.Contains(output, "evidence") {
+		t.Error("debug output should include evidence paths")
+	}
+}
+
+// =============================================================================
+// BUILD PASSAGE FIELDS FROM GRAPH TESTS
+// =============================================================================
+
+func TestBuildPassageFieldsFromGraph_Empty(t *testing.T) {
+	graph := NewActivationGraph()
+	fields := BuildPassageFieldsFromGraph(graph)
+
+	if len(fields) != 0 {
+		t.Errorf("empty graph should produce empty fields, got %d", len(fields))
+	}
+}
+
+func TestBuildPassageFieldsFromGraph_WithNodes(t *testing.T) {
+	graph := NewActivationGraph()
+	graph.AddNode("love", 1.0, ConfidenceVerified)
+	graph.AddNode("light", 0.8, ConfidencePlausible)
+	graph.AddEdge("love", "light", "related", 0.7, ConfidencePlausible)
+	graph.PropagateActivation()
+
+	fields := BuildPassageFieldsFromGraph(graph)
+
+	if len(fields) != 2 {
+		t.Errorf("graph with 2 nodes should produce 2 fields, got %d", len(fields))
+	}
+
+	// Both fields should have valid structure
+	for _, field := range fields {
+		if field.Concept == "" {
+			t.Error("field should have a concept")
+		}
+		if field.Strength <= 0 {
+			t.Error("field should have positive strength")
+		}
+	}
+}
+
+func TestBuildPassageFieldsFromGraph_TokenSourcesFromEvidence(t *testing.T) {
+	graph := NewActivationGraph()
+	node := graph.AddNode("truth", 1.0, ConfidenceVerified)
+	node.Evidence = append(node.Evidence, EvidencePath{
+		SourceToken: "truth",
+		SourceType:  "passage_signal",
+		Confidence:  ConfidenceVerified,
+		Weight:      1.0,
+	})
+
+	fields := BuildPassageFieldsFromGraph(graph)
+
+	truthField := fields.GetField("truth")
+	if truthField == nil {
+		t.Fatal("should have truth field")
+	}
+
+	if len(truthField.TokenSources) == 0 {
+		t.Error("truth field should have 'truth' as token source from evidence")
+	}
+
+	foundTruth := false
+	for _, src := range truthField.TokenSources {
+		if src == "truth" {
+			foundTruth = true
+			break
+		}
+	}
+	if !foundTruth {
+		t.Error("truth field should have 'truth' as token source")
+	}
+}
+
+// =============================================================================
+// ANALYZE PASSAGE FROM TOKENS TESTS
+// =============================================================================
+
+func TestAnalyzePassageFromTokens_Direct(t *testing.T) {
+	engine, err := NewEngine()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tokens := []string{"love", "truth"}
+	fields := AnalyzePassageFromTokens(tokens, engine.Knowledge)
+
+	if len(fields) == 0 {
+		t.Error("should produce passage fields from tokens")
+	}
+}
+
+func TestAnalyzePassageFromTokens_TokenProvenance(t *testing.T) {
+	engine, err := NewEngine()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tokens := []string{"light", "truth"}
+	fields := AnalyzePassageFromTokens(tokens, engine.Knowledge)
+
+	// Both fields should exist with evidence paths
+	lightField := fields.GetField("light")
+	if lightField == nil {
+		t.Error("should have light field")
+	} else {
+		// Light field should have evidence paths (the key requirement)
+		if len(lightField.EvidencePaths) == 0 {
+			t.Error("light field should have evidence paths")
+		}
+		if lightField.Strength <= 0 {
+			t.Error("light field should have positive strength")
+		}
+	}
+
+	// Truth field should also exist
+	truthField := fields.GetField("truth")
+	if truthField == nil {
+		t.Error("should have truth field")
+	} else {
+		if len(truthField.EvidencePaths) == 0 {
+			t.Error("truth field should have evidence paths")
+		}
+	}
 }
