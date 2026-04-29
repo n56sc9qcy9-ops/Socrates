@@ -70,12 +70,12 @@ Spend at least 10 focused minutes. If the first test passes immediately, use the
 
 Acceptance Criteria:
 
-- A test proves removing a key evidence token weakens the relevant activation field.
-- The test is data-driven and does not require production word-specific branches.
-- Existing bounded-work and render-mode tests still pass.
-- `go test ./...` passes.
-- Work is committed locally and not pushed.
+- [x] A test proves removing a key evidence token weakens the relevant activation field.
+- [x] The test is data-driven and does not require production word-specific branches.
+- [x] Existing bounded-work and render-mode tests still pass.
+- [x] `go test ./...` passes.
+- [ ] Work is committed locally and not pushed.
 
 ## Next After This
 
-If the key-token regression passes, the Activation-Energy Discipline Gate can be treated as complete and the next task should move to Phase 5: Activation Graph hardening.
+~~If the key-token regression passes, the Activation-Energy Discipline Gate can be treated as complete and the next task should move to Phase 5: Activation Graph hardening.~~
