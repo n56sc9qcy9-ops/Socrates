@@ -214,3 +214,33 @@ PASS
 Local commit:
 
 - `e4ede94 Add key-token removal regression tests for Activation-Energy Discipline Gate`
+
+### Phase 5 First Activation Graph Slice
+
+Completed:
+
+- Added a first-class `ActivationGraph` with nodes, edges, evidence paths, bounded propagation, and cycle-prevention tests.
+- Routed convergence through the graph internally.
+- Bounded graph expansion score.
+- Deduplicated repeated primitive fragment signals.
+- Added a `"God is Love"` regression around bounded score components and duplicate default evidence.
+
+Recorded verification from Pi:
+
+```text
+?     socrates/cmd/socrates       [no test files]
+ok    socrates/internal/decipher  (cached)
+ok    socrates/internal/knowledge (cached)
+ok    socrates/internal/resonance (cached)
+```
+
+Architect review notes for next task:
+
+- Whitespace can still create repetition evidence unless glyph repetition ignores non-letters.
+- Propagation uses mutable visited state and should be made path-local/deterministic.
+- Graph-derived nodes need to be clearly distinguished from direct nodes.
+- Duplicate edges/evidence need stronger graph-level deduplication.
+
+Local commit:
+
+- `79963d4 Phase 5: Activation Graph layer with bounded scores and deduplication`
