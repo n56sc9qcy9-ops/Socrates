@@ -151,7 +151,15 @@ func (g *ActivationGraph) AddNode(concept string, strength float64, confidence s
 }
 
 // AddEdge adds an edge to the graph.
+// Deduplicates by (from, to, relationType) - first edge wins.
 func (g *ActivationGraph) AddEdge(from, to, relationType string, weight float64, confidence string) *ActivationEdge {
+	// Deduplicate: check if similar edge exists
+	for _, existing := range g.Edges {
+		if existing.From == from && existing.To == to && existing.RelationType == relationType {
+			return existing // Return existing, don't add duplicate
+		}
+	}
+
 	edge := &ActivationEdge{
 		From:          from,
 		To:            to,
@@ -309,14 +317,18 @@ func BuildGraphFromEvidence(
 	}
 
 	// Phase 4: Add graph-expanded concepts from YAML relations
+	// These nodes have depth 1 (not direct) so they don't inflate direct counts
+	// Only new nodes get depth 1 - existing direct nodes stay direct
 	for fromConcept, relations := range conceptExpansions {
 		for _, rel := range relations {
 			// Add the related concept if not already present
 			if _, exists := g.Nodes[rel.To]; !exists {
-				g.AddNode(rel.To, rel.Weight*0.5, ConfidencePlausible)
+				node := g.AddNode(rel.To, rel.Weight*0.5, ConfidencePlausible)
+				node.Depth = 1 // Graph-expanded, not direct
 			}
+			// Note: if node already exists (was direct), don't change its depth
 
-			// Add relation edge (will be populated during propagation)
+			// Add relation edge with deduplication
 			g.AddEdge(fromConcept, rel.To, rel.Type, rel.Weight, ConfidencePlausible)
 		}
 	}
@@ -347,14 +359,14 @@ func (g *ActivationGraph) resetVisited() {
 // =============================================================================
 
 // PropagateActivation propagates activation through graph edges with decay.
-// This is bounded by MaxDepth and cycle-safe via the Visited flag.
+// Uses path-local visited tracking for deterministic cycle-safe propagation.
 func (g *ActivationGraph) PropagateActivation() {
-	g.resetVisited()
-
-	// Propagate from each node with initial strength
+	// Propagate from each depth-0 (direct) node with a fresh path-local visited set
 	for _, node := range g.Nodes {
 		if node.Depth == 0 {
-			g.propagateFrom(node, node.Strength, 0)
+			visitedInPath := make(map[string]bool)
+			visitedInPath[node.Concept] = true
+			g.propagateFrom(node, node.Strength, 0, visitedInPath)
 		}
 	}
 
@@ -370,7 +382,8 @@ func (g *ActivationGraph) PropagateActivation() {
 }
 
 // propagateFrom propagates activation from a source node through its edges.
-func (g *ActivationGraph) propagateFrom(source *ActivationNode, strength float64, depth int) {
+// Uses path-local visited tracking for deterministic cycle-safe propagation.
+func (g *ActivationGraph) propagateFrom(source *ActivationNode, strength float64, depth int, visitedInPath map[string]bool) {
 	if depth >= g.MaxDepth {
 		return // Bounded depth
 	}
@@ -382,8 +395,8 @@ func (g *ActivationGraph) propagateFrom(source *ActivationNode, strength float64
 			continue
 		}
 
-		// Cycle detection: prevent revisiting at same depth level
-		if target.Visited {
+		// Path-local cycle detection: prevent revisiting same node in current path
+		if visitedInPath[edge.To] {
 			continue
 		}
 
@@ -395,8 +408,10 @@ func (g *ActivationGraph) propagateFrom(source *ActivationNode, strength float64
 			continue
 		}
 
-		// Mark as visited before propagating
-		target.Visited = true
+		// Add to path-local visited set
+		visitedInPath[edge.To] = true
+
+		// Update target strength
 		target.Strength += decayedStrength
 
 		// Set depth if not already set (first path wins)
@@ -404,11 +419,8 @@ func (g *ActivationGraph) propagateFrom(source *ActivationNode, strength float64
 			target.Depth = depth + 1
 		}
 
-		// Recursively propagate
-		g.propagateFrom(target, decayedStrength, depth+1)
-
-		// Unmark after processing all outgoing edges from this path
-		// This allows other paths to reach this node
+		// Recursively propagate with the path-local visited set
+		g.propagateFrom(target, decayedStrength, depth+1, visitedInPath)
 	}
 }
 

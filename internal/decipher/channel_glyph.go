@@ -49,13 +49,16 @@ func analyzeLatinGlyphs(s string, kb *knowledge.Knowledge) []Signal {
 		return signals
 	}
 
-	// Character frequency
+	// Character frequency - only count letters, not spaces or punctuation
 	charFreq := make(map[rune]int)
 	for _, r := range s {
-		charFreq[r]++
+		if isLetter(r) {
+			charFreq[r]++
+		}
 	}
 
 	// Repeated letters - deduplicate to single repetition signal
+	// Only letters (not whitespace or punctuation) trigger repetition evidence
 	hasRepetition := false
 	for _, count := range charFreq {
 		if count > 1 && !hasRepetition {
@@ -302,4 +305,17 @@ func analyzeHanGlyphs(runes []rune, kb *knowledge.Knowledge) []Signal {
 	}
 
 	return signals
+}
+
+// isLetter returns true if r is an alphabetic letter (Latin or otherwise).
+// Excludes whitespace, punctuation, and other non-letter characters.
+func isLetter(r rune) bool {
+	return (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') ||
+		(r >= 0xC0 && r <= 0x24F) || // Latin Extended
+		(r >= 0x370 && r <= 0x3FF) || // Greek
+		(r >= 0x400 && r <= 0x4FF) || // Cyrillic
+		(r >= 0x900 && r <= 0x97F) || // Devanagari
+		(r >= 0x4E00 && r <= 0x9FFF) || // CJK Unified Ideographs
+		(r >= 0x3040 && r <= 0x309F) || // Hiragana
+		(r >= 0x30A0 && r <= 0x30FF) // Katakana
 }

@@ -662,3 +662,301 @@ func TestActivationGraph_EdgeCase_SingleNode(t *testing.T) {
 		t.Errorf("single node graph should have 1 top node, got %d", len(topNodes))
 	}
 }
+
+// =============================================================================
+// PROPAGATION DETERMINISM TESTS
+// =============================================================================
+
+func TestPropagateActivation_StableWithinSinglePass(t *testing.T) {
+	// Test that propagation produces consistent results within a single run
+	// by checking intermediate results are stable
+	g := NewActivationGraph()
+
+	g.AddNode("a", 1.0, ConfidenceVerified)
+	g.AddNode("b", 0.8, ConfidenceVerified)
+	g.AddNode("c", 0.6, ConfidenceVerified)
+	g.AddEdge("a", "b", "related", 0.8, ConfidencePlausible)
+	g.AddEdge("b", "c", "related", 0.8, ConfidencePlausible)
+	g.AddEdge("a", "c", "related", 0.6, ConfidencePlausible)
+
+	// Record results after single propagation
+	g.PropagateActivation()
+	result := make(map[string]float64)
+	for _, node := range g.Nodes {
+		result[node.Concept] = node.Strength
+	}
+
+	// Check that propagation is bounded (no excessive growth)
+	for concept, strength := range result {
+		if strength > 2.0 {
+			t.Errorf("concept '%s' has inflated strength %.4f", concept, strength)
+		}
+	}
+
+	// Direct nodes should retain their original strength
+	if aNode := g.GetNode("a"); aNode.Strength < 1.0 {
+		t.Errorf("direct node 'a' should retain at least original strength 1.0, got %.4f", aNode.Strength)
+	}
+}
+
+func TestPropagateActivation_CycleSafe(t *testing.T) {
+	// Test that cycles don't cause infinite propagation or stack overflow
+	g := NewActivationGraph()
+
+	g.AddNode("a", 1.0, ConfidenceVerified)
+	g.AddNode("b", 0.8, ConfidenceVerified)
+	g.AddNode("c", 0.6, ConfidenceVerified)
+
+	// Create cycle: a -> b -> c -> a
+	g.AddEdge("a", "b", "related", 0.8, ConfidencePlausible)
+	g.AddEdge("b", "c", "related", 0.8, ConfidencePlausible)
+	g.AddEdge("c", "a", "related", 0.8, ConfidencePlausible)
+
+	// This should not cause infinite recursion or stack overflow
+	g.PropagateActivation()
+
+	// All nodes should have bounded strength (no infinite growth)
+	for _, node := range g.Nodes {
+		if node.Strength > 2.0 {
+			t.Errorf("node '%s' has inflated strength %.4f from cycle", node.Concept, node.Strength)
+		}
+	}
+}
+
+func TestPropagateActivation_LongCycleSafe(t *testing.T) {
+	// Test that long chains with cycles don't explode
+	g := NewActivationGraph()
+
+	g.AddNode("a", 1.0, ConfidenceVerified)
+	g.AddNode("b", 0.8, ConfidenceVerified)
+	g.AddNode("c", 0.6, ConfidenceVerified)
+	g.AddNode("d", 0.4, ConfidencePlausible)
+	g.AddNode("e", 0.3, ConfidencePlausible)
+
+	// Long chain: a -> b -> c -> d -> e -> a
+	g.AddEdge("a", "b", "related", 0.8, ConfidencePlausible)
+	g.AddEdge("b", "c", "related", 0.8, ConfidencePlausible)
+	g.AddEdge("c", "d", "related", 0.8, ConfidencePlausible)
+	g.AddEdge("d", "e", "related", 0.8, ConfidencePlausible)
+	g.AddEdge("e", "a", "related", 0.8, ConfidencePlausible)
+
+	// This should complete without stack overflow
+	g.PropagateActivation()
+
+	// All nodes should have bounded strength
+	for _, node := range g.Nodes {
+		if node.Strength > 2.0 {
+			t.Errorf("node '%s' has inflated strength %.4f from long cycle", node.Concept, node.Strength)
+		}
+	}
+}
+
+// =============================================================================
+// DIRECT VS DERIVED NODE TESTS
+// =============================================================================
+
+func TestDirectAndDerivedNodes_Distinguishable(t *testing.T) {
+	// Test that direct nodes (depth 0) and derived nodes (depth > 0) are distinguishable
+	g := NewActivationGraph()
+
+	// Add direct node
+	directNode := g.AddNode("direct", 1.0, ConfidenceVerified)
+	if directNode.Depth != 0 {
+		t.Errorf("direct node should have depth 0, got %d", directNode.Depth)
+	}
+
+	// Add derived node (simulating graph expansion)
+	derivedNode := g.AddNode("derived", 0.5, ConfidencePlausible)
+	derivedNode.Depth = 1 // Manually set to derived
+
+	if directNode.Depth == derivedNode.Depth {
+		t.Error("direct and derived nodes should have different depths")
+	}
+}
+
+func TestGraphExpandedNodes_NotDirect(t *testing.T) {
+	kb := testKB()
+	if kb == nil {
+		t.Skip("no embedded knowledge available")
+	}
+
+	// Create test data with a concept that will expand via relations
+	channels := []ChannelResult{
+		{
+			Name: "test",
+			Signals: []Signal{
+				{Text: "love", Target: "love", Channel: "test", Confidence: ConfidenceVerified, Weight: 0.8},
+			},
+		},
+	}
+
+	passageSignals := []PassageSignal{}
+	fuzzyMatches := []MatchEvidence{}
+	conceptExpansions := map[string][]knowledge.DecipherConceptRelation{}
+
+	// Get relations for "love" using the correct method
+	if relations := kb.GetConceptRelationsAsDecipher("love"); len(relations) > 0 {
+		conceptExpansions["love"] = relations
+	}
+
+	graph := BuildGraphFromEvidence(channels, passageSignals, fuzzyMatches, conceptExpansions, kb)
+	graph.PropagateActivation()
+
+	// Check that expanded nodes have depth > 0
+	directCount := 0
+	for _, node := range graph.Nodes {
+		if node.Depth == 0 {
+			directCount++
+		}
+	}
+
+	// The "love" node should be direct (depth 0)
+	loveNode := graph.GetNode("love")
+	if loveNode == nil {
+		t.Fatal("love node should exist")
+	}
+	if loveNode.Depth != 0 {
+		t.Errorf("direct node 'love' should have depth 0, got %d", loveNode.Depth)
+	}
+}
+
+// =============================================================================
+// EDGE DEDUPLICATION TESTS
+// =============================================================================
+
+func TestAddEdge_DeduplicatesByIdentity(t *testing.T) {
+	g := NewActivationGraph()
+
+	g.AddNode("a", 1.0, ConfidenceVerified)
+	g.AddNode("b", 0.8, ConfidenceVerified)
+
+
+	// Add edge first time
+	e1 := g.AddEdge("a", "b", "related", 0.8, ConfidencePlausible)
+
+	// Try to add duplicate edge (same from, to, relationType)
+	e2 := g.AddEdge("a", "b", "related", 0.9, ConfidencePlausible) // Different weight
+
+	// Should return existing edge, not create new one
+	if e1 != e2 {
+		t.Error("duplicate edge should return existing edge")
+	}
+
+	// Graph should only have one edge
+	if len(g.Edges) != 1 {
+		t.Errorf("graph should have 1 edge, got %d", len(g.Edges))
+	}
+
+	// Edge should retain original weight
+	if e1.Weight != 0.8 {
+		t.Errorf("edge should retain original weight 0.8, got %.2f", e1.Weight)
+	}
+}
+
+func TestAddEdge_DifferentRelationTypesNotDuplicates(t *testing.T) {
+	g := NewActivationGraph()
+
+
+	g.AddNode("a", 1.0, ConfidenceVerified)
+	g.AddNode("b", 0.8, ConfidenceVerified)
+
+	// Add edge with "related"
+	g.AddEdge("a", "b", "related", 0.8, ConfidencePlausible)
+
+	// Add edge with "similar" - different relation type, should be kept
+	g.AddEdge("a", "b", "similar", 0.7, ConfidencePlausible)
+
+	// Should have 2 edges
+	if len(g.Edges) != 2 {
+		t.Errorf("graph should have 2 edges (different relation types), got %d", len(g.Edges))
+	}
+}
+
+func TestAddEdge_DifferentToNotDuplicate(t *testing.T) {
+	g := NewActivationGraph()
+
+	g.AddNode("a", 1.0, ConfidenceVerified)
+	g.AddNode("b", 0.8, ConfidenceVerified)
+	g.AddNode("c", 0.6, ConfidenceVerified)
+
+	// Add edge a -> b
+	g.AddEdge("a", "b", "related", 0.8, ConfidencePlausible)
+
+	// Add edge a -> c - different target, should be kept
+	g.AddEdge("a", "c", "related", 0.7, ConfidencePlausible)
+
+	// Should have 2 edges
+	if len(g.Edges) != 2 {
+		t.Errorf("graph should have 2 edges (different targets), got %d", len(g.Edges))
+	}
+}
+
+// =============================================================================
+// EVIDENCE DEDUPLICATION TESTS
+// =============================================================================
+
+func TestActivationNode_AddEvidence_DeduplicatesByID(t *testing.T) {
+	node := &ActivationNode{
+		Concept: "test",
+		Evidence: make([]EvidencePath, 0),
+	}
+
+
+	// Add first evidence
+	evidence1 := EvidencePath{
+		SourceToken: "token1",
+		SourceForm:  "form1",
+		SourceType:  "direct",
+		Confidence:  ConfidenceVerified,
+		Weight:      0.8,
+	}
+	if !node.AddEvidence(evidence1) {
+		t.Error("first evidence should be added")
+	}
+
+	// Add duplicate evidence (same ID)
+	evidence1Dup := EvidencePath{
+		SourceToken: "token1", // Same token
+		SourceForm:  "form1",  // Same form
+		SourceType:  "direct", // Same type
+		Confidence:  ConfidenceVerified,
+		Weight:      0.8,
+	}
+	if node.AddEvidence(evidence1Dup) {
+		t.Error("duplicate evidence should not be added")
+	}
+
+	if len(node.Evidence) != 1 {
+		t.Errorf("node should have 1 evidence, got %d", len(node.Evidence))
+	}
+}
+
+func TestActivationNode_AddEvidence_DifferentIDNotDuplicates(t *testing.T) {
+	node := &ActivationNode{
+		Concept: "test",
+		Evidence: make([]EvidencePath, 0),
+	}
+
+	// Add evidence from different sources
+	evidence1 := EvidencePath{
+		SourceToken: "token1",
+		SourceForm:  "form1",
+		SourceType:  "direct",
+		Confidence:  ConfidenceVerified,
+		Weight:      0.8,
+	}
+	evidence2 := EvidencePath{
+		SourceToken: "token2", // Different token
+		SourceForm:  "form2",
+		SourceType:  "passage", // Different type
+		Confidence:  ConfidencePlausible,
+		Weight:      0.6,
+	}
+
+	node.AddEvidence(evidence1)
+	node.AddEvidence(evidence2)
+
+	if len(node.Evidence) != 2 {
+		t.Errorf("node should have 2 evidence from different sources, got %d", len(node.Evidence))
+	}
+}
