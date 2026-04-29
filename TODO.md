@@ -36,6 +36,20 @@ Current git status reported after Pi's last task:
 ## main...origin/main [ahead 5]
 ```
 
+Manual output check to protect:
+
+```text
+go run ./cmd/socrates decipher "God is Love"
+```
+
+Observed issues that this graph task must address or explicitly justify:
+
+- `Score.Components.GraphExpansionScore` rendered as `2.45`; score components should have clear bounded semantics and should not exceed their documented range.
+- Default output repeats identical evidence such as `primitive 'love' matches love -> love`; graph evidence paths should deduplicate meaningful paths before rendering/scoring.
+- Glyph channel treats repeated spaces as `repetition`; whitespace should not create symbolic glyph evidence unless deliberately justified.
+- Exact/fuzzy scores show `0.00` even though `love` is visibly matched through fragments; this may be valid by current channel separation, but Pi should verify and document the boundary.
+- Bounded work discarded counts are very high for a short phrase; Pi should verify phrase candidate generation is bounded per token or explain why whole-phrase candidate generation is expected here.
+
 ## Current Next Task
 
 Task:
@@ -68,12 +82,13 @@ Instructions:
 10. Keep `Reading.Convergence` and existing render output working. Add graph data to structured reading only if needed and keep default output concise.
 11. Route `DetectConvergence` through the new graph internally, even if compatibility fields such as `ActivatedConcepts`, `TopConcepts`, and `RelationPaths` remain.
 12. Add tests for graph node creation from evidence, relation propagation with decay, evidence path preservation, cycle/loop prevention, and deduplication.
-13. Keep the existing key-token, bounded-work, render-mode, and architecture regression tests passing.
-14. Do not implement Phase 6 passage field analysis beyond what is needed to build the graph from existing passage signals.
-15. Do not implement harmonic/audio rendering or concept-to-frequency mappings.
-16. Run targeted tests while working, then `go test ./...`.
-17. Commit the completed graph work locally with a clear message. Do not push.
-18. Report final `git status --short --branch`, tests run, files changed, and any graph limitations left intentionally out of scope.
+13. Add a regression test or golden-ish assertion around `God is Love` or an equivalent short phrase proving graph scores are bounded, repeated evidence paths are not duplicated, and whitespace does not create symbolic repetition evidence.
+14. Keep the existing key-token, bounded-work, render-mode, and architecture regression tests passing.
+15. Do not implement Phase 6 passage field analysis beyond what is needed to build the graph from existing passage signals.
+16. Do not implement harmonic/audio rendering or concept-to-frequency mappings.
+17. Run targeted tests while working, then `go test ./...`.
+18. Commit the completed graph work locally with a clear message. Do not push.
+19. Report final `git status --short --branch`, tests run, files changed, and any graph limitations left intentionally out of scope.
 
 Pi work requirement:
 Spend at least 30 focused minutes. This is larger than the previous regression task. If the first implementation passes quickly, use the remaining time to review graph invariants and add one more meaningful regression test rather than stopping early.
@@ -86,6 +101,9 @@ Acceptance Criteria:
 - Propagation is bounded and cycle-safe.
 - Duplicate evidence paths do not inflate activation.
 - `DetectConvergence` uses the graph internally.
+- Score components exposed in default output have bounded, defensible ranges.
+- Default evidence output deduplicates repeated meaningful paths.
+- Whitespace does not create symbolic repetition evidence.
 - Existing public render behavior remains stable.
 - `go test ./...` passes.
 - Work is committed locally and not pushed.
