@@ -273,3 +273,29 @@ Architect review notes for next task:
 Local commit:
 
 - `67031be Phase 5/6: graph hardening and passage field analysis`
+
+### Passage Field Integration Into Reading
+
+Completed:
+
+- Added `PassageFields` to structured `Reading`.
+- Routed multi-token analysis through `AnalyzePassageFromTokens` to avoid circular `engine.Analyze` calls.
+- Added passage-field summaries to default render output and full passage-field details to debug output.
+- Added tests for passage field structure, evidence paths, relation paths, token provenance, repeated-token bounds, and render behavior.
+
+Recorded verification from Pi:
+
+```text
+go test ./...
+PASS
+```
+
+Architect review notes for next task:
+
+- Runtime knowledge is embedded from `internal/knowledge/*.yaml`.
+- The project needs a curated knowledge-growth pipeline rather than ad hoc YAML edits or automatic learning.
+- `passage_field.go` confidence merging should be checked because the helper semantics can downgrade confidence if used with inverted arguments.
+
+Local commit:
+
+- `c9c0c0e integrate passage fields into readings`

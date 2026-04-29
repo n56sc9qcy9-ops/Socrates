@@ -27,82 +27,85 @@ Completed and committed locally:
 
 - Phase 3A cleanup.
 - Activation-Energy Discipline Gate.
-- Phase 5 first activation graph slice.
-- Phase 5/6 graph hardening and first passage-field API.
+- Phase 5 activation graph hardening.
+- Phase 6 passage fields integrated into `Reading`.
 
 Current git status reported after Pi's last task:
 
 ```text
-## main...origin/main [ahead 10]
+## main...origin/main [ahead 11]
 ```
 
-Architect review of Phase 5/6 slice:
+Architect review notes:
 
-- Good: graph propagation now uses path-local visited tracking, derived nodes can be depth `1`, edge identity is deduped, glyph repetition ignores non-letters, and `PassageField` exists.
-- Gap: `PassageField` is not part of `Reading`, so the main engine/render path does not expose graph-backed passage fields.
-- Gap: token provenance can be indirect or noisy because `AnalyzePassage` calls `engine.Analyze(token)` and then reuses convergence sources instead of preserving the original passage token as the primary source.
-- Gap: `PassageField.RelationPaths` is defined but not populated.
-- Gap: some passage tests are permissive (`t.Log`, `>=`, or "may or may not") and would not catch weak passage-field behavior.
-- Gap: repeated `PropagateActivation()` on the same graph accumulates strength; Pi documented this as single-pass, but tests/API should guard or make the single-pass contract explicit.
+- Runtime knowledge is loaded from embedded `internal/knowledge/*.yaml`, not automatically from root `knowledge/`.
+- More concepts must enter through a curated, validated data pipeline. The app must not silently learn trusted concepts from user input.
+- Preflight bug to fix: `isHigherConfidence()` / merge usage in `passage_field.go` can downgrade confidence during merge because the argument semantics are inverted.
 
 ## Current Next Task
 
 Task:
-Make passage fields production-facing, evidence-strict, and renderable without bloating default output.
+Build a safe knowledge-growth pipeline: validate, import, and suggest knowledge without auto-promoting untrusted input.
 
 Context:
-The first passage-field API exists, but it is not yet an engine result. This task should finish Phase 6 enough that `Engine.Analyze` returns passage fields in `Reading`, debug output can inspect them, default output summarizes only top fields, and tests prove fields depend on actual passage tokens and graph relation paths.
+The engine is now graph-backed and passage-aware, but the knowledge base is still hand-edited YAML. That is acceptable for early development, but the project needs a disciplined path for adding concepts, forms, relations, script words, and glyph patterns. The pipeline must keep knowledge auditable, data-driven, and test-protected.
 
 Likely files:
 
-- `internal/decipher/types.go`
-- `internal/decipher/engine.go`
-- `internal/decipher/render.go`
+- `internal/knowledge/knowledge.go`
+- `internal/knowledge/loader.go`
+- `internal/knowledge/knowledge_test.go`
+- `internal/knowledge/*.yaml`
+- `knowledge/*.yaml`
+- `cmd/socrates/main.go`
 - `internal/decipher/passage_field.go`
-- `internal/decipher/passage_field_test.go`
-- `internal/decipher/activation_graph.go`
-- `internal/decipher/activation_graph_test.go`
-- `internal/decipher/engine_test.go`
+- new package/file if useful: `internal/knowledge/validate.go`
+- new package/file if useful: `internal/knowledge/suggestions.go`
+- new docs if useful: `docs/KNOWLEDGE_CURATION.md`
 
 Instructions:
 
 1. Start with `git status --short --branch` and record it.
 2. Run `go test ./...` before changing code and record the baseline result.
-3. Add passage fields to structured `Reading`, likely `PassageFields PassageFields`, without removing existing compatibility fields.
-4. Route `Engine.Analyze` so phrase inputs populate `Reading.PassageFields` through the explicit activation graph.
-5. Preserve real passage-token provenance. The original token from the passage must appear as the source for direct token activations.
-6. Populate `PassageField.RelationPaths` from graph-backed relation paths relevant to that field.
-7. Make `PassageField` carry enough evidence detail to defend each top field. Add an evidence-path field if needed rather than relying only on token strings.
-8. Make repeated `PropagateActivation()` behavior explicit: either make propagation idempotent by resetting to base strengths before each run, or enforce a single-pass API with a test that prevents accidental repeated use.
-9. Strengthen permissive tests. Replace `t.Log` and weak `>=` assertions with assertions that would fail if token provenance, field weakening, or relation paths broke.
-10. Add a regression proving removing a key token from a passage strictly weakens the relevant field, not just "does not increase".
-11. Add a regression proving repeated occurrences of the same token do not inflate a field beyond the meaningful evidence policy.
-12. Add a regression proving relation paths appear on fields when connected concepts co-activate.
-13. Default render should show only top passage fields and short evidence paths. It must remain concise.
-14. Debug render should show full passage-field details, token sources, relation paths, and evidence paths.
-15. Keep existing graph, bounded-work, render-mode, key-token, and architecture tests passing.
-16. Do not implement harmonic/audio rendering or concept-to-frequency mappings.
-17. Run targeted tests while working, then `go test ./...`.
-18. Commit the completed passage-field integration locally with a clear message. Do not push.
-19. Report final `git status --short --branch`, tests run, files changed, and limitations left intentionally out of scope.
+3. Fix the `isHigherConfidence` merge bug in `passage_field.go` first and add a regression test proving verified confidence is not downgraded by merging plausible/speculative evidence.
+4. Decide and document the authoritative runtime data directory. Current runtime uses embedded `internal/knowledge/*.yaml`; root `knowledge/*.yaml` must either be documented as non-runtime source material or kept in sync by tests/tooling.
+5. Add a validation layer for knowledge data. It should check at least:
+   - concept IDs are unique and non-empty
+   - concept aliases do not ambiguously point to multiple concepts unless explicitly allowed
+   - every form/script word/glyph target concept exists, or is explicitly marked external/speculative by policy
+   - every relation endpoint exists
+   - weights are in `(0, 1]`
+   - confidence is one of `verified`, `plausible`, `speculative`
+   - duplicate forms/relations are either rejected or deterministic
+6. Add CLI support for validation, likely `socrates knowledge validate`, without redesigning the whole CLI.
+7. Add an import path for curated knowledge packs, likely `socrates knowledge validate --dir <path>` first. Do not auto-write into embedded YAML in this task unless the write path is explicit and safe.
+8. Add a suggestion mechanism for unknown or weakly matched inputs. Suggestions may be written to a separate review file or printed as structured output, but they must not become trusted concepts automatically.
+9. Define the minimal review record for future additions: proposed concept/form/relation, evidence source, confidence, weight, rationale/notes, and whether it was accepted.
+10. Add tests for validation failures: missing relation endpoint, form target missing concept, invalid confidence, invalid weight, duplicate concept ID, ambiguous alias.
+11. Add tests proving suggestions are separate from trusted embedded knowledge.
+12. Keep all decipher/render/passage/graph tests passing.
+13. Do not import a large external dictionary in this task. Build the pipeline first.
+14. Do not add auto-learning from user input into trusted YAML.
+15. Do not implement harmonic/audio rendering or concept-to-frequency mappings.
+16. Run targeted tests while working, then `go test ./...`.
+17. Commit the completed knowledge-pipeline work locally with a clear message. Do not push.
+18. Report final `git status --short --branch`, tests run, files changed, and how a human curator would add a new concept after this task.
 
 Pi work requirement:
-Spend at least 60 focused minutes. If the implementation passes quickly, use the remaining time to remove weak tests and add stricter passage-field regressions.
+Spend at least 60 focused minutes. If validation is finished early, use the remaining time to add stronger failure tests and a concise curation doc.
 
 Acceptance Criteria:
 
-- `Reading` exposes passage fields as structured data.
-- `Engine.Analyze` populates passage fields for multi-token input.
-- Passage fields preserve original token sources.
-- Passage fields include relation paths or evidence paths sufficient to explain top fields.
-- Removing a key passage token strictly weakens the related field.
-- Duplicate/repeated token evidence follows a tested, non-inflating policy.
-- Default output remains concise and evidence-first.
-- Debug output exposes full passage-field details.
-- Repeated graph propagation behavior is idempotent or explicitly guarded by tests.
+- Confidence merge bug is fixed and tested.
+- The authoritative runtime knowledge location is documented.
+- Knowledge validation exists and is covered by failure tests.
+- CLI can validate embedded or directory-based knowledge.
+- Suggestions are separated from trusted knowledge.
+- New concepts have a documented human-curation path.
+- Existing tests still pass.
 - `go test ./...` passes.
 - Work is committed locally and not pushed.
 
 ## Next After This
 
-If this passes, the next task should be Phase 7: evidence-first CLI polish and examples using graph-backed passage fields.
+If this passes, the next task should add the first curated knowledge pack using the new pipeline, not by ad hoc YAML edits.
