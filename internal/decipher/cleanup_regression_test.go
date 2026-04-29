@@ -27,7 +27,6 @@ func TestNoSemanticTargetsInProduction(t *testing.T) {
 	prodFiles := []string{
 		"activation.go",
 		"candidate_generation.go",
-		"channel_cross_language.go",
 		"channel_fragment.go",
 		"channel_glyph.go",
 		"channel_scoring.go",

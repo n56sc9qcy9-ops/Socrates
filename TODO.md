@@ -12,6 +12,8 @@ The Architect must read this file first and give the Coder one narrow task from 
 - If another `.md` file claims to be active but is not linked here, ignore that claim and follow `TODO.md`.
 - Do not mark checklist items complete unless the listed acceptance criteria are actually met.
 - Do not skip to later phases while the current next task has unmet acceptance criteria.
+- The Architect does not run tests.
+- The Coder/Pi runs the baseline tests before changing code, then runs tests again after changes.
 
 Markers:
 
@@ -25,59 +27,68 @@ Markers:
 ## Current Next Task
 
 Task:
-Finish the remaining Phase 3A cleanup blockers before starting activation-energy scoring work.
+Split default output from debug output while preserving evidence-first structured data.
 
 Context:
-Phase 3A is mostly complete, but it is not finished. The code still contains hardcoded cross-language semantic maps, semantic alias normalization in Go, and root artifact files. These conflict with the data-driven architecture. Do not begin the Activation-Energy Discipline Gate until these blockers are resolved or explicitly justified.
+Phase 3A cleanup, deduplication, and bounded-work hardening are complete. Pi reported `go test ./...` passing after the bounded candidate/fuzzy work on 2026-04-29, with 53 decipher tests, 9 knowledge tests, and 5 resonance tests. The next activation-energy risk is output discipline: default output should show concise evidence paths and conclusions, while full generated candidates, fuzzy matches, and internal bounded-work details should move behind explicit debug output.
 
 Files:
+- `internal/decipher/types.go`
 - `internal/decipher/engine.go`
-- `internal/decipher/channel_cross_language.go`
-- `internal/decipher/cleanup_regression_test.go`
+- `internal/decipher/render.go`
+- `cmd/socrates/main.go`
 - `internal/decipher/engine_test.go`
-- `internal/knowledge/forms.yaml`
-- `internal/knowledge/concepts.yaml`
-- `internal/knowledge/relations.yaml`
-- `internal/knowledge/loader.go`
-- `internal/knowledge/knowledge.go`
-- root files `socrates` and `skal`
 
 Instructions:
-1. Inspect the hardcoded maps in `channel_cross_language.go`.
-2. Move cross-language echo/root knowledge into YAML data, or remove the channel if existing generic form matching already covers it.
-3. Remove semantic alias normalization from `engine.go`, or move the alias data into the knowledge layer.
-4. Add or update regression tests so hardcoded semantic/cross-language maps cannot return to production Go.
-5. Confirm whether root files `socrates` and `skal` are build artifacts. Remove them if they are not source files.
-6. Run `go test ./...`.
-7. Update checklist markers only for acceptance criteria that are actually satisfied.
+1. Start with `git status --short --branch` and record whether the worktree is dirty, ahead, or behind. Do not pull/rebase over dirty local work.
+2. Run `go test ./...` before changing code and record the exact baseline result in the final report.
+3. Inspect current CLI and render output before editing. Identify exactly where candidates, fuzzy matches, generated forms, discarded counts, channels, and evidence paths are printed.
+4. Define an explicit output mode shape. Prefer a small typed option such as `RenderModeDefault` / `RenderModeDebug` or a `RenderOptions` struct over ad hoc booleans.
+5. Keep default output concise: input, top convergence/evidence paths, score summary, warnings, and bounded-work discard counts are acceptable.
+6. Move full candidate lists, full fuzzy match lists, verbose generated forms, and internal match details to debug output only.
+7. Preserve structured `Reading` fields. This task changes rendering/CLI output discipline, not the engine's ability to return data.
+8. Add or update CLI flags for debug output only if the CLI currently has a natural place for it. Do not create a broad CLI redesign.
+9. Add tests proving default rendering does not dump candidate or fuzzy-match internals.
+10. Add tests proving debug rendering can still show generated forms, candidates, fuzzy matches, and discarded counts.
+11. Add tests proving every default conclusion shown has an evidence path or channel signal reference, not only a bare concept name.
+12. Keep existing public behavior stable where practical. Do not add word-specific branches or hardcoded semantic exceptions to make output tests pass.
+13. Run targeted render/CLI tests after implementation, then run `go test ./...` as the final verification.
+14. After final tests pass, update only the checklist items whose acceptance criteria are actually proven.
+15. Update git at the end: commit the completed output-discipline changes with a clear message, or state exactly why committing was not possible. Do not push. Leave `git status --short --branch` in the final report.
+
+Pi work requirement:
+Spend at least 10 focused minutes on this task before reporting back. If the first code change passes quickly, use the remaining time for review, edge-case tests, and checking that default output is concise without hiding debug data.
 
 Constraints:
 - No hardcoded semantic word lists in production Go.
 - No direct behavior for specific words like `skal`, `energy`, `truth`, or `light`.
 - No concept-to-frequency, pitch, music, harmonic, or audio mappings.
-- No global mutable knowledge state.
-- Do not change scoring semantics in this task unless required by tests.
-- Do not implement debug rendering in this task.
+- Do not implement harmonic/audio rendering.
+- Do not add production Go branches for specific words.
 - Knowledge and confidence assumptions must stay data-driven.
+- Do not change candidate-generation or fuzzy-matching semantics unless required by a rendering test failure.
+- Do not remove the existing candidate-generation methods.
+- Do not make fuzzy matching depend on global mutable state.
 
 Tests:
-- Production Go search must not find hardcoded cross-language semantic maps.
-- Production Go search must not find semantic alias normalization maps.
-- Existing architecture regression tests must still scan the current production files.
-- Add targeted regression coverage for the moved/removed cross-language knowledge path.
+- Default render output does not include full candidate dumps.
+- Default render output does not include full fuzzy-match dumps.
+- Debug render output includes generated forms, candidates, fuzzy matches, and discarded counts.
+- Default output still shows evidence paths or channel signal references for displayed conclusions.
+- Existing bounded-work, deduplication, and fuzzy-match tests still pass.
 
 Acceptance Criteria:
-- No production Go file contains hardcoded cross-language or semantic alias maps.
-- Root artifact files are removed or explicitly justified.
-- The Phase 3A acceptance list below is true.
-- `go test ./...` passes.
+- Default CLI/render output is concise and does not dump candidate or match internals.
+- Debug CLI/render output can still show generated forms, candidates, fuzzy matches, and discarded counts.
+- Conclusions visible in default output have evidence paths or channel signal references.
+- The relevant Activation-Energy Discipline Gate checklist items below are updated only if acceptance is met.
+- `go test ./...` passes after changes.
 
 Do Not:
 - Do not implement harmonic/audio rendering.
-- Do not add production Go branches for specific words like `skal`, `energy`, `truth`, or `light`.
 - Do not add new semantic alias maps in Go.
-- Do not start the Activation-Energy Discipline Gate yet.
-- Do not broaden this into the legacy `internal/resonance` frequency cleanup.
+- Do not mark the full Activation-Energy Discipline Gate complete.
+- Do not leave the repository in an unreported dirty/ahead/behind state.
 
 ## North Star
 
@@ -91,7 +102,7 @@ Resonance is not evidence volume. Resonance is coherent activation: independent,
 
 ## Non-Negotiable Rules
 
-- [!] No hardcoded semantic word lists in production Go. Current violations include cross-language maps and semantic alias normalization in Go.
+- [x] No hardcoded semantic word lists in production Go. Cross-language maps and semantic alias normalization removed.
 - [x] No direct `skal` behavior in production Go.
 - [x] No modal/emptiness/contrast marker maps in production Go.
 - [x] No silent fallback to legacy hardcoded knowledge.
@@ -101,12 +112,12 @@ Resonance is not evidence volume. Resonance is coherent activation: independent,
 - [ ] No mixed-purpose files over 500 lines without explicit approval.
 - [ ] Every output must show evidence paths, not only conclusions.
 - [ ] Default output must be concise; full candidates and fuzzy matches must be debug output.
-- [ ] No score inflation from duplicated fragments, repeated weak matches, or debug noise.
-- [ ] No concept-to-frequency, concept-to-pitch, or harmonic mappings in Go.
+- [x] No score inflation from duplicated fragments, repeated weak matches, or debug noise.
+- [!] No concept-to-frequency, concept-to-pitch, or harmonic mappings in Go. Legacy `internal/resonance` frequency code still exists; do not expand it.
 
 ## Current Priority
 
-1. Finish remaining Phase 3A cleanup blockers.
+1. [x] Finish remaining Phase 3A cleanup blockers. **COMPLETED 2026-04-28**
 2. Activation-Energy Discipline Gate: scoring, deduplication, and verbosity.
 3. Phase 5: Activation Graph hardening.
 4. Phase 6: Passage Field Analysis.
@@ -119,7 +130,7 @@ Do not add exact word meanings to Go code. Add or change knowledge only in YAML.
 
 Do not build audio yet. Harmonic rendering comes after the activation-energy core is bounded, deduplicated, data-driven, and evidence-first.
 
-The Architect should assign only one narrow coder task at a time. The current task is Phase 3A cleanup, not scoring or audio.
+The Architect should assign only one narrow coder task at a time. The current task is Activation-Energy Discipline Gate, not audio.
 
 ## Phase 3A: Architecture Cleanup Gate
 
@@ -137,12 +148,12 @@ Stop feature work until this is complete. This phase is a no-behavior-change cle
 - [x] Move Han character associations/readings from Go code into data.
 - [x] Remove global mutable `KnowledgeBase`.
 - [x] Pass knowledge through `Engine` or explicit analyzer structs.
-- [ ] Remove or rename legacy architecture types such as `Primitive`, `FragmentSeed`, and `FragmentLens` if they are no longer part of the real design.
-- [ ] Remove root build/artifact files such as `socrates` and accidental empty files such as `skal`, after confirming they are not source files.
-- [ ] Add regression tests that fail if semantic mappings return to production channel code.
-- [ ] Add file-size/code-shape tests or checks for oversized mixed-purpose files.
-- [ ] Move hardcoded cross-language echo/root maps from Go into data.
-- [ ] Move semantic alias normalization out of `engine.go` into data or remove it.
+- [!] Remove or rename legacy architecture types such as `Primitive`, `FragmentSeed`, and `FragmentLens` if they are no longer part of the real design. Deferred cleanup; not the current gate.
+- [x] Remove root build/artifact files such as `socrates` and accidental empty files such as `skal`, after confirming they are not source files.
+- [x] Add regression tests that fail if semantic mappings return to production channel code.
+- [!] Add file-size/code-shape tests or checks for oversized mixed-purpose files. Deferred cleanup; not the current gate.
+- [x] Move hardcoded cross-language echo/root maps from Go into data.
+- [x] Move semantic alias normalization out of `engine.go` into data or remove it.
 
 Acceptance:
 
@@ -150,42 +161,46 @@ Acceptance:
 - [x] `internal/decipher/discovery.go` is split into focused files and no longer acts as the main dumping ground.
 - [x] `internal/decipher/channels.go` is split into focused channel files.
 - [x] Engine analysis can run with an explicit knowledge fixture without touching global state.
-- [ ] No production Go file contains hardcoded cross-language or semantic alias maps.
-- [ ] Root artifact files are removed or explicitly justified.
-- [ ] `go test ./...` passes.
-- [ ] Phase completion is recorded only after the above checks pass.
+- [x] No production Go file contains hardcoded cross-language or semantic alias maps.
+- [x] Root artifact files are removed or explicitly justified.
+- [x] `go test ./...` passes.
+- [x] Phase completion is recorded only after the above checks pass.
 
-Known current blockers checked on 2026-04-28:
+Phase 3A completed on 2026-04-28:
 
-- `internal/decipher/channel_cross_language.go` still contains hardcoded cross-language semantic maps.
-- `internal/decipher/engine.go` still contains semantic alias normalization.
-- Root artifact files `skal` and `socrates` still exist in the working tree.
-- Do not report Phase 3A complete until those are resolved and `go test ./...` passes.
+- Removed `internal/decipher/channel_cross_language.go` (cross-language maps moved to YAML forms)
+- Simplified `normalizeTarget()` in `engine.go` (semantic aliasing handled by knowledge layer)
+- Removed root artifact files `skal` and `socrates`
+- Updated regression tests to reflect file removal
+- Added `TestCrossLanguageFormsViaYAML` and `TestNoCrossLanguageChannel` tests
+- All tests pass (`go test ./...` passes)
+- Cross-language forms (chi, ruach, prana, om, logos, dao) are now data-driven via forms.yaml
 
 ## Activation-Energy Discipline Gate
 
 Stop new feature work until scoring, deduplication, and output verbosity reflect coherent activation energy.
 
-- [ ] Define score semantics for coherent activation energy.
-- [ ] Deduplicate evidence by meaningful path, not only by rendered text.
-- [ ] Prevent repeated fragments from increasing strength without independent support.
-- [ ] Prevent weak fuzzy matches from dominating scores.
-- [ ] Make exact/verified multi-channel evidence score above speculative single-channel evidence.
-- [ ] Make candidate generation bounded for long input.
-- [ ] Cap fuzzy matching work and expose discarded counts.
+- [/] Define score semantics for coherent activation energy. Deduplication and bounded work are implemented; output separation remains.
+- [x] Deduplicate evidence by meaningful path, not only by rendered text.
+- [x] Prevent repeated fragments from increasing strength without independent support.
+- [x] Prevent weak fuzzy matches from dominating scores.
+- [x] Make exact/verified multi-channel evidence score above speculative single-channel evidence.
+- [x] Make candidate generation bounded for long input.
+- [x] Cap fuzzy matching work and expose discarded counts.
 - [ ] Split default output from debug output.
 - [ ] Keep default CLI output concise.
-- [ ] Add tests for duplicate evidence, weak fuzzy noise, and key-token removal.
+- [/] Add tests for duplicate evidence, weak fuzzy noise, and key-token removal. Duplicate/weak tests are present; key-token removal remains.
 
 Acceptance:
 
-- [ ] Duplicated evidence does not increase resonance after the first meaningful occurrence.
-- [ ] Weak fuzzy matches do not dominate the score.
-- [ ] Exact/verified multi-channel evidence scores higher than speculative single-channel evidence.
+- [x] Duplicated evidence does not increase resonance after the first meaningful occurrence.
+- [x] Weak fuzzy matches do not dominate the score.
+- [x] Exact/verified multi-channel evidence scores higher than speculative single-channel evidence.
 - [ ] Removing a key evidence token weakens the relevant activation field.
 - [ ] Default output does not dump candidate or match internals.
 - [ ] Debug output can still show generated forms and match details.
-- [ ] `go test ./...` passes.
+- [x] `go test ./...` passes for the completed Phase 3A and deduplication pass.
+- [x] `go test ./...` passes after the strict bounded-work verification pass. Pi reported passing tests on 2026-04-29: 53 decipher, 9 knowledge, 5 resonance.
 
 ## Phase 3: Generic Form Generation
 

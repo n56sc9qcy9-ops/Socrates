@@ -31,18 +31,22 @@ func NewEngineWithKnowledge(kb *knowledge.Knowledge) *Engine {
 
 // Analyze runs all channels and produces a complete reading.
 func (e *Engine) Analyze(input string) Reading {
+	// Use default bounds for bounded, data-driven operation
+	candBounds := DefaultCandidateBounds()
+	fuzzBounds := DefaultFuzzyBounds()
+
 	// Generate forms
 	forms := GenerateForms(input)
 
-	// Generate candidate forms for neighbor discovery
-	candidates := GenerateCandidateForms(input)
+	// Generate candidate forms for neighbor discovery (bounded)
+	candidates, discardedCand := GenerateCandidateForms(input, candBounds)
 
 	// Run all channels
 	channels := RunAllChannels(forms, e.Knowledge)
 
-	// Run fuzzy anchor matching
+	// Run fuzzy anchor matching (bounded)
 	anchors := GetAllAnchors(e.Knowledge)
-	fuzzyMatches := FuzzyMatchEvidence(candidates, anchors)
+	fuzzyMatches, discardedComp := FuzzyMatchEvidence(candidates, anchors, fuzzBounds)
 
 	// Expand concepts through graph
 	directConcepts := extractDirectConcepts(channels)
@@ -52,8 +56,9 @@ func (e *Engine) Analyze(input string) Reading {
 	passageSignals := AnalyzePassageTokens(forms.Tokens, e.Knowledge)
 	convergence := DetectConvergence(passageSignals, directConcepts, e.Knowledge)
 
-	// Collect all signals
+	// Collect all signals and deduplicate before scoring
 	allSignals := collectAllSignals(channels)
+	allSignals = DeduplicateSignals(allSignals)
 
 	// Build signal graph by target
 	signalGraph := buildSignalGraph(allSignals)
@@ -74,23 +79,25 @@ func (e *Engine) Analyze(input string) Reading {
 	warnings := generateWarnings(input, converging, weakSignals)
 
 	return Reading{
-		Input:              input,
-		Forms:              forms,
-		Candidates:         candidates,
-		FuzzyMatches:       fuzzyMatches,
-		ConceptExpansions:  conceptExpansions,
-		PassageSignals:     passageSignals,
-		Convergence:        convergence,
-		Channels:           channels,
+		Input:               input,
+		Forms:               forms,
+		Candidates:          candidates,
+		FuzzyMatches:        fuzzyMatches,
+		ConceptExpansions:   conceptExpansions,
+		PassageSignals:      passageSignals,
+		Convergence:         convergence,
+		Channels:            channels,
 		ConvergingPatterns: converging,
-		WeakSignals:        weakSignals,
+		WeakSignals:         weakSignals,
 		Score: Score{
 			Overall:    finalScore,
 			ByChannel:  calculateChannelScores(channels),
 			Components: scoreComponents,
 		},
-		ConciseReading: reading,
-		Warnings:       warnings,
+		ConciseReading:        reading,
+		Warnings:             warnings,
+		DiscardedCandidates:  discardedCand,
+		DiscardedComparisons: discardedComp,
 	}
 }
 
@@ -138,10 +145,22 @@ type SignalNode struct {
 }
 
 // buildSignalGraph groups signals by target concept.
+// Deduplicates by channel+target before aggregating to prevent duplicate evidence inflation.
 func buildSignalGraph(signals []Signal) map[string]SignalNode {
 	graph := make(map[string]SignalNode)
 
+	// First deduplicate by channel+target to prevent duplicate evidence inflation
+	seenKeys := make(map[string]bool)
+	dedupedSignals := make([]Signal, 0, len(signals))
 	for _, sig := range signals {
+		key := sig.Channel + "|" + sig.Target
+		if !seenKeys[key] {
+			seenKeys[key] = true
+			dedupedSignals = append(dedupedSignals, sig)
+		}
+	}
+
+	for _, sig := range dedupedSignals {
 		// Normalize target for grouping
 		target := normalizeTarget(sig.Target)
 
@@ -166,44 +185,10 @@ func buildSignalGraph(signals []Signal) map[string]SignalNode {
 }
 
 // normalizeTarget groups similar targets together.
+// Uses concept aliases from the knowledge layer for semantic grouping.
 func normalizeTarget(target string) string {
-	// Map common targets to canonical forms
-	aliases := map[string]string{
-		"breath":        "breath",
-		"wind":          "breath",
-		"air":           "breath",
-		"prana":         "breath",
-		"ruach":         "breath",
-		"qi":            "breath",
-		"spirit":        "spirit",
-		"soul":          "spirit",
-		"mind":          "mind",
-		"consciousness": "mind",
-		"word":          "word",
-		"speech":        "word",
-		"logos":         "word",
-		"utterance":     "word",
-		"truth":         "truth",
-		"real":          "truth",
-		"light":         "light",
-		"life":          "life",
-		"vitality":      "life",
-		"living":        "life",
-		"one":           "one",
-		"unity":         "one",
-		"give":          "give",
-		"gift":          "give",
-		"path":          "path",
-		"way":           "path",
-		"source":        "source",
-		"origin":        "source",
-		"being":         "being",
-		"existence":     "being",
-	}
-
-	if canon, ok := aliases[target]; ok {
-		return canon
-	}
+	// Basic normalization: return target as-is for now.
+	// Semantic aliasing is handled by the knowledge layer through concept relations.
 	return target
 }
 

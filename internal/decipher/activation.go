@@ -119,6 +119,13 @@ type PassageSignal struct {
 	MatchScore float64
 }
 
+// EvidenceID returns a deterministic identity for this signal.
+// Used for deduplication before scoring.
+func (ps PassageSignal) EvidenceID() string {
+	// Include token, concept, and match form for meaningful identity
+	return ps.Token + "|" + ps.Concept + "|" + ps.MatchForm
+}
+
 // ActivatedConcept represents a concept activated through form matching.
 type ActivatedConcept struct {
 	Concept    string
@@ -138,10 +145,10 @@ func AnalyzePassageTokens(tokens []string, kb *knowledge.Knowledge) []PassageSig
 
 	for _, token := range tokens {
 		// Generate candidate forms for this token
-		candidates := GenerateCandidateForms(token)
+		candidates, _ := GenerateCandidateForms(token)
 
 		// Try to match against known anchors
-		matches := FuzzyMatchEvidence(candidates, anchors)
+		matches, _ := FuzzyMatchEvidence(candidates, anchors)
 
 		for _, match := range matches {
 			if match.Distance < 1.0 { // Only strong matches
@@ -181,11 +188,23 @@ func computeSignalConfidence(anchorConf string, weight float64) string {
 
 // ComputeActivatedConcepts converts passage signals to activated concepts.
 // This groups signals by concept and sums activation strength.
+// IMPORTANT: Deduplicates by evidence ID to prevent duplicate evidence inflation.
 func ComputeActivatedConcepts(signals []PassageSignal, directConcepts []string, kb *knowledge.Knowledge) []ActivatedConcept {
+	// Deduplicate signals first to prevent duplicate evidence inflation
+	seenIDs := make(map[string]bool)
+	dedupedSignals := make([]PassageSignal, 0, len(signals))
+	for _, sig := range signals {
+		id := sig.EvidenceID()
+		if !seenIDs[id] {
+			seenIDs[id] = true
+			dedupedSignals = append(dedupedSignals, sig)
+		}
+	}
+
 	activated := make(map[string]*ActivatedConcept)
 
-	// Process fuzzy match signals
-	for _, sig := range signals {
+	// Process fuzzy match signals (deduplicated)
+	for _, sig := range dedupedSignals {
 		if existing, ok := activated[sig.Concept]; ok {
 			existing.Strength += sig.Weight
 			existing.Sources = append(existing.Sources, sig.Token)

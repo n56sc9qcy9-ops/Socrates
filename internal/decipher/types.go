@@ -100,6 +100,14 @@ type Signal struct {
 	Weight     float64
 }
 
+// EvidenceID returns a deterministic identity for this signal.
+// Used for deduplication before scoring.
+func (s Signal) EvidenceID() string {
+	// Include channel, target, and text for meaningful identity
+	// Same target via different channels is independent evidence
+	return s.Channel + "|" + s.Target + "|" + s.Text
+}
+
 // ChannelResult holds results from a single resonance channel.
 type ChannelResult struct {
 	Name    string
@@ -146,4 +154,42 @@ type Reading struct {
 	Score              Score
 	ConciseReading     string
 	Warnings           []string
+	// Discarded counts for bounded work
+	DiscardedCandidates int `json:"discardedCandidates,omitempty"` // Candidates skipped due to bounds
+	DiscardedComparisons int `json:"discardedComparisons,omitempty"` // Fuzzy comparisons skipped due to bounds
+}
+
+// CandidateBounds defines limits for candidate generation.
+// High-confidence candidates (normalized, skeleton, phonetic) are always kept.
+// Speculative candidates (edit variants, n-grams, prefixes, suffixes) are capped.
+type CandidateBounds struct {
+	// MaxCandidates is the maximum total candidates allowed.
+	MaxCandidates int
+	// MaxSpeculativeCandidates caps speculative candidates (edit variants, n-grams, etc.).
+	// If 0, uses MaxCandidates as default.
+	MaxSpeculativeCandidates int
+}
+
+// DefaultCandidateBounds returns sensible defaults for bounded candidate generation.
+func DefaultCandidateBounds() CandidateBounds {
+	return CandidateBounds{
+		MaxCandidates:           50,
+		MaxSpeculativeCandidates: 30,
+	}
+}
+
+// FuzzyBounds defines limits for fuzzy matching comparisons.
+type FuzzyBounds struct {
+	// MaxComparisons is the maximum candidate-anchor comparisons allowed.
+	MaxComparisons int
+	// MaxMatches caps the output fuzzy matches.
+	MaxMatches int
+}
+
+// DefaultFuzzyBounds returns sensible defaults for bounded fuzzy matching.
+func DefaultFuzzyBounds() FuzzyBounds {
+	return FuzzyBounds{
+		MaxComparisons: 500,
+		MaxMatches:     20,
+	}
 }

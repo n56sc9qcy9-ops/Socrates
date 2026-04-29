@@ -19,20 +19,40 @@ type CandidateForm struct {
 // GenerateCandidateForms creates all candidate forms from the input.
 // This is the core neighbor generation algorithm - not hardcoded.
 // Deduplicates forms by keeping the best match for each unique form.
-func GenerateCandidateForms(input string) []CandidateForm {
+// Bounded: speculative candidates (edit variants, n-grams, prefixes, suffixes)
+// are capped for long inputs to prevent unbounded work.
+// Returns candidates and total count of discarded candidates due to bounds.
+func GenerateCandidateForms(input string, bounds ...CandidateBounds) ([]CandidateForm, int) {
 	candidates := make([]CandidateForm, 0)
 	seenForms := make(map[string]CandidateForm) // Track best candidate per form
 	script := DetectScript(input)
+	discarded := 0
 
 	// Only process Latin script for neighbor generation
 	if script != ScriptLatin {
-		return candidates
+		return candidates, 0
+	}
+
+	// Determine bounds with safe defaults
+	maxCandidates := 50
+	maxSpeculative := 30
+	if len(bounds) > 0 && bounds[0].MaxCandidates > 0 {
+		maxCandidates = bounds[0].MaxCandidates
+	}
+	if len(bounds) > 0 && bounds[0].MaxSpeculativeCandidates > 0 {
+		maxSpeculative = bounds[0].MaxSpeculativeCandidates
+	} else if len(bounds) > 0 && bounds[0].MaxCandidates > 0 {
+		// If only MaxCandidates is set, use it as the speculative cap
+		maxSpeculative = bounds[0].MaxCandidates
 	}
 
 	normalized := strings.ToLower(strings.TrimSpace(input))
+	inputLen := len(normalized)
 
 	// Phase 3 form generation methods:
-	// 1. Normalized form
+	// CORE: High-confidence candidates always included first
+
+	// 1. Normalized form (always first, highest confidence)
 	addCandidate(&candidates, seenForms, CandidateForm{
 		Form:       normalized,
 		Method:     "normalized",
@@ -40,7 +60,7 @@ func GenerateCandidateForms(input string) []CandidateForm {
 		Confidence: "verified",
 	})
 
-	// 2. Consonant skeleton
+	// 2. Consonant skeleton (always included)
 	skeleton := consonantSkeleton(normalized)
 	addCandidate(&candidates, seenForms, CandidateForm{
 		Form:       skeleton,
@@ -49,7 +69,7 @@ func GenerateCandidateForms(input string) []CandidateForm {
 		Confidence: "verified",
 	})
 
-	// 3. Vowel skeleton
+	// 3. Vowel skeleton (included if not same as normalized or skeleton)
 	vowelSkeleton := vowelSkeleton(normalized)
 	addCandidate(&candidates, seenForms, CandidateForm{
 		Form:       vowelSkeleton,
@@ -58,7 +78,7 @@ func GenerateCandidateForms(input string) []CandidateForm {
 		Confidence: "plausible",
 	})
 
-	// 4. Phonetic variants
+	// 4. Phonetic variants (always included - core plausible form)
 	phonetic := generatePhonetic(normalized)
 	addCandidate(&candidates, seenForms, CandidateForm{
 		Form:       phonetic,
@@ -78,37 +98,195 @@ func GenerateCandidateForms(input string) []CandidateForm {
 		})
 	}
 
+	// Count speculative candidates generated so far
+	speculativeCount := 0
+
 	// 6. Doubled-letter variants (insert doubled consonants)
-	for _, c := range generateDoubledVariants(normalized) {
+	// These are speculative - they grow with input length
+	doubledVariants := generateDoubledVariants(normalized)
+	maxDoubled := 3
+	for i, c := range doubledVariants {
+		if speculativeCount >= maxSpeculative {
+			discarded += len(doubledVariants) - i
+			break
+		}
+		if i >= maxDoubled {
+			discarded += len(doubledVariants) - i
+			break
+		}
 		addCandidate(&candidates, seenForms, c)
+		speculativeCount++
 	}
 
 	// 7. Common sound substitutions
-	for _, c := range generateSoundSubstitutions(normalized) {
+	// These are plausible but can multiply; cap them
+	soundSubs := generateSoundSubstitutions(normalized)
+	maxSoundSubs := 4
+	for i, c := range soundSubs {
+		if speculativeCount >= maxSpeculative {
+			discarded += len(soundSubs) - i
+			break
+		}
+		if i >= maxSoundSubs {
+			discarded += len(soundSubs) - i
+			break
+		}
 		addCandidate(&candidates, seenForms, c)
+		speculativeCount++
 	}
 
-	// 8. One-letter edit variants
-	for _, c := range generateEditVariants(normalized, 1) {
-		addCandidate(&candidates, seenForms, c)
+	// SPECULATIVE: Bounded variants for long inputs
+	// For short inputs (< 8 chars), generate all edit variants
+	// For long inputs (>= 8 chars), cap edit variants based on speculative budget
+
+	// 8. One-letter edit variants (bounded for long inputs)
+	// These are the most expensive speculative source
+	if inputLen < 8 {
+		// Short inputs: generate all edit variants but cap at speculative budget
+		for _, c := range generateEditVariants(normalized, 1) {
+			if speculativeCount >= maxSpeculative {
+				discarded++
+				continue
+			}
+			addCandidate(&candidates, seenForms, c)
+			speculativeCount++
+		}
+	} else {
+		// Long inputs: cap edit variants strictly
+		// Calculate what we would generate vs what we can afford
+		totalDeletions := len(normalized)
+		totalInsertions := len(normalized) * 26
+		totalSubstitutions := len(normalized) * 25
+
+		// Budget remaining for edit variants
+		editBudget := maxSpeculative - speculativeCount
+		if editBudget < 0 {
+			editBudget = 0
+		}
+
+		// Cap deletions at editBudget (but also limit per-type)
+		maxDeletions := min2(editBudget/2, inputLen-1)
+		if maxDeletions > 10 {
+			maxDeletions = 10
+		}
+		for i := 0; i < len(normalized) && i < maxDeletions; i++ {
+			variant := normalized[:i] + normalized[i+1:]
+			if len(variant) > 0 {
+				addCandidate(&candidates, seenForms, CandidateForm{
+					Form:       variant,
+					Method:     "deletion",
+					Distance:   1,
+					Confidence: "speculative",
+				})
+				speculativeCount++
+			}
+		}
+
+		// Track discarded edit variants
+		discarded += totalDeletions - min2(maxDeletions, totalDeletions)
+		discarded += totalInsertions // All insertions discarded for long inputs
+		discarded += totalSubstitutions // All substitutions discarded for long inputs
 	}
 
-	// Phase 3: N-grams (bigrams and trigrams)
-	for _, c := range generateNgrams(normalized) {
-		addCandidate(&candidates, seenForms, c)
+	// 9. N-grams (bounded for long inputs)
+	// Cap n-grams: bigrams and trigrams grow quadratically with input length
+	maxNgrams := 0
+	if inputLen < 10 {
+		// Short inputs: generate all but cap total n-grams
+		maxNgrams = 10
+	} else {
+		// For long inputs, cap n-grams strictly
+		maxNgrams = 6
 	}
 
-	// Phase 3: Prefix fragments
-	for _, c := range generatePrefixFragments(normalized) {
-		addCandidate(&candidates, seenForms, c)
+	// Calculate n-grams we would generate
+	maxPossibleNgrams := 0
+	if inputLen >= 2 {
+		maxPossibleNgrams += inputLen - 1 // bigrams
+	}
+	if inputLen >= 3 {
+		maxPossibleNgrams += inputLen - 2 // trigrams
 	}
 
-	// Phase 3: Suffix fragments
-	for _, c := range generateSuffixFragments(normalized) {
-		addCandidate(&candidates, seenForms, c)
+	count := 0
+	// Only generate bigrams for bounded inputs
+	for i := 0; i < len(normalized)-1 && count < maxNgrams; i++ {
+		addCandidate(&candidates, seenForms, CandidateForm{
+			Form:       normalized[i:i+2],
+			Method:     "bigram",
+			Distance:   0.5,
+			Confidence: "plausible",
+		})
+		count++
+	}
+	// Count discarded n-grams
+	if maxPossibleNgrams > count {
+		discarded += maxPossibleNgrams - count
 	}
 
-	return candidates
+	// 10. Prefix fragments (bounded for long inputs)
+	maxPrefixLen := 4
+	if inputLen > 12 {
+		maxPrefixLen = 3
+	}
+	// Calculate prefixes we would generate
+	originalPrefixes := max2(0, inputLen-2)
+	cappedPrefixes := min2(originalPrefixes, maxPrefixLen-1)
+	for l := 2; l <= maxPrefixLen && l <= inputLen-1 && (l-1) < maxPrefixLen; l++ {
+		addCandidate(&candidates, seenForms, CandidateForm{
+			Form:       normalized[:l],
+			Method:     "prefix_" + string(rune('0'+l)),
+			Distance:   0.3,
+			Confidence: "plausible",
+		})
+	}
+	// Track discarded prefixes
+	if originalPrefixes > cappedPrefixes {
+		discarded += originalPrefixes - cappedPrefixes
+	}
+
+	// 11. Suffix fragments (bounded for long inputs)
+	maxSuffixLen := 4
+	if inputLen > 12 {
+		maxSuffixLen = 3
+	}
+	// Calculate suffixes we would generate
+	originalSuffixes := max2(0, inputLen-2)
+	cappedSuffixes := min2(originalSuffixes, maxSuffixLen-1)
+	for l := 2; l <= maxSuffixLen && l <= inputLen-1 && (l-1) < maxSuffixLen; l++ {
+		addCandidate(&candidates, seenForms, CandidateForm{
+			Form:       normalized[len(normalized)-l:],
+			Method:     "suffix_" + string(rune('0'+l)),
+			Distance:   0.3,
+			Confidence: "plausible",
+		})
+	}
+	// Track discarded suffixes
+	if originalSuffixes > cappedSuffixes {
+		discarded += originalSuffixes - cappedSuffixes
+	}
+
+	// Apply absolute cap if we somehow exceeded maxCandidates
+	if len(candidates) > maxCandidates {
+		discarded += len(candidates) - maxCandidates
+		candidates = candidates[:maxCandidates]
+	}
+
+	return candidates, discarded
+}
+
+func min2(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max2(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }
 
 // addCandidate adds a candidate, keeping the best (lowest distance/highest confidence) for duplicates.

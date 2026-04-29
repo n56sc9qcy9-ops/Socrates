@@ -10,7 +10,6 @@ import (
 // - channel_sound.go: runSoundChannel
 // - channel_script_word.go: runScriptWordChannel
 // - channel_fragment.go: runFragmentChannel, runWholeTokenMatching, FragmentLens.Weight
-// - channel_cross_language.go: runCrossLanguageChannel
 // - channel_symbolic.go: runSymbolicChannel
 // - channel_scoring.go: calculateChannelScore, itoa
 
@@ -34,10 +33,6 @@ func RunAllChannels(forms Forms, kb *knowledge.Knowledge) []ChannelResult {
 	// Fragment channel (uses knowledge data when available)
 	fragmentResult := runFragmentChannel(forms, kb)
 	results = append(results, fragmentResult)
-
-	// Cross-language channel
-	crossResult := runCrossLanguageChannel(forms)
-	results = append(results, crossResult)
 
 	// Symbolic channel
 	symbolicResult := runSymbolicChannel(forms, kb)

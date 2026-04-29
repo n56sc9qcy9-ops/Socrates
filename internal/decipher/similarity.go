@@ -17,6 +17,13 @@ type MatchEvidence struct {
 	Weight     float64
 }
 
+// EvidenceID returns a deterministic identity for this match evidence.
+// Used for deduplication before scoring.
+func (me MatchEvidence) EvidenceID() string {
+	// Include input form, anchor form, and method - not distance (same path may have slightly different distance values)
+	return me.InputForm + "|" + me.AnchorForm + "|" + me.Method
+}
+
 // AnchorConcept is a minimal anchor concept for fuzzy matching.
 type AnchorConcept struct {
 	Form       string
@@ -32,21 +39,81 @@ type AnchorConcept struct {
 // FuzzyMatchEvidence finds fuzzy matches between candidate forms and anchors.
 // Uses method-aware acceptance logic to prevent weak matches.
 // Key tightening: accepts only forms >= 4 chars for most methods (fragments need >= 3).
-func FuzzyMatchEvidence(candidates []CandidateForm, anchors []AnchorConcept) []MatchEvidence {
+// Bounded: candidate-anchor comparisons are capped to prevent unbounded work.
+// High-confidence candidates are processed first (exact, verified, plausible).
+// Returns matches and exact count of discarded comparisons (skipped candidate-anchor pairs).
+func FuzzyMatchEvidence(candidates []CandidateForm, anchors []AnchorConcept, bounds ...FuzzyBounds) ([]MatchEvidence, int) {
 	evidence := make([]MatchEvidence, 0)
 	seen := make(map[string]bool) // Dedupe by inputForm:anchorForm
 
-	for _, cand := range candidates {
+	// Determine bounds with safe defaults
+	maxComparisons := 500
+	maxMatches := 20
+	if len(bounds) > 0 {
+		if bounds[0].MaxComparisons > 0 {
+			maxComparisons = bounds[0].MaxComparisons
+		}
+		if bounds[0].MaxMatches > 0 {
+			maxMatches = bounds[0].MaxMatches
+		}
+	}
+
+	discarded := 0
+	comparisons := 0
+
+	// Sort candidates by confidence: verified > plausible > speculative
+	// This ensures high-confidence candidates get matched first when caps are applied
+	sortedCandidates := make([]CandidateForm, len(candidates))
+	copy(sortedCandidates, candidates)
+	sort.Slice(sortedCandidates, func(i, j int) bool {
+		// Sort order: verified > plausible > speculative
+		order := map[string]int{"verified": 0, "plausible": 1, "speculative": 2}
+		iOrder := order[sortedCandidates[i].Confidence]
+		jOrder := order[sortedCandidates[j].Confidence]
+		if iOrder != jOrder {
+			return iOrder < jOrder
+		}
+		// Secondary sort by distance (lower is better)
+		return sortedCandidates[i].Distance < sortedCandidates[j].Distance
+	})
+
+	// Pre-filter anchors that are too short (need at least 3 chars for meaningful match)
+	validAnchors := make([]AnchorConcept, 0)
+	for _, a := range anchors {
+		if len(a.Form) >= 3 {
+			validAnchors = append(validAnchors, a)
+		}
+	}
+	anchorCount := len(validAnchors)
+
+	for _, cand := range sortedCandidates {
 		// CRITICAL: Skip very short candidates - they cause spurious matches
-		// Only accept candidates >= 4 chars for fuzzy matching (fragments >= 3 are too short)
+		// Only accept candidates >= 4 chars for fuzzy matching
 		if len(cand.Form) < 4 {
 			continue
 		}
 
-		for _, anchor := range anchors {
-			// Skip anchors that are too short (need at least 3 chars for meaningful match)
-			if len(anchor.Form) < 3 {
-				continue
+		// Calculate how many comparisons remain after this candidate
+		remainingComparisons := comparisons + anchorCount
+
+		// Check if adding this candidate would exceed cap
+		if remainingComparisons > maxComparisons {
+			// Count ALL remaining comparisons (not just this candidate's)
+			// Remaining candidates = total sorted candidates - already processed
+			// We estimate based on total pairs minus what we've done
+			totalPossibleComparisons := len(sortedCandidates) * anchorCount
+			discarded += totalPossibleComparisons - comparisons
+			break // Cap reached, no more comparisons
+		}
+
+		// Process this candidate against all anchors
+		for _, anchor := range validAnchors {
+			comparisons++
+
+			// Check cap on comparisons (outer loop should prevent this, but be safe)
+			if comparisons > maxComparisons {
+				discarded++
+				break
 			}
 
 			method, distance := fuzzyMatch(cand.Form, anchor.Form)
@@ -57,6 +124,11 @@ func FuzzyMatchEvidence(candidates []CandidateForm, anchors []AnchorConcept) []M
 					continue
 				}
 				seen[key] = true
+
+				// Check cap on matches
+				if len(evidence) >= maxMatches {
+					continue
+				}
 
 				weight := calculateMatchWeight(cand, anchor, method, distance)
 				evidence = append(evidence, MatchEvidence{
@@ -75,7 +147,7 @@ func FuzzyMatchEvidence(candidates []CandidateForm, anchors []AnchorConcept) []M
 		return compareEvidence(evidence[i], evidence[j]) > 0
 	})
 
-	return evidence
+	return evidence, discarded
 }
 
 // acceptMatch determines if a fuzzy match should be accepted based on method and distance.
@@ -221,7 +293,7 @@ func LevenshteinDistance(a, b string) int {
 			if a[i-1] != b[j-1] {
 				cost = 1
 			}
-			matrix[i][j] = minInt(
+			matrix[i][j] = min3(
 				matrix[i-1][j]+1,      // deletion
 				matrix[i][j-1]+1,      // insertion
 				matrix[i-1][j-1]+cost, // substitution
@@ -232,7 +304,7 @@ func LevenshteinDistance(a, b string) int {
 	return matrix[len(a)][len(b)]
 }
 
-func minInt(a, b, c int) int {
+func min3(a, b, c int) int {
 	if a < b {
 		if a < c {
 			return a
