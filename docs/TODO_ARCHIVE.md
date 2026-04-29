@@ -187,3 +187,30 @@ ok  socrates/internal/resonance  (cached)
 Local commit:
 
 - `f0e129e Split default output from debug output`
+
+### Key-Token Removal Regression
+
+Completed:
+
+- Added regression tests proving selected YAML-backed evidence forms weaken when key evidence is removed or perturbed.
+- Covered overall score, graph expansion score, passage convergence score, and exact-match weakening.
+- Left production code unchanged; no word-specific production branches were added.
+- Marked the Activation-Energy Discipline Gate complete.
+
+Recorded verification from Pi:
+
+```text
+=== RUN   TestKeyTokenRemovalWeakenActivation
+--- PASS
+=== RUN   TestKeyTokenRemovalWeakenActivationMultiWord
+--- PASS
+=== RUN   TestKeyTokenRemovalWeakensConvergence
+--- PASS
+=== RUN   TestKeyTokenRemovalWeakenExactMatch
+--- PASS
+PASS
+```
+
+Local commit:
+
+- `e4ede94 Add key-token removal regression tests for Activation-Energy Discipline Gate`
