@@ -11,6 +11,10 @@ import (
 func runFragmentChannel(forms Forms, kb *knowledge.Knowledge) ChannelResult {
 	signals := make([]Signal, 0)
 
+	// Track primitives to avoid emitting duplicate primitive signals
+	// (same primitive found via different fragment parts should only appear once)
+	emittedPrimitives := make(map[string]bool)
+
 	// First: exact whole-token matching
 	exactSignals := runWholeTokenMatching(forms, kb)
 	signals = append(signals, exactSignals...)
@@ -36,14 +40,18 @@ func runFragmentChannel(forms Forms, kb *knowledge.Knowledge) ChannelResult {
 			// Lookup primitives from knowledge base
 			prims := knowledgeBasedPrimitiveLookup(part, kb)
 			for _, prim := range prims {
-				signals = append(signals, Signal{
-					Text:       "primitive '" + part + "' matches " + prim.Name,
-					Target:     prim.ID,
-					Channel:    "Fragment",
-					Lens:       "primitive",
-					Confidence: ConfidenceVerified,
-					Weight:     0.6,
-				})
+				// Only emit one signal per primitive concept, regardless of fragment part
+				if !emittedPrimitives[prim.ID] {
+					emittedPrimitives[prim.ID] = true
+					signals = append(signals, Signal{
+						Text:       "primitive '" + prim.Name + "' matches " + prim.Name,
+						Target:     prim.ID,
+						Channel:    "Fragment",
+						Lens:       "primitive",
+						Confidence: ConfidenceVerified,
+						Weight:     0.6,
+					})
+				}
 			}
 		}
 	}

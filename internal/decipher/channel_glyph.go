@@ -55,11 +55,14 @@ func analyzeLatinGlyphs(s string, kb *knowledge.Knowledge) []Signal {
 		charFreq[r]++
 	}
 
-	// Repeated letters
-	for r, count := range charFreq {
-		if count > 1 {
+	// Repeated letters - deduplicate to single repetition signal
+	hasRepetition := false
+	for _, count := range charFreq {
+		if count > 1 && !hasRepetition {
+			// Only emit one repetition signal per word (not per character)
+			hasRepetition = true
 			signals = append(signals, Signal{
-				Text:       string(r) + " repeated " + itoa(count) + "x",
+				Text:       "repeated letters detected",
 				Target:     "repetition",
 				Channel:    "Glyph",
 				Lens:       "glyph",

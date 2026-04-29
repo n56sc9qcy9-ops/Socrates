@@ -52,9 +52,13 @@ func (e *Engine) Analyze(input string) Reading {
 	directConcepts := extractDirectConcepts(channels)
 	conceptExpansions := ExpandConcepts(directConcepts, 0.4, e.Knowledge)
 
-	// Analyze passage-level convergence using generic concept activation
+	// Analyze passage-level convergence using the activation graph
 	passageSignals := AnalyzePassageTokens(forms.Tokens, e.Knowledge)
-	convergence := DetectConvergence(passageSignals, directConcepts, e.Knowledge)
+	
+	// Build and propagate through the activation graph
+	activationGraph := BuildGraphFromEvidence(channels, passageSignals, fuzzyMatches, conceptExpansions, e.Knowledge)
+	activationGraph.PropagateActivation()
+	convergence := activationGraph.ToConvergenceResult()
 
 	// Collect all signals and deduplicate before scoring
 	allSignals := collectAllSignals(channels)

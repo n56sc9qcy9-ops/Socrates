@@ -39,15 +39,20 @@ func CalculateScoreComponents(
 		components.FuzzyMatchScore = fuzzyWeight / float64(len(dedupedMatches)) * 0.8 // Fuzzy is weaker
 	}
 
-	// Graph expansion score
+	// Graph expansion score - normalize by count AND cap at 1.0
 	var expansionWeight float64
+	var expansionCount int
 	for _, exps := range expansions {
 		for _, e := range exps {
 			expansionWeight += e.Weight
+			expansionCount++
 		}
 	}
-	if len(expansions) > 0 {
-		components.GraphExpansionScore = expansionWeight / float64(len(expansions)) * 0.7
+	if expansionCount > 0 {
+		components.GraphExpansionScore = expansionWeight / float64(expansionCount) * 0.7
+		if components.GraphExpansionScore > 1.0 {
+			components.GraphExpansionScore = 1.0
+		}
 	}
 
 	// Passage convergence score - derived from generic activation, not semantic buckets

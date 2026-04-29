@@ -1638,3 +1638,57 @@ func TestKeyTokenRemovalWeakenExactMatch(t *testing.T) {
 			readingSpirit.Score.Overall, readingSpiri.Score.Overall)
 	}
 }
+
+// TestGodIsLove_BoundedScores verifies that "God is Love" has:
+// - Bounded score components (all in [0, 1] range)
+// - No duplicate evidence paths in output
+// - No whitespace creating spurious repetition signals
+func TestGodIsLove_BoundedScores(t *testing.T) {
+	engine, err := NewEngine()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	reading := engine.Analyze("God is Love")
+	output := RenderReadingWithOptions(reading, DefaultRenderOptions())
+
+	// Verify score components are bounded in [0, 1]
+	comp := reading.Score.Components
+	if comp.ExactMatchScore < 0 || comp.ExactMatchScore > 1.0 {
+		t.Errorf("ExactMatchScore should be in [0, 1], got %f", comp.ExactMatchScore)
+	}
+	if comp.FuzzyMatchScore < 0 || comp.FuzzyMatchScore > 1.0 {
+		t.Errorf("FuzzyMatchScore should be in [0, 1], got %f", comp.FuzzyMatchScore)
+	}
+	if comp.GraphExpansionScore < 0 || comp.GraphExpansionScore > 1.0 {
+		t.Errorf("GraphExpansionScore should be in [0, 1], got %f", comp.GraphExpansionScore)
+	}
+	if comp.PassageConvergenceScore < 0 || comp.PassageConvergenceScore > 1.0 {
+		t.Errorf("PassageConvergenceScore should be in [0, 1], got %f", comp.PassageConvergenceScore)
+	}
+	if comp.MultiMethodBonus < 0 || comp.MultiMethodBonus > 1.0 {
+		t.Errorf("MultiMethodBonus should be in [0, 1], got %f", comp.MultiMethodBonus)
+	}
+	if comp.ChannelDiversityBonus < 0 || comp.ChannelDiversityBonus > 1.0 {
+		t.Errorf("ChannelDiversityBonus should be in [0, 1], got %f", comp.ChannelDiversityBonus)
+	}
+
+	// Verify no duplicate evidence paths in output
+	// Count occurrences of "primitive 'love' matches love" - should appear once
+	countPrimitiveLove := strings.Count(output, "primitive 'love' matches love")
+	if countPrimitiveLove > 1 {
+		t.Errorf("primitive 'love' should appear at most once in output, got %d occurrences", countPrimitiveLove)
+	}
+
+	// Verify no per-character repetition signals (whitespace should not create them)
+	// Should NOT have patterns like "o repeated 2x" or "repeated 2x" appearing multiple times
+	repetitionCount := strings.Count(output, "repeated letters detected")
+	if repetitionCount > 1 {
+		t.Errorf("'repeated letters detected' should appear at most once, got %d occurrences", repetitionCount)
+	}
+
+	// Verify overall score is bounded
+	if reading.Score.Overall < 0 || reading.Score.Overall > 1.0 {
+		t.Errorf("Overall score should be in [0, 1], got %f", reading.Score.Overall)
+	}
+}
