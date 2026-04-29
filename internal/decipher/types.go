@@ -193,3 +193,32 @@ func DefaultFuzzyBounds() FuzzyBounds {
 		MaxMatches:     20,
 	}
 }
+
+// RenderMode controls what level of detail is included in rendered output.
+type RenderMode int
+
+const (
+	// RenderModeDefault shows concise output: input, top evidence paths, score summary, warnings.
+	RenderModeDefault RenderMode = iota
+	// RenderModeDebug shows full output including candidates, fuzzy matches, generated forms, and internal details.
+	RenderModeDebug
+)
+
+// RenderOptions controls rendering behavior.
+type RenderOptions struct {
+	Mode RenderMode
+}
+
+// DefaultRenderOptions returns default render options (default mode).
+func DefaultRenderOptions() RenderOptions {
+	return RenderOptions{
+		Mode: RenderModeDefault,
+	}
+}
+
+// DebugRenderOptions returns render options for debug output.
+func DebugRenderOptions() RenderOptions {
+	return RenderOptions{
+		Mode: RenderModeDebug,
+	}
+}

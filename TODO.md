@@ -180,15 +180,15 @@ Phase 3A completed on 2026-04-28:
 
 Stop new feature work until scoring, deduplication, and output verbosity reflect coherent activation energy.
 
-- [/] Define score semantics for coherent activation energy. Deduplication and bounded work are implemented; output separation remains.
+- [x] Define score semantics for coherent activation energy. Deduplication and bounded work are implemented; output separation implemented 2026-04-29.
 - [x] Deduplicate evidence by meaningful path, not only by rendered text.
 - [x] Prevent repeated fragments from increasing strength without independent support.
 - [x] Prevent weak fuzzy matches from dominating scores.
 - [x] Make exact/verified multi-channel evidence score above speculative single-channel evidence.
 - [x] Make candidate generation bounded for long input.
 - [x] Cap fuzzy matching work and expose discarded counts.
-- [ ] Split default output from debug output.
-- [ ] Keep default CLI output concise.
+- [x] Split default output from debug output. Completed 2026-04-29.
+- [x] Keep default CLI output concise. Default is ~50 lines, debug is ~170 lines.
 - [/] Add tests for duplicate evidence, weak fuzzy noise, and key-token removal. Duplicate/weak tests are present; key-token removal remains.
 
 Acceptance:
@@ -197,8 +197,8 @@ Acceptance:
 - [x] Weak fuzzy matches do not dominate the score.
 - [x] Exact/verified multi-channel evidence scores higher than speculative single-channel evidence.
 - [ ] Removing a key evidence token weakens the relevant activation field.
-- [ ] Default output does not dump candidate or match internals.
-- [ ] Debug output can still show generated forms and match details.
+- [x] Default output does not dump candidate or match internals.
+- [x] Debug output can still show generated forms and match details.
 - [x] `go test ./...` passes for the completed Phase 3A and deduplication pass.
 - [x] `go test ./...` passes after the strict bounded-work verification pass. Pi reported passing tests on 2026-04-29: 53 decipher, 9 knowledge, 5 resonance.
 
