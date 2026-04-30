@@ -50,11 +50,12 @@ Completed and committed locally:
 - Configurable ranking weights and train/held-out evaluation split.
 - False activation reduction through harmonic evidence gating and ranking calibration.
 - Review-file generation for proposed ranking weight changes.
+- Human review/apply workflow for proposed ranking weight changes.
 
 Current git status before this handoff:
 
 ```text
-## main...origin/main [ahead 34]
+## main...origin/main [ahead 36]
 ```
 
 Architect correction:
@@ -69,79 +70,99 @@ Architect correction:
 - Pi completed ranking weights and held-out evaluation in commit `b66e47a`.
 - Pi completed false activation reduction in commit `0030020`.
 - Pi completed review-gated weight suggestion generation in commit `4b50136`.
+- Pi completed human review/apply workflow for proposed weight changes in commit `c420013`.
 - Field precision improved without recall collapse:
   - train field precision `0.23 -> 0.39`, recall `1.00 -> 1.00`
   - held-out field precision `0.16 -> 0.27`, recall `0.62 -> 0.62`
   - train pass rate `0/8 -> 8/8`
   - held-out pass rate `0/8 -> 5/8`
-- The next step is not counsellor prose and not new symbolic feature work. It is human review/apply for generated suggestions.
+- The next step is not counsellor prose and not new symbolic feature work. It is repository shape and knowledge layout cleanup.
 
 ## Current Next Task
 
 Task:
-Add human review/apply workflow for proposed weight changes.
+Consolidate knowledge layout and clarify runtime/reference/review data boundaries.
 
 Context:
-The evidence pipeline, harmonic core, training evaluation, validation, channel semantics, identity/provenance model, concept schema guardrails, ranking weights, held-out evaluation, false-activation gating, and review-file generation are now in place.
+The evidence pipeline, harmonic core, training evaluation, validation, channel semantics, identity/provenance model, concept schema guardrails, ranking weights, held-out evaluation, false-activation gating, review-file generation, and review/apply workflow are now in place.
 
-Socrates can now generate pending weight suggestions in `review/weight_suggestions.yaml`. The next step is controlled human review: humans should be able to mark suggestions accepted or rejected, and only accepted suggestions should be applied through an explicit command.
-
-The goal is:
+The repository now has two knowledge-looking locations:
 
 ```text
-pending suggestions
-  -> human marks accepted/rejected
-  -> explicit apply command reads accepted suggestions
-  -> updates target config only after validation
-  -> leaves an audit trail
+knowledge/
+  concepts.yaml
+  forms.yaml
+  relations.yaml
+
+internal/knowledge/
+  concepts.yaml
+  forms.yaml
+  relations.yaml
+  glyphs.yaml
+  frequencies.yaml
+  loader.go
+  ...
+```
+
+This is confusing. Future agents and humans may edit the wrong YAML. Socrates needs one clearly documented active runtime knowledge location and separate places for review, reference/source, and archive material.
+
+The goal:
+
+```text
+active runtime knowledge: one authoritative location
+review suggestions: separate from active runtime knowledge
+reference/source material: separate from active runtime knowledge
+archive: separate from active runtime knowledge
 ```
 
 Reference:
 
-- `TRAINING_MODEL.md`
-- `IMPLEMENTATION_ROADMAP.md`
 - `ARCHITECTURE.md`
+- `README.md`
+- `docs/KNOWLEDGE_CURATION.md`
+- `IMPLEMENTATION_ROADMAP.md`
 
 Likely files:
 
-- `internal/decipher/scoring.go`
-- `internal/decipher/types.go`
-- `internal/decipher/*`
-- `internal/training/*`
-- `training/weights.yaml`
-- `review/weight_suggestions.yaml`
-- new file if useful: `internal/training/weight_review.go`
-- new file if useful: `review/applied_weight_changes.yaml`
+- `README.md`
+- `ARCHITECTURE.md`
+- `docs/KNOWLEDGE_CURATION.md`
+- `IMPLEMENTATION_ROADMAP.md`
+- `internal/knowledge/loader.go`
+- `internal/knowledge/*.yaml`
+- `knowledge/*.yaml`
+- `review/*`
+- `training/*`
 
 Instructions:
 
 1. Start with `git status --short --branch` and record it.
 2. Run `go test ./...` before changing code and record the baseline result.
 3. Run the documented validation command and record the result.
-4. Define the review/apply workflow for weight suggestions.
-   - Suggestions must have statuses: `pending`, `accepted`, `rejected`.
-   - Only `accepted` suggestions may be applied.
-   - `pending` and `rejected` suggestions must never change runtime config.
-5. Add a parser/validator for review files.
-   - Invalid statuses fail.
-   - Missing target path/current/suggested values fail.
-   - Target paths must be restricted to known ranking weight fields.
-6. Add an explicit apply command if the scope stays small.
-   - Example: `socrates train apply-weight-suggestions`
-   - It must require an explicit review file path or use the documented default review path.
-   - It must update only `training/weights.yaml` or the project’s chosen ranking weight config, not active knowledge YAML.
-7. Before applying, verify the current value in the target config still matches the suggestion's recorded current value.
-   - If it does not match, refuse to apply and report drift.
-8. After applying, run or require validation of the updated weight config.
-9. Write an audit record for applied suggestions.
-   - Include timestamp if available, suggestion path, old value, new value, metrics delta, and status.
-   - Keep rejected suggestions in the review file or audit trail.
-10. Do not auto-accept suggestions.
-11. Do not generate new suggestions in this task unless needed for tests.
-12. Do not mutate active knowledge.
-13. Do not add new active concepts, forms, relations, examples, AI, embeddings, counsellor/transmutation fields, UI, or audio in this task.
-14. Keep train and held-out metrics separate in any reporting.
-15. Preserve completed guardrails:
+4. Decide and document the authoritative runtime knowledge location.
+   - Preferred long-term shape: root `knowledge/` contains structured subfolders such as `runtime/`, `reference/`, `review/`, and `archive/`.
+   - If Go embedding makes immediate root-runtime migration too large, keep `internal/knowledge/*.yaml` as active runtime for now, but move or rename root `knowledge/*.yaml` so it cannot be mistaken for runtime.
+   - The final state of this task must have no ambiguous duplicate runtime-looking YAML.
+5. Make the chosen active runtime knowledge location explicit in:
+   - `README.md`
+   - `docs/KNOWLEDGE_CURATION.md`
+   - relevant architecture docs if needed
+6. Ensure loader/validation behavior matches the documented active runtime location.
+   - `knowledge validate` should validate active embedded/runtime knowledge by default.
+   - `knowledge validate --dir <path>` should remain available for explicit alternate directories.
+7. Separate non-runtime material.
+   - Review suggestions belong under `review/`.
+   - Training examples and weights belong under `training/`.
+   - Reference/source/seed/archive material must not sit beside runtime YAML unless clearly named as non-runtime.
+8. Do not silently delete useful source material.
+   - If root `knowledge/*.yaml` is obsolete, move it to a clearly named archive/reference location or document why it is removed.
+   - Preserve git history naturally through the move.
+9. Add guardrails so future agents do not edit the wrong YAML.
+   - Documentation must say where active knowledge lives.
+   - If practical, add a lightweight test or validation check proving the active knowledge files exist where documented.
+10. Do not change knowledge semantics in this task except what is necessary for layout.
+11. Do not add new active concepts, forms, relations, examples, AI, embeddings, counsellor/transmutation fields, UI, or audio in this task.
+12. Preserve completed guardrails:
    - active YAML validates
    - `knowledge validate` works
    - channel diversity counts active evidence only
@@ -149,26 +170,23 @@ Instructions:
    - multi-concept fuzzy evidence remains complete
    - cross-script love and Hebrew `El` boundary behavior still works
    - concept schema hygiene warnings remain visible and bounded
-16. Keep the implementation light. Prefer explicit YAML update logic over a broad config-management framework.
-17. Add or update tests proving:
-   - pending suggestions do not apply
-   - rejected suggestions do not apply
-   - accepted suggestions apply only to allowed weight fields
-   - current-value drift prevents apply
-   - audit record is written
-   - active knowledge YAML is not mutated
-18. Run targeted tests while working, then `go test ./...` or `make test`.
-19. Commit the completed review/apply workflow locally with a clear message. Do not push.
-20. Report final `git status --short --branch`, validation result, tests run, files changed, and an example accepted/rejected/apply flow.
+13. Keep implementation light. Prefer moving/renaming data and updating docs over a loader rewrite unless the loader rewrite is clearly simpler and safer.
+14. Add or update tests proving:
+   - documented active knowledge location is valid
+   - default embedded validation still validates active runtime knowledge
+   - explicit `--dir` validation still works
+   - review/training/reference material is not accidentally treated as active runtime knowledge
+15. Run targeted tests while working, then `go test ./...` or `make test`.
+16. Commit the completed repository/knowledge layout cleanup locally with a clear message. Do not push.
+17. Report final `git status --short --branch`, validation result, tests run, files changed/moved, and the final runtime/reference/review/archive layout.
 
 Acceptance Criteria:
 
-- Pending/rejected suggestions cannot mutate config.
-- Accepted suggestions can be applied only through an explicit command.
-- Apply checks current-value drift before writing.
-- Applied changes leave an audit trail.
-- Active knowledge YAML is not mutated.
-- Train and held-out metrics remain separate and visible.
+- There is exactly one documented active runtime knowledge location.
+- Root `knowledge/` and `internal/knowledge/` are no longer ambiguous duplicates.
+- Review, training, reference/source, and archive data are clearly separated from active runtime knowledge.
+- Loader and validation behavior match the documentation.
+- Useful source/reference material is preserved or intentionally removed with rationale.
 - Existing harmonic core, training evaluation, quality gate behavior, identity/provenance hardening, and cross-script convergence still pass.
 - Training does not mutate active knowledge.
 - No black-box truth model is introduced.
@@ -177,7 +195,7 @@ Acceptance Criteria:
 
 ## Next After This
 
-After human review/apply for weight suggestions is stable, do repository shape and maintainability cleanup before counsellor/transmutation fields.
+After repository shape and knowledge layout are clean, split oversized tests by behavior. Only after maintainability cleanup should Socrates add counsellor/transmutation fields.
 
 ## Nice To Have Later
 
