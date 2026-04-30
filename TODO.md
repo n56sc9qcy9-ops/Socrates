@@ -51,11 +51,12 @@ Completed and committed locally:
 - False activation reduction through harmonic evidence gating and ranking calibration.
 - Review-file generation for proposed ranking weight changes.
 - Human review/apply workflow for proposed ranking weight changes.
+- Knowledge layout consolidation; active runtime in `internal/knowledge/`, reference in `knowledge/reference/`.
 
 Current git status before this handoff:
 
 ```text
-## main...origin/main [ahead 36]
+## main...origin/main [ahead 38]
 ```
 
 Architect correction:
@@ -71,98 +72,71 @@ Architect correction:
 - Pi completed false activation reduction in commit `0030020`.
 - Pi completed review-gated weight suggestion generation in commit `4b50136`.
 - Pi completed human review/apply workflow for proposed weight changes in commit `c420013`.
+- Pi completed knowledge layout consolidation in commit `916c504`.
+- Active runtime knowledge is documented as `internal/knowledge/`.
+- Root `knowledge/` now holds non-runtime reference material under `knowledge/reference/`.
 - Field precision improved without recall collapse:
   - train field precision `0.23 -> 0.39`, recall `1.00 -> 1.00`
   - held-out field precision `0.16 -> 0.27`, recall `0.62 -> 0.62`
   - train pass rate `0/8 -> 8/8`
   - held-out pass rate `0/8 -> 5/8`
-- The next step is not counsellor prose and not new symbolic feature work. It is repository shape and knowledge layout cleanup.
+- The next step is not counsellor prose and not new symbolic feature work. It is test maintainability cleanup.
 
 ## Current Next Task
 
 Task:
-Consolidate knowledge layout and clarify runtime/reference/review data boundaries.
+Split oversized tests by behavior without changing runtime behavior.
 
 Context:
-The evidence pipeline, harmonic core, training evaluation, validation, channel semantics, identity/provenance model, concept schema guardrails, ranking weights, held-out evaluation, false-activation gating, review-file generation, and review/apply workflow are now in place.
+The evidence pipeline, harmonic core, training evaluation, validation, channel semantics, identity/provenance model, concept schema guardrails, ranking weights, held-out evaluation, false-activation gating, review-file generation, review/apply workflow, and knowledge layout are now in place.
 
-The repository now has two knowledge-looking locations:
-
-```text
-knowledge/
-  concepts.yaml
-  forms.yaml
-  relations.yaml
-
-internal/knowledge/
-  concepts.yaml
-  forms.yaml
-  relations.yaml
-  glyphs.yaml
-  frequencies.yaml
-  loader.go
-  ...
-```
-
-This is confusing. Future agents and humans may edit the wrong YAML. Socrates needs one clearly documented active runtime knowledge location and separate places for review, reference/source, and archive material.
-
-The goal:
+The next maintainability risk is oversized test files. They make future agents slower and less reliable because unrelated behaviors are mixed together.
 
 ```text
-active runtime knowledge: one authoritative location
-review suggestions: separate from active runtime knowledge
-reference/source material: separate from active runtime knowledge
-archive: separate from active runtime knowledge
+internal/decipher/engine_test.go           ~1694 lines
+internal/decipher/activation_graph_test.go ~958 lines
+internal/decipher/passage_field_test.go    ~886 lines
 ```
+
+The goal is a behavior-preserving test split. Do not refactor production code in this task.
 
 Reference:
 
 - `ARCHITECTURE.md`
-- `README.md`
-- `docs/KNOWLEDGE_CURATION.md`
-- `IMPLEMENTATION_ROADMAP.md`
+- `CONTRIBUTING.md`
 
 Likely files:
 
-- `README.md`
-- `ARCHITECTURE.md`
-- `docs/KNOWLEDGE_CURATION.md`
-- `IMPLEMENTATION_ROADMAP.md`
-- `internal/knowledge/loader.go`
-- `internal/knowledge/*.yaml`
-- `knowledge/*.yaml`
-- `review/*`
-- `training/*`
+- `internal/decipher/engine_test.go`
+- `internal/decipher/activation_graph_test.go`
+- `internal/decipher/passage_field_test.go`
+- new test files under `internal/decipher/`
 
 Instructions:
 
 1. Start with `git status --short --branch` and record it.
 2. Run `go test ./...` before changing code and record the baseline result.
-3. Run the documented validation command and record the result.
-4. Decide and document the authoritative runtime knowledge location.
-   - Preferred long-term shape: root `knowledge/` contains structured subfolders such as `runtime/`, `reference/`, `review/`, and `archive/`.
-   - If Go embedding makes immediate root-runtime migration too large, keep `internal/knowledge/*.yaml` as active runtime for now, but move or rename root `knowledge/*.yaml` so it cannot be mistaken for runtime.
-   - The final state of this task must have no ambiguous duplicate runtime-looking YAML.
-5. Make the chosen active runtime knowledge location explicit in:
-   - `README.md`
-   - `docs/KNOWLEDGE_CURATION.md`
-   - relevant architecture docs if needed
-6. Ensure loader/validation behavior matches the documented active runtime location.
-   - `knowledge validate` should validate active embedded/runtime knowledge by default.
-   - `knowledge validate --dir <path>` should remain available for explicit alternate directories.
-7. Separate non-runtime material.
-   - Review suggestions belong under `review/`.
-   - Training examples and weights belong under `training/`.
-   - Reference/source/seed/archive material must not sit beside runtime YAML unless clearly named as non-runtime.
-8. Do not silently delete useful source material.
-   - If root `knowledge/*.yaml` is obsolete, move it to a clearly named archive/reference location or document why it is removed.
-   - Preserve git history naturally through the move.
-9. Add guardrails so future agents do not edit the wrong YAML.
-   - Documentation must say where active knowledge lives.
-   - If practical, add a lightweight test or validation check proving the active knowledge files exist where documented.
-10. Do not change knowledge semantics in this task except what is necessary for layout.
-11. Do not add new active concepts, forms, relations, examples, AI, embeddings, counsellor/transmutation fields, UI, or audio in this task.
-12. Preserve completed guardrails:
+3. Do not change production code.
+4. Split tests by behavior, not by arbitrary line count.
+5. Preserve test names where practical, or use names that keep failure output easy to map to the original behavior.
+6. Suggested split:
+   - `engine_render_test.go`
+   - `engine_scoring_test.go`
+   - `engine_bounds_test.go`
+   - `engine_regression_test.go`
+   - `activation_graph_build_test.go`
+   - `activation_graph_propagation_test.go`
+   - `activation_graph_dedup_test.go`
+   - `activation_graph_paths_test.go`
+   - `passage_field_merge_test.go`
+   - `passage_field_convergence_test.go`
+   - `passage_field_regression_test.go`
+7. Keep shared test helpers local and minimal.
+   - Do not create a large abstract test framework.
+   - If helpers are needed, put them in a small clearly named `_test.go` helper file.
+8. Avoid rewriting assertions except where necessary for moves/imports.
+9. Do not add new features, new active knowledge, AI, embeddings, counsellor/transmutation fields, UI, or audio.
+10. Preserve completed guardrails:
    - active YAML validates
    - `knowledge validate` works
    - channel diversity counts active evidence only
@@ -170,23 +144,16 @@ Instructions:
    - multi-concept fuzzy evidence remains complete
    - cross-script love and Hebrew `El` boundary behavior still works
    - concept schema hygiene warnings remain visible and bounded
-13. Keep implementation light. Prefer moving/renaming data and updating docs over a loader rewrite unless the loader rewrite is clearly simpler and safer.
-14. Add or update tests proving:
-   - documented active knowledge location is valid
-   - default embedded validation still validates active runtime knowledge
-   - explicit `--dir` validation still works
-   - review/training/reference material is not accidentally treated as active runtime knowledge
-15. Run targeted tests while working, then `go test ./...` or `make test`.
-16. Commit the completed repository/knowledge layout cleanup locally with a clear message. Do not push.
-17. Report final `git status --short --branch`, validation result, tests run, files changed/moved, and the final runtime/reference/review/archive layout.
+11. Run targeted tests while working, then `go test ./...` or `make test`.
+12. Commit the completed test split locally with a clear message. Do not push.
+13. Report final `git status --short --branch`, tests run, files changed/moved, and approximate before/after line counts for split files.
 
 Acceptance Criteria:
 
-- There is exactly one documented active runtime knowledge location.
-- Root `knowledge/` and `internal/knowledge/` are no longer ambiguous duplicates.
-- Review, training, reference/source, and archive data are clearly separated from active runtime knowledge.
-- Loader and validation behavior match the documentation.
-- Useful source/reference material is preserved or intentionally removed with rationale.
+- Oversized test files are split by behavior.
+- Runtime behavior is unchanged.
+- Production code is untouched except for unavoidable formatting/import consequences, if any.
+- Test failure output remains easy to understand.
 - Existing harmonic core, training evaluation, quality gate behavior, identity/provenance hardening, and cross-script convergence still pass.
 - Training does not mutate active knowledge.
 - No black-box truth model is introduced.
@@ -195,7 +162,7 @@ Acceptance Criteria:
 
 ## Next After This
 
-After repository shape and knowledge layout are clean, split oversized tests by behavior. Only after maintainability cleanup should Socrates add counsellor/transmutation fields.
+After oversized tests are split, perform a production-file responsibility audit. Only after maintainability cleanup should Socrates add counsellor/transmutation fields.
 
 ## Nice To Have Later
 
