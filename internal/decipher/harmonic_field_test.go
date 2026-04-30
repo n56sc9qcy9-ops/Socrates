@@ -17,22 +17,25 @@ func TestBuildHarmonicFieldFromData(t *testing.T) {
 	// Create mock passage fields with concepts that have frequency profiles
 	pf := PassageFields{
 		&PassageField{
-			Concept:      "breath",
-			Strength:     0.9,
+			Concept:       "breath",
+			Strength:      0.9,
 			Confidence:   "verified",
-			TokenSources: []string{"prana", "ruach"},
+			TokenSources:  []string{"prana", "ruach"},
+			EvidenceCount: 2, // Multiple evidence paths
 		},
 		&PassageField{
-			Concept:      "life",
-			Strength:     0.8,
+			Concept:       "life",
+			Strength:      0.8,
 			Confidence:   "verified",
-			TokenSources: []string{"zoe", " vita"},
+			TokenSources:  []string{"zoe", "vita"},
+			EvidenceCount: 2, // Multiple evidence paths
 		},
 		&PassageField{
-			Concept:      "spirit",
-			Strength:     0.7,
+			Concept:       "spirit",
+			Strength:      0.7,
 			Confidence:   "plausible",
-			TokenSources: []string{"pneuma"},
+			TokenSources:  []string{"pneuma"},
+			EvidenceCount: 1, // At least one evidence path
 		},
 	}
 
@@ -116,10 +119,11 @@ func TestNoProfileNoField(t *testing.T) {
 	pf := PassageFields{}
 	for _, concept := range conceptsWithoutProfiles {
 		pf = append(pf, &PassageField{
-			Concept:      concept,
+			Concept:       concept,
 			Strength:     0.8,
 			Confidence:   "verified",
 			TokenSources: []string{"test"},
+			EvidenceCount: 2,
 		})
 	}
 
@@ -149,22 +153,25 @@ func TestMultipleSourcesOneTone(t *testing.T) {
 	// e.g., breath, wind, spirit all share breath-vibration profile
 	pf := PassageFields{
 		&PassageField{
-			Concept:      "breath",
+			Concept:       "breath",
 			Strength:     0.9,
 			Confidence:   "verified",
 			TokenSources: []string{"prana"},
+			EvidenceCount: 2, // Multiple evidence paths
 		},
 		&PassageField{
-			Concept:      "wind",
+			Concept:       "wind",
 			Strength:     0.7,
 			Confidence:   "plausible",
 			TokenSources: []string{"vayu"},
+			EvidenceCount: 2,
 		},
 		&PassageField{
-			Concept:      "spirit",
+			Concept:       "spirit",
 			Strength:     0.6,
 			Confidence:   "plausible",
 			TokenSources: []string{"atman"},
+			EvidenceCount: 2,
 		},
 	}
 
@@ -198,14 +205,16 @@ func TestHarmonicScoring(t *testing.T) {
 	// Test with concepts that should have compatible profiles
 	pf := PassageFields{
 		&PassageField{
-			Concept:    "breath",
-			Strength:   0.9,
-			Confidence: "verified",
+			Concept:       "breath",
+			Strength:     0.9,
+			Confidence:   "verified",
+			EvidenceCount: 2,
 		},
 		&PassageField{
-			Concept:    "life",
-			Strength:   0.8,
-			Confidence: "verified",
+			Concept:       "life",
+			Strength:     0.8,
+			Confidence:   "verified",
+			EvidenceCount: 2,
 		},
 	}
 
@@ -294,9 +303,10 @@ func TestRenderHarmonicField(t *testing.T) {
 
 	pf := PassageFields{
 		&PassageField{
-			Concept:    "breath",
-			Strength:   0.9,
-			Confidence: "verified",
+			Concept:       "breath",
+			Strength:     0.9,
+			Confidence:   "verified",
+			EvidenceCount: 2,
 		},
 	}
 

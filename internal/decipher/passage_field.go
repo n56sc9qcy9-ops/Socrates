@@ -7,13 +7,54 @@ import (
 // PassageField represents a concept field activated by passage tokens.
 // Groups activation by concept with evidence from multiple token sources.
 type PassageField struct {
-	Concept       string
-	Strength      float64
-	Confidence    string
-	Depth         int            // 0 = direct, 1+ = graph-expanded
-	TokenSources  []string       // Original tokens that activated this field
-	EvidencePaths []EvidencePath // Evidence paths explaining this field
-	RelationPaths []string       // Relation paths through the activation graph
+	Concept        string
+	Strength       float64
+	Confidence     string
+	Depth          int            // 0 = direct, 1+ = graph-expanded
+	TokenSources   []string       // Original tokens that activated this field
+	EvidencePaths  []EvidencePath // Evidence paths explaining this field
+	RelationPaths  []string       // Relation paths through the activation graph
+	EvidenceCount  int            // Number of distinct evidence paths supporting this field
+}
+
+// Gate returns true if this passage field passes a harmonic field gate.
+// Requires minimum strength and minimum evidence count.
+// Very strong verified concepts (strength >= 0.5) bypass evidence count requirements.
+func (f *PassageField) Gate(gate HarmonicFieldGate) bool {
+	// Check strength threshold
+	if f.Strength < gate.MinConceptStrength {
+		return false
+	}
+
+	// For very strong verified concepts, allow even with zero/low evidence count
+	if f.Strength >= 0.5 && f.Confidence == ConfidenceVerified {
+		return true
+	}
+
+	// Check evidence count
+	if f.EvidenceCount < gate.MinEvidenceCount {
+		return false
+	}
+
+	// Check confidence - verified and plausible pass, speculative fails
+	if f.Confidence == ConfidenceVerified || f.Confidence == ConfidencePlausible {
+		return true
+	}
+	return false
+}
+
+// GateStrength returns the gated strength and whether this field passes the gate.
+func (f *PassageField) GateStrength(gate HarmonicFieldGate) (float64, bool) {
+	if !f.Gate(gate) {
+		return 0, false
+	}
+
+	// Apply speculative discount
+	if f.Confidence == ConfidenceSpeculative {
+		return f.Strength * gate.SpeculativeDiscount, true
+	}
+
+	return f.Strength, true
 }
 
 // PassageFields is a collection of PassageField instances.
@@ -89,14 +130,18 @@ func BuildPassageFieldsFromGraph(graph *ActivationGraph) PassageFields {
 	fields := make(PassageFields, 0, len(graph.Nodes))
 
 	for _, node := range graph.Nodes {
+		// Count unique evidence paths by source type for gating
+		evidCount := len(node.Evidence)
+
 		field := &PassageField{
-			Concept:       node.Concept,
-			Strength:      node.Strength,
+			Concept:        node.Concept,
+			Strength:       node.Strength,
 			Confidence:    node.Confidence,
 			Depth:         node.Depth,
 			TokenSources:  []string{},
 			EvidencePaths: make([]EvidencePath, 0),
 			RelationPaths: []string{},
+			EvidenceCount: evidCount,
 		}
 
 		// Collect token sources from evidence

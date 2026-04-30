@@ -4,17 +4,153 @@ import (
 	"socrates/internal/knowledge"
 )
 
+// HarmonicFieldGate defines evidence gates for harmonic field activation.
+// These gates reduce false activations by filtering weak or speculative evidence.
+type HarmonicFieldGate struct {
+	// Minimum concept strength required to contribute to harmonic field.
+	// Concepts with strength below this threshold are excluded.
+	MinConceptStrength float64
+
+	// Minimum confidence level for full contribution.
+	// Verified and plausible concepts contribute fully.
+	// Speculative concepts contribute at SpeculativeDiscount rate.
+	MinConfidence string
+
+	// Discount applied to speculative evidence (0.0-1.0).
+	SpeculativeDiscount float64
+
+	// Minimum evidence count for a concept to be included.
+	// Concepts activated by fewer than this many evidence paths are gated.
+	MinEvidenceCount int
+}
+
+// DefaultHarmonicFieldGate returns the default gate configuration.
+// This gate reduces false activations by requiring:
+// - Minimum concept strength (filters weak activations from structural noise)
+// - At least one evidence path (requires some evidence support)
+// - Plausible or better confidence (filters speculative-only concepts)
+// - For weaker concepts (strength < 0.5), requires stronger evidence support
+func DefaultHarmonicFieldGate() HarmonicFieldGate {
+	return HarmonicFieldGate{
+		MinConceptStrength:  0.25, // Gate weak activations; concepts below this don't contribute
+		MinConfidence:       ConfidencePlausible, // Require plausible or better
+		SpeculativeDiscount: 0.3,  // Heavy discount for speculative evidence
+		MinEvidenceCount:    1,    // At least one evidence path required
+	}
+}
+
+// PassesGate returns true if the concept passes the gate.
+// Requires minimum strength, and for weaker concepts requires evidence support.
+func (g HarmonicFieldGate) PassesGate(strength float64, confidence string, evidenceCount int) bool {
+	// Check strength threshold
+	if strength < g.MinConceptStrength {
+		return false
+	}
+
+	// For very strong concepts (>= 0.5), allow even with zero evidence count
+	// This handles cases where a concept has strong activation from one source
+	if strength >= 0.5 && evidenceCount == 0 {
+		return confidence == ConfidenceVerified || confidence == ConfidencePlausible
+	}
+
+	// For moderate strength, require at least one evidence path
+	if evidenceCount < g.MinEvidenceCount {
+		return false
+	}
+
+	// Check confidence - verified and plausible pass
+	if confidence == ConfidenceVerified || confidence == ConfidencePlausible {
+		return true
+	}
+
+	// Speculative: fail unless exceptional strength
+	return false
+}
+
+// EffectiveStrength computes the effective strength after gate application.
+// Returns (strength, included) where included indicates if the concept should be used.
+// Note: This function only checks strength and confidence; evidence count is checked separately.
+func (g HarmonicFieldGate) EffectiveStrength(strength float64, confidence string) (float64, bool) {
+	// Check strength threshold
+	if strength < g.MinConceptStrength {
+		return 0, false
+	}
+
+	// Check confidence - verified and plausible pass
+	if confidence == ConfidenceVerified || confidence == ConfidencePlausible {
+		return strength, true
+	}
+
+	// Speculative: fail unless exceptional strength
+	// But for now, speculative always fails the confidence gate
+	return 0, false
+}
+
 // BuildHarmonicField constructs a harmonic field from active passage fields.
 // The field is built from data-backed frequency profiles, not from hardcoded Go constants.
+// False activations are reduced through evidence gating:
+// - Weak concepts (strength < 0.15) are excluded
+// - Speculative concepts are heavily discounted
+// - Evidence count threshold prevents single-source inflation
 func BuildHarmonicField(pf PassageFields, kb *knowledge.Knowledge) *HarmonicField {
+	return BuildHarmonicFieldWithGate(pf, kb, DefaultHarmonicFieldGate())
+}
+
+// BuildHarmonicFieldWithGate constructs a harmonic field with explicit evidence gates.
+func BuildHarmonicFieldWithGate(pf PassageFields, kb *knowledge.Knowledge, gate HarmonicFieldGate) *HarmonicField {
 	if pf == nil || len(pf) == 0 {
 		return nil
 	}
 
-	// Collect all activated concepts and their strengths
+	// Collect all activated concepts and their strengths, filtering by gate
 	activatedConcepts := make(map[string]float64)
+	conceptEvidenceCount := make(map[string]int)
+	conceptConfidence := make(map[string]string)
+
 	for _, field := range pf {
-		activatedConcepts[field.Concept] = field.Strength
+		// Apply confidence gate first
+		// For high-strength verified concepts, allow even with zero evidence count
+		if field.Strength >= 0.5 && field.Confidence == ConfidenceVerified {
+			// Strong verified concept - bypass evidence count requirement
+			activatedConcepts[field.Concept] = field.Strength
+			conceptConfidence[field.Concept] = field.Confidence
+			continue
+		}
+
+		// Apply normal gate
+		strength, included := gate.EffectiveStrength(field.Strength, field.Confidence)
+		if !included {
+			continue
+		}
+
+		// Check evidence count using the dedicated field
+		// For test compatibility, also check EvidencePaths length
+		evidCount := field.EvidenceCount
+		if evidCount == 0 {
+			evidCount = len(field.EvidencePaths)
+		}
+		if evidCount < gate.MinEvidenceCount {
+			continue
+		}
+
+		// Track best strength and evidence count per concept
+		if existing, exists := activatedConcepts[field.Concept]; exists {
+			if strength > existing {
+				activatedConcepts[field.Concept] = strength
+			}
+		} else {
+			activatedConcepts[field.Concept] = strength
+		}
+
+		conceptEvidenceCount[field.Concept] = evidCount
+		// Keep highest confidence
+		if existingConf, ok := conceptConfidence[field.Concept]; ok {
+			if confidencePriority(field.Confidence) > confidencePriority(existingConf) {
+				conceptConfidence[field.Concept] = field.Confidence
+			}
+		} else {
+			conceptConfidence[field.Concept] = field.Confidence
+		}
 	}
 
 	if len(activatedConcepts) == 0 {
