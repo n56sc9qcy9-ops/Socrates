@@ -49,11 +49,12 @@ Completed and committed locally:
 - Concept schema hygiene; alias collisions guarded and broad spiritual fields separated.
 - Configurable ranking weights and train/held-out evaluation split.
 - False activation reduction through harmonic evidence gating and ranking calibration.
+- Review-file generation for proposed ranking weight changes.
 
 Current git status before this handoff:
 
 ```text
-## main...origin/main [ahead 32]
+## main...origin/main [ahead 34]
 ```
 
 Architect correction:
@@ -67,31 +68,32 @@ Architect correction:
 - That seed-label warning category is accepted as visible curation debt for now; it must not be hidden, but it no longer blocks ranking work.
 - Pi completed ranking weights and held-out evaluation in commit `b66e47a`.
 - Pi completed false activation reduction in commit `0030020`.
+- Pi completed review-gated weight suggestion generation in commit `4b50136`.
 - Field precision improved without recall collapse:
   - train field precision `0.23 -> 0.39`, recall `1.00 -> 1.00`
   - held-out field precision `0.16 -> 0.27`, recall `0.62 -> 0.62`
   - train pass rate `0/8 -> 8/8`
   - held-out pass rate `0/8 -> 5/8`
-- The next step is not counsellor prose and not new symbolic feature work. It is review-gated weight suggestion.
+- The next step is not counsellor prose and not new symbolic feature work. It is human review/apply for generated suggestions.
 
 ## Current Next Task
 
 Task:
-Generate review files for proposed weight changes.
+Add human review/apply workflow for proposed weight changes.
 
 Context:
-The evidence pipeline, harmonic core, training evaluation, validation, channel semantics, identity/provenance model, concept schema guardrails, ranking weights, held-out evaluation, and false-activation gating are now in place.
+The evidence pipeline, harmonic core, training evaluation, validation, channel semantics, identity/provenance model, concept schema guardrails, ranking weights, held-out evaluation, false-activation gating, and review-file generation are now in place.
 
-Socrates can now evaluate ranking behavior and expose train/held-out metrics. The next long-horizon need is controlled learning: the system may suggest weight changes, but it must not silently rewrite active knowledge or active runtime weights.
+Socrates can now generate pending weight suggestions in `review/weight_suggestions.yaml`. The next step is controlled human review: humans should be able to mark suggestions accepted or rejected, and only accepted suggestions should be applied through an explicit command.
 
-The goal is a review workflow:
+The goal is:
 
 ```text
-evaluate current weights
-  -> propose candidate weight changes with before/after metrics
-  -> write suggestions to review files
-  -> human accepts/rejects later
-  -> active YAML/config remains unchanged
+pending suggestions
+  -> human marks accepted/rejected
+  -> explicit apply command reads accepted suggestions
+  -> updates target config only after validation
+  -> leaves an audit trail
 ```
 
 Reference:
@@ -106,37 +108,40 @@ Likely files:
 - `internal/decipher/types.go`
 - `internal/decipher/*`
 - `internal/training/*`
-- `training/examples.yaml`
 - `training/weights.yaml`
-- `training/heldout.yaml`
-- new file if useful: `internal/training/weight_suggestions.go`
-- new file if useful: `review/weight_suggestions.yaml`
+- `review/weight_suggestions.yaml`
+- new file if useful: `internal/training/weight_review.go`
+- new file if useful: `review/applied_weight_changes.yaml`
 
 Instructions:
 
 1. Start with `git status --short --branch` and record it.
 2. Run `go test ./...` before changing code and record the baseline result.
 3. Run the documented validation command and record the result.
-4. Capture baseline train and held-out metrics before generating suggestions.
-5. Add a suggestion generator for ranking weights.
-   - It may compare current weights against a small bounded set of candidate changes.
-   - It must report before/after train and held-out metrics.
-   - It must prefer held-out improvement over train-only improvement.
-   - It must reject or flag suggestions that improve train metrics while degrading held-out metrics beyond a documented tolerance.
-6. Write suggestions to a review file, not active runtime YAML/config.
-   - Suggested path: `review/weight_suggestions.yaml` or similar.
-   - Create the review directory if needed.
-   - Include current value, suggested value, metric delta, rationale, and status.
-   - Default status should be pending review.
-7. Add CLI support only if it stays simple.
-   - Example target: `socrates train suggest-weights`
-   - If CLI scope gets large, expose the library/report first and leave CLI for a later task.
-8. Do not auto-apply suggestions.
-9. Do not mutate `training/weights.yaml` in this task except if needed to document schema comments.
-10. Do not mutate active knowledge.
-11. Do not add new active concepts, forms, relations, examples, AI, embeddings, counsellor/transmutation fields, UI, or audio in this task.
-12. Keep train and held-out metrics separate.
-13. Preserve completed guardrails:
+4. Define the review/apply workflow for weight suggestions.
+   - Suggestions must have statuses: `pending`, `accepted`, `rejected`.
+   - Only `accepted` suggestions may be applied.
+   - `pending` and `rejected` suggestions must never change runtime config.
+5. Add a parser/validator for review files.
+   - Invalid statuses fail.
+   - Missing target path/current/suggested values fail.
+   - Target paths must be restricted to known ranking weight fields.
+6. Add an explicit apply command if the scope stays small.
+   - Example: `socrates train apply-weight-suggestions`
+   - It must require an explicit review file path or use the documented default review path.
+   - It must update only `training/weights.yaml` or the project’s chosen ranking weight config, not active knowledge YAML.
+7. Before applying, verify the current value in the target config still matches the suggestion's recorded current value.
+   - If it does not match, refuse to apply and report drift.
+8. After applying, run or require validation of the updated weight config.
+9. Write an audit record for applied suggestions.
+   - Include timestamp if available, suggestion path, old value, new value, metrics delta, and status.
+   - Keep rejected suggestions in the review file or audit trail.
+10. Do not auto-accept suggestions.
+11. Do not generate new suggestions in this task unless needed for tests.
+12. Do not mutate active knowledge.
+13. Do not add new active concepts, forms, relations, examples, AI, embeddings, counsellor/transmutation fields, UI, or audio in this task.
+14. Keep train and held-out metrics separate in any reporting.
+15. Preserve completed guardrails:
    - active YAML validates
    - `knowledge validate` works
    - channel diversity counts active evidence only
@@ -144,23 +149,25 @@ Instructions:
    - multi-concept fuzzy evidence remains complete
    - cross-script love and Hebrew `El` boundary behavior still works
    - concept schema hygiene warnings remain visible and bounded
-14. Keep the implementation light. Prefer deterministic candidate generation and explicit reports over optimization frameworks.
-15. Add or update tests proving:
-   - suggestions are written to review files, not active YAML/config
-   - suggestions include before/after train and held-out metrics
-   - train-only improvements that harm held-out metrics are flagged or rejected
-   - pending review status is present
-   - training still does not mutate active knowledge
-16. Run targeted tests while working, then `go test ./...` or `make test`.
-17. Commit the completed weight-suggestion review workflow locally with a clear message. Do not push.
-18. Report final `git status --short --branch`, validation result, tests run, files changed, and an example suggestion entry.
+16. Keep the implementation light. Prefer explicit YAML update logic over a broad config-management framework.
+17. Add or update tests proving:
+   - pending suggestions do not apply
+   - rejected suggestions do not apply
+   - accepted suggestions apply only to allowed weight fields
+   - current-value drift prevents apply
+   - audit record is written
+   - active knowledge YAML is not mutated
+18. Run targeted tests while working, then `go test ./...` or `make test`.
+19. Commit the completed review/apply workflow locally with a clear message. Do not push.
+20. Report final `git status --short --branch`, validation result, tests run, files changed, and an example accepted/rejected/apply flow.
 
 Acceptance Criteria:
 
-- Weight changes can be suggested into review files.
-- Suggested changes include current value, suggested value, rationale, and train/held-out metric deltas.
-- Suggestions are pending review by default.
-- Active YAML/config is not mutated automatically.
+- Pending/rejected suggestions cannot mutate config.
+- Accepted suggestions can be applied only through an explicit command.
+- Apply checks current-value drift before writing.
+- Applied changes leave an audit trail.
+- Active knowledge YAML is not mutated.
 - Train and held-out metrics remain separate and visible.
 - Existing harmonic core, training evaluation, quality gate behavior, identity/provenance hardening, and cross-script convergence still pass.
 - Training does not mutate active knowledge.
@@ -170,7 +177,7 @@ Acceptance Criteria:
 
 ## Next After This
 
-After review-file generation for proposed weight changes is stable, add a human review/apply workflow. Only after that should Socrates add counsellor/transmutation fields.
+After human review/apply for weight suggestions is stable, do repository shape and maintainability cleanup before counsellor/transmutation fields.
 
 ## Nice To Have Later
 
