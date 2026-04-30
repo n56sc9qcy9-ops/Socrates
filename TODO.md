@@ -46,11 +46,12 @@ Completed and committed locally:
 - Channel semantics correction and cross-script meaning-frequency convergence.
 - Architecture quality gate for validation, scoring, evaluation, and evidence-path integrity.
 - Knowledge identity/provenance hardening; validation warnings reduced to zero.
+- Concept schema hygiene; alias collisions guarded and broad spiritual fields separated.
 
 Current git status before this handoff:
 
 ```text
-## main...origin/main [ahead 26]
+## main...origin/main [ahead 28]
 ```
 
 Architect correction:
@@ -59,100 +60,96 @@ Architect correction:
 - Pi completed the quality gate, including active-channel diversity, positional `knowledge validate`, precision-aware training evaluation, and multi-concept fuzzy evidence handling.
 - Pi completed identity/provenance hardening: confidence is `verified`, `plausible`, `speculative`; provenance/source is `curated`, `traditional`, `human_review`, `physics`; `curated` is not confidence.
 - Validation warning debt was reduced to zero.
-- The next step is not counsellor prose, not new symbolic feature work, and not ranking-weight tuning yet.
-- The remaining schema risk is concept hygiene: `id`, `name`, `aliases`, and broad spiritual equivalences must not collapse distinct fields.
+- Pi completed concept schema hygiene in commit `0a4661d`.
+- Remaining validation warnings are now a single explicit seed-label category: `name == id` for uncurated display labels.
+- That seed-label warning category is accepted as visible curation debt for now; it must not be hidden, but it no longer blocks ranking work.
+- The next step is not counsellor prose and not new symbolic feature work. It is ranking-weight hardening and held-out evaluation.
 
 ## Current Next Task
 
 Task:
-Audit concept schema hygiene and guard broad spiritual identities.
+Add configurable ranking weights and held-out evaluation.
 
 Context:
-Pi completed identity/provenance hardening in commit `3ef62c0`. Validation now reaches zero warnings. That is good, but clean validation does not prove that the concept model is spiritually or semantically clean.
+The evidence pipeline, harmonic core, training evaluation, validation, channel semantics, identity/provenance model, and concept schema guardrails are now in place.
 
-Observed issue:
-
-```yaml
-- id: source
-  name: source
-  aliases: [source, origin, beginning, genesis, god, power, divine, totality]
-```
-
-This blurs canonical identity, display label, aliases, and neighboring concepts. It also risks collapsing distinct spiritual fields such as `source`, `god`, `divine`, and `power`.
-
-Before ranking-weight tuning, audit the concept schema itself:
-
-- Concept IDs are canonical identities.
-- Names are human display labels.
-- Aliases are alternate surface labels, not a place to store neighboring concepts.
-- Broad spiritual terms may resonate through relations without being flattened into one alias bucket.
+The current training evaluator can detect low precision, but the ranking assumptions are still scattered through scoring code and curated weights. The next task is to make ranking weights explicit, measurable, and testable against training examples, then add a small held-out evaluation split so changes can be judged without tuning only to the examples being inspected.
 
 Reference:
 
-- `docs/KNOWLEDGE_CURATION.md`
-- `HARMONIC_DATA_MODEL.md`
+- `TRAINING_MODEL.md`
+- `IMPLEMENTATION_ROADMAP.md`
 - `ARCHITECTURE.md`
 
 Likely files:
 
-- `internal/knowledge/concepts.yaml`
-- `internal/knowledge/validate.go`
-- `internal/knowledge/validate_test.go`
-- `internal/knowledge/knowledge.go`
-- `docs/KNOWLEDGE_CURATION.md`
+- `internal/decipher/scoring.go`
+- `internal/decipher/types.go`
+- `internal/decipher/*`
+- `internal/training/*`
+- `training/examples.yaml`
+- new file if useful: `internal/decipher/ranking_weights.go`
+- new file if useful: `internal/training/report.go`
+- new file if useful: `training/weights.yaml`
+- new file if useful: `training/heldout.yaml`
 
 Instructions:
 
 1. Start with `git status --short --branch` and record it.
 2. Run `go test ./...` before changing code and record the baseline result.
 3. Run the documented validation command and record the result.
-4. Audit `concepts.yaml` for concept hygiene issues:
-   - `name` exactly equals `id`
-   - alias equals own `id`
-   - alias equals another concept's `id`
-   - duplicate aliases across concepts
-   - broad spiritual terms stored as aliases where relations would be more accurate
-5. Add validator warnings or failures for the hygiene issues above.
-   - Do not make seed-data convenience silently acceptable.
-   - If `name == id` is temporarily accepted, it must be visible as a warning category until curated.
-6. Clean the most important concept entries, especially broad spiritual fields:
-   - `source`
-   - `god`
-   - `divine`
-   - `power`
-   - `one`
-   - `light`
-   - `truth`
-   - `love`
-7. Prefer relations over aliases when concepts are distinct but resonant.
-   - Example: `source` may relate to `god`, `divine`, or `power`, but they should not automatically be identical aliases unless deliberately documented.
-8. Do not do a broad concept-pack expansion in this task.
-9. Preserve the completed quality-gate behavior:
+4. Add a `RankingWeights` or equivalent structure for evidence-path scoring assumptions.
+5. Include weights for at least:
+   - exact form match
+   - fuzzy form match
+   - phonetic/script/glyph evidence where currently scored
+   - confidence labels
+   - graph relation support
+   - propagation depth penalty
+   - passage co-activation
+   - harmonic profile support
+   - harmonic ratio/archetype compatibility
+   - duplicate/noise penalty
+   - dissonance penalty
+6. Provide default weights that preserve current behavior as closely as practical.
+7. Make evaluation report which weight set was used.
+8. Add optional `--weights <path>` support if the implementation shape is clear and remains light.
+9. Add a held-out example split.
+   - Keep training examples separate from active knowledge.
+   - Keep held-out examples separate from training/tuning examples.
+   - Evaluation should report train and held-out metrics separately.
+10. Add debug/report output that shows feature or evidence contributions for expected and false activations.
+11. Do not let training mutate active knowledge.
+12. Do not write suggested weights back into active YAML in this task.
+13. Do not add AI, embeddings, counsellor/transmutation fields, UI, or audio in this task.
+14. Preserve completed guardrails:
    - active YAML validates
    - `knowledge validate` works
    - channel diversity counts active evidence only
    - training evaluation is precision-aware
    - multi-concept fuzzy evidence remains complete
    - cross-script love and Hebrew `El` boundary behavior still works
-10. Keep the implementation light. Prefer validator guardrails and focused curation over large refactors.
-11. Add or update tests proving:
-   - alias cannot equal own concept ID without warning/failure
-   - alias cannot equal another concept ID without warning/failure
-   - duplicate aliases are detected
-   - broad spiritual identities are represented through relations when distinct
-   - validation remains compact and actionable
-12. Run targeted tests while working, then `go test ./...` or `make test`.
-13. Commit the completed concept schema hygiene work locally with a clear message. Do not push.
-14. Report final `git status --short --branch`, validation result, concept hygiene warnings before/after, tests run, and files changed.
+   - concept schema hygiene warnings remain visible and bounded
+15. Keep the implementation light. Prefer explicit structs and reports over a general ML framework.
+16. Add or update tests proving:
+   - default weights preserve baseline evaluation behavior as closely as practical
+   - invalid weight files fail validation if `--weights` is added
+   - evaluation reports active weight set
+   - train and held-out metrics are reported separately
+   - expected and false activations expose feature/evidence contributions in debug/report mode
+   - training still does not mutate active knowledge
+17. Run targeted tests while working, then `go test ./...` or `make test`.
+18. Commit the completed ranking/held-out evaluation work locally with a clear message. Do not push.
+19. Report final `git status --short --branch`, validation result, tests run, files changed, and example train/held-out metrics.
 
 Acceptance Criteria:
 
-- Concept `id`, `name`, `aliases`, and relations have distinct meanings.
-- Own-ID aliases are detected and removed or explicitly warned.
-- Cross-concept alias collisions are detected.
-- Broad spiritual fields are not silently flattened into aliases.
-- Validation remains compact and actionable.
-- Existing harmonic core, training evaluation, quality gate behavior, and cross-script convergence still pass.
+- Ranking weights are explicit and inspectable.
+- Default weights preserve current behavior as closely as practical.
+- Training evaluation reports which weights were used.
+- Held-out examples exist and report separately from training examples.
+- Debug/report output shows feature or evidence contributions for activations.
+- Existing harmonic core, training evaluation, quality gate behavior, identity/provenance hardening, and cross-script convergence still pass.
 - Training does not mutate active knowledge.
 - No black-box truth model is introduced.
 - `go test ./...` passes.
@@ -160,7 +157,7 @@ Acceptance Criteria:
 
 ## Next After This
 
-After concept schema hygiene is clean, return to configurable ranking weights and a small held-out evaluation split. Only after that should Socrates add counsellor/transmutation fields.
+After ranking weights and held-out evaluation are stable, add review-file generation for proposed weight changes. Only after that should Socrates add counsellor/transmutation fields.
 
 ## Nice To Have Later
 
