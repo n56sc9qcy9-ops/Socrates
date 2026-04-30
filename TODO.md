@@ -27,85 +27,89 @@ Completed and committed locally:
 
 - Phase 3A cleanup.
 - Activation-Energy Discipline Gate.
-- Phase 5 activation graph hardening.
-- Phase 6 passage fields integrated into `Reading`.
+- Phase 5/6 graph and passage-field work.
+- First knowledge validation/suggestion pipeline.
 
 Current git status reported after Pi's last task:
 
 ```text
-## main...origin/main [ahead 11]
+## main...origin/main [ahead 15]
 ```
 
-Architect review notes:
+Architect review of knowledge pipeline:
 
-- Runtime knowledge is loaded from embedded `internal/knowledge/*.yaml`, not automatically from root `knowledge/`.
-- More concepts must enter through a curated, validated data pipeline. The app must not silently learn trusted concepts from user input.
-- Preflight bug to fix: `isHigherConfidence()` / merge usage in `passage_field.go` can downgrade confidence during merge because the argument semantics are inverted.
+- Good: validation and suggestion packages exist, curation doc exists, and trusted knowledge is still embedded from `internal/knowledge/*.yaml`.
+- Must fix next: CLI docs say `socrates knowledge validate`, but implementation appears to use a `--validate` flag internally. The documented command must actually work.
+- Must fix next: alias ambiguity is documented but not fully validated across concepts.
+- Must fix next: form/glyph targets for missing concepts are warnings in places where the task expected strict policy. Decide strict vs explicit external/speculative policy and test it.
+- Must fix next: suggestions exist as package functions, but no CLI path exposes them; docs imply `decipher unknown_word > suggestions.txt`, which does not actually produce suggestion records.
+- Should fix next: `ftos` is a lossy custom formatter and should use standard formatting.
+- Should fix next: `TestValidateKnowledge_ValidKnowledge` should assert embedded knowledge has no validation errors, not only that validation runs.
 
 ## Current Next Task
 
 Task:
-Build a safe knowledge-growth pipeline: validate, import, and suggest knowledge without auto-promoting untrusted input.
+Harden the knowledge pipeline UX and strictness, then add the first small curated knowledge pack through it.
 
 Context:
-The engine is now graph-backed and passage-aware, but the knowledge base is still hand-edited YAML. That is acceptable for early development, but the project needs a disciplined path for adding concepts, forms, relations, script words, and glyph patterns. The pipeline must keep knowledge auditable, data-driven, and test-protected.
+The pipeline exists, but the command-line behavior, validator strictness, suggestion exposure, and tests need to match the documented curation workflow. After hardening, add one deliberately small curated pack using the pipeline rather than ad hoc expansion.
 
 Likely files:
 
-- `internal/knowledge/knowledge.go`
-- `internal/knowledge/loader.go`
-- `internal/knowledge/knowledge_test.go`
-- `internal/knowledge/*.yaml`
-- `knowledge/*.yaml`
 - `cmd/socrates/main.go`
-- `internal/decipher/passage_field.go`
-- new package/file if useful: `internal/knowledge/validate.go`
-- new package/file if useful: `internal/knowledge/suggestions.go`
-- new docs if useful: `docs/KNOWLEDGE_CURATION.md`
+- `internal/knowledge/validate.go`
+- `internal/knowledge/validate_test.go`
+- `internal/knowledge/suggestions.go`
+- `internal/knowledge/suggestions_test.go`
+- `internal/knowledge/*.yaml`
+- `docs/KNOWLEDGE_CURATION.md`
+- `TODO.md`
 
 Instructions:
 
 1. Start with `git status --short --branch` and record it.
 2. Run `go test ./...` before changing code and record the baseline result.
-3. Fix the `isHigherConfidence` merge bug in `passage_field.go` first and add a regression test proving verified confidence is not downgraded by merging plausible/speculative evidence.
-4. Decide and document the authoritative runtime data directory. Current runtime uses embedded `internal/knowledge/*.yaml`; root `knowledge/*.yaml` must either be documented as non-runtime source material or kept in sync by tests/tooling.
-5. Add a validation layer for knowledge data. It should check at least:
-   - concept IDs are unique and non-empty
-   - concept aliases do not ambiguously point to multiple concepts unless explicitly allowed
-   - every form/script word/glyph target concept exists, or is explicitly marked external/speculative by policy
-   - every relation endpoint exists
-   - weights are in `(0, 1]`
-   - confidence is one of `verified`, `plausible`, `speculative`
-   - duplicate forms/relations are either rejected or deterministic
-6. Add CLI support for validation, likely `socrates knowledge validate`, without redesigning the whole CLI.
-7. Add an import path for curated knowledge packs, likely `socrates knowledge validate --dir <path>` first. Do not auto-write into embedded YAML in this task unless the write path is explicit and safe.
-8. Add a suggestion mechanism for unknown or weakly matched inputs. Suggestions may be written to a separate review file or printed as structured output, but they must not become trusted concepts automatically.
-9. Define the minimal review record for future additions: proposed concept/form/relation, evidence source, confidence, weight, rationale/notes, and whether it was accepted.
-10. Add tests for validation failures: missing relation endpoint, form target missing concept, invalid confidence, invalid weight, duplicate concept ID, ambiguous alias.
-11. Add tests proving suggestions are separate from trusted embedded knowledge.
-12. Keep all decipher/render/passage/graph tests passing.
-13. Do not import a large external dictionary in this task. Build the pipeline first.
-14. Do not add auto-learning from user input into trusted YAML.
-15. Do not implement harmonic/audio rendering or concept-to-frequency mappings.
-16. Run targeted tests while working, then `go test ./...`.
-17. Commit the completed knowledge-pipeline work locally with a clear message. Do not push.
-18. Report final `git status --short --branch`, tests run, files changed, and how a human curator would add a new concept after this task.
+3. Fix the CLI so the documented command works exactly:
+   - `socrates knowledge validate`
+   - `socrates knowledge validate --dir <path>`
+4. Add tests or a small command parser helper test for the knowledge CLI behavior if practical.
+5. Add a suggestion CLI path, for example:
+   - `socrates knowledge suggest <word-or-phrase>`
+   - It should print review records only; it must not mutate trusted YAML.
+6. Update docs so they do not claim normal `decipher` output emits suggestions unless that is actually implemented.
+7. Make alias ambiguity validation real. Duplicate aliases across different concept IDs must be rejected or explicitly reported according to policy.
+8. Make target-reference validation strict and documented:
+   - trusted forms, script words, relations, and glyph patterns should target existing concepts
+   - if external/speculative targets are allowed, represent that policy explicitly and test it
+9. Replace custom `ftos` with standard formatting.
+10. Strengthen validator tests so embedded runtime knowledge must have zero validation errors.
+11. Add tests proving suggestions remain separate from trusted embedded knowledge and from YAML mutation.
+12. Add the first small curated knowledge pack through the validated path. Keep it narrow: 2-4 concepts/forms/relations max, with review notes in docs or comments. Prefer concepts that improve passage-field examples without adding canned readings.
+13. Re-run validation after adding the pack.
+14. Keep all decipher/render/passage/graph tests passing.
+15. Do not import a large dictionary.
+16. Do not auto-learn from user input.
+17. Do not implement harmonic/audio rendering or concept-to-frequency mappings.
+18. Run targeted tests while working, then `go test ./...`.
+19. Commit the completed pipeline-hardening/curated-pack work locally with a clear message. Do not push.
+20. Report final `git status --short --branch`, tests run, files changed, exact CLI examples, and what curated knowledge was added.
 
 Pi work requirement:
-Spend at least 60 focused minutes. If validation is finished early, use the remaining time to add stronger failure tests and a concise curation doc.
+Spend at least 60 focused minutes. If the CLI fixes are quick, use the remaining time on strict validation tests and the first curated pack.
 
 Acceptance Criteria:
 
-- Confidence merge bug is fixed and tested.
-- The authoritative runtime knowledge location is documented.
-- Knowledge validation exists and is covered by failure tests.
-- CLI can validate embedded or directory-based knowledge.
-- Suggestions are separated from trusted knowledge.
-- New concepts have a documented human-curation path.
+- Documented validation CLI works as written.
+- Suggestion CLI exists and does not mutate trusted knowledge.
+- Alias ambiguity is validated.
+- Missing target policy is strict, explicit, and tested.
+- Embedded runtime knowledge validates with zero errors.
+- Curation docs match real CLI behavior.
+- One small curated knowledge pack is added through the validated workflow.
 - Existing tests still pass.
 - `go test ./...` passes.
 - Work is committed locally and not pushed.
 
 ## Next After This
 
-If this passes, the next task should add the first curated knowledge pack using the new pipeline, not by ad hoc YAML edits.
+If this passes, the next task should be Phase 7: evidence-first CLI polish using the larger, validated knowledge base.

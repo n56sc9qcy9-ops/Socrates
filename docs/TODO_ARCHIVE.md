@@ -299,3 +299,33 @@ Architect review notes for next task:
 Local commit:
 
 - `c9c0c0e integrate passage fields into readings`
+
+### First Knowledge Growth Pipeline
+
+Completed:
+
+- Added knowledge validation package with errors/warnings.
+- Added suggestion/review data structures.
+- Added curation documentation.
+- Added initial CLI support for knowledge validation.
+- Fixed passage-field confidence merge bug per Pi's report.
+
+Recorded verification from Pi:
+
+```text
+go test ./...
+PASS
+```
+
+Architect review notes for next task:
+
+- CLI usage and implementation need alignment: docs say `socrates knowledge validate`, but implementation uses a validation flag internally.
+- Alias ambiguity validation needs to check aliases across concepts, not only empty aliases.
+- Target-reference policy needs to be stricter or explicitly external/speculative.
+- Suggestions exist in code but are not exposed by CLI.
+- Validation should assert embedded runtime knowledge has zero errors.
+
+Local commits:
+
+- `d4a69da Build knowledge-growth pipeline: validate, import, and suggest`
+- `c32af07 Add KNOWLEDGE_CURATION.md guide for human curators`
