@@ -1,5 +1,7 @@
 package knowledge
 
+import "strings"
+
 // WarningCategory classifies validation warnings for reporting.
 type WarningCategory string
 
@@ -143,7 +145,7 @@ func ValidateKnowledge(kb *Knowledge) *ValidationResult {
 	}
 
 	// Validate concepts
-	validateConcepts(kb.Concepts, result)
+	validateConcepts(kb.Concepts, kb, result)
 
 	// Validate forms - check targets exist
 	validateForms(kb.Forms, kb, result)
@@ -164,8 +166,21 @@ func ValidateKnowledge(kb *Knowledge) *ValidationResult {
 }
 
 // validateConcepts validates concept definitions.
-func validateConcepts(concepts []Concept, result *ValidationResult) {
+// Also requires kb for cross-reference hygiene checks.
+func validateConcepts(concepts []Concept, kb *Knowledge, result *ValidationResult) {
 	seenIDs := make(map[string]int) // id -> first index
+
+	// Build all IDs and aliases for cross-reference checks
+	allIDs := make(map[string]bool)
+	aliasCount := make(map[string][]int) // alias -> concept indices
+	for i, c := range concepts {
+		allIDs[c.ID] = true
+		for _, alias := range c.Aliases {
+			if alias != "" {
+				aliasCount[alias] = append(aliasCount[alias], i)
+			}
+		}
+	}
 
 	for i, c := range concepts {
 		field := conceptField(i)
@@ -188,11 +203,55 @@ func validateConcepts(concepts []Concept, result *ValidationResult) {
 			result.AddError(field+".name", "concept name cannot be empty")
 		}
 
-		// Check aliases don't create ambiguity
+		// Check name != id (warning: uncurated label)
+		if c.Name == c.ID {
+			result.AddWarning(field+".name", "concept name equals id; consider a descriptive human label", CategoryDataQuality)
+		}
+
+		// Check aliases for hygiene issues
 		for j, alias := range c.Aliases {
 			if alias == "" {
 				result.AddWarning(field+".aliases["+itoa(j)+"]", "empty alias", CategoryDataQuality)
+				continue
 			}
+
+			// Alias equals own ID
+			if alias == c.ID {
+				result.AddWarning(field+".aliases["+itoa(j)+"]", "alias '"+alias+"' equals own concept id; remove or use a distinct label", CategoryDataQuality)
+			}
+
+			// Alias equals another concept's canonical ID
+			if allIDs[alias] && alias != c.ID {
+				result.AddWarning(field+".aliases["+itoa(j)+"]", "alias '"+alias+"' is another concept's canonical id; use relations instead", CategoryDataQuality)
+			}
+		}
+
+		// Check for duplicate aliases across concepts
+		if indices, exists := aliasCount[c.ID]; exists && len(indices) > 1 {
+			// Find all concepts with this alias
+			conceptNames := make([]string, 0)
+			for _, idx := range indices {
+				conceptNames = append(conceptNames, concepts[idx].ID)
+			}
+			result.AddWarning(field+".id", "alias '"+c.ID+"' appears in multiple concepts: "+strings.Join(conceptNames, ", "), CategoryDataQuality)
+		}
+	}
+
+	// Check for duplicate alias usage (same alias in multiple concepts)
+	seenAlias := make(map[string][]string) // alias -> [concept IDs]
+	for _, c := range concepts {
+		for _, alias := range c.Aliases {
+			if alias != "" && alias != c.ID { // Skip own ID aliases
+				if _, exists := seenAlias[alias]; !exists {
+					seenAlias[alias] = []string{}
+				}
+				seenAlias[alias] = append(seenAlias[alias], c.ID)
+			}
+		}
+	}
+	for alias, conceptIDs := range seenAlias {
+		if len(conceptIDs) > 1 {
+			result.AddWarning("concept_aliases", "alias '"+alias+"' appears in multiple concepts: "+strings.Join(conceptIDs, ", "), CategoryDataQuality)
 		}
 	}
 }

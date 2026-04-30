@@ -204,3 +204,41 @@ Validation should warn or fail for:
 - `name` exactly equals `id` across many entries, indicating uncurated labels
 
 This is not cosmetic. Poor identity hygiene will poison resonance, training, and future counsellor guidance.
+
+## Architect Addendum: Repository Shape And Maintainability
+
+This is not the active task while Pi is working. It is a future architecture debt item that must be handled before major new feature layers.
+
+Problem:
+
+- Some production files have too many responsibilities.
+- Some test files are too large for future agents to reason about safely.
+- Runtime YAML and reference YAML exist in multiple locations, which risks edits landing in the wrong knowledge set.
+
+Required future guardrails:
+
+- Exactly one knowledge location must be authoritative for runtime behavior.
+- Non-runtime knowledge must be clearly labeled as reference, review, archive, seed, or source material.
+- Docs must state which YAML is embedded and active.
+- Large tests should be split by behavior, not mechanically by line count.
+- Production files should be split only after behavior is stable, and only along real ownership boundaries.
+
+Known maintainability targets:
+
+- `internal/decipher/engine.go`: keep orchestration here; move settled scoring, passage, harmonic, or rendering-prep responsibilities out when stable.
+- `internal/decipher/activation_graph.go`: separate graph construction, propagation, evidence paths, and deduplication when stable.
+- `internal/decipher/candidate_generation.go`: separate normalization, phonetic, n-gram, edit-variant, and skeleton generation when stable.
+- `internal/decipher/engine_test.go`: split into render, scoring, bounds, regression, and integration suites.
+- `internal/decipher/activation_graph_test.go`: split by graph construction, propagation, deduplication, and path behavior.
+- `internal/decipher/passage_field_test.go`: split by merge, convergence, and regression behavior.
+
+Knowledge layout target:
+
+```text
+active runtime knowledge: one clearly documented location
+review suggestions: separate from active runtime knowledge
+reference/source material: separate from active runtime knowledge
+archive: separate from active runtime knowledge
+```
+
+This cleanup must not change resonance behavior by accident. It should be done as a dedicated architecture-maintenance task with before/after tests.

@@ -463,3 +463,118 @@ func errorsForField(result *ValidationResult, fieldPrefix string) []ValidationEr
 	}
 	return filtered
 }
+
+// =============================================================================
+// CONCEPT SCHEMA HYGIENE TESTS
+// =============================================================================
+
+func TestConceptSchema_OwnIdAliasWarning(t *testing.T) {
+	kb := &Knowledge{
+		Concepts: []Concept{
+			{ID: "test", Name: "test", Aliases: []string{"test"}},
+		},
+	}
+
+	result := ValidateKnowledge(kb)
+
+	found := false
+	for _, warn := range result.Warnings {
+		if containsString(warn.Message, "equals own concept id") {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Error("should warn when alias equals own concept id")
+	}
+}
+
+func TestConceptSchema_CrossIdAliasWarning(t *testing.T) {
+	kb := &Knowledge{
+		Concepts: []Concept{
+			{ID: "a", Name: "a"},
+			{ID: "b", Name: "b", Aliases: []string{"a"}},
+		},
+	}
+
+	result := ValidateKnowledge(kb)
+
+	found := false
+	for _, warn := range result.Warnings {
+		if containsString(warn.Message, "another concept's canonical id") {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Error("should warn when alias is another concept's id")
+	}
+}
+
+func TestConceptSchema_DuplicateAliasWarning(t *testing.T) {
+	kb := &Knowledge{
+		Concepts: []Concept{
+			{ID: "a", Name: "a", Aliases: []string{"shared"}},
+			{ID: "b", Name: "b", Aliases: []string{"shared"}},
+		},
+	}
+
+	result := ValidateKnowledge(kb)
+
+	found := false
+	for _, warn := range result.Warnings {
+		if containsString(warn.Message, "appears in multiple concepts") {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Error("should warn when alias appears in multiple concepts")
+	}
+}
+
+func TestConceptSchema_NameEqualsIdWarning(t *testing.T) {
+	kb := &Knowledge{
+		Concepts: []Concept{
+			{ID: "test", Name: "test"},
+		},
+	}
+
+	result := ValidateKnowledge(kb)
+
+	found := false
+	for _, warn := range result.Warnings {
+		if containsString(warn.Message, "name equals id") {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Error("should warn when concept name equals id")
+	}
+}
+
+func TestConceptSchema_ValidDistinctConcepts(t *testing.T) {
+	kb := &Knowledge{
+		Concepts: []Concept{
+			{ID: "source", Name: "Source", Aliases: []string{"origin"}},
+			{ID: "god", Name: "Deity", Aliases: []string{"divine"}},
+		},
+	}
+
+	result := ValidateKnowledge(kb)
+
+	// No schema hygiene warnings for distinct, well-defined concepts
+	schemaWarnings := 0
+	for _, warn := range result.Warnings {
+		if containsString(warn.Message, "own concept id") ||
+		   containsString(warn.Message, "another concept's canonical id") ||
+		   containsString(warn.Message, "appears in multiple concepts") ||
+		   containsString(warn.Message, "name equals id") {
+			schemaWarnings++
+		}
+	}
+	if schemaWarnings > 0 {
+		t.Errorf("expected no schema hygiene warnings for well-defined concepts, got %d", schemaWarnings)
+	}
+}
