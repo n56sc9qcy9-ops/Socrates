@@ -48,11 +48,12 @@ Completed and committed locally:
 - Knowledge identity/provenance hardening; validation warnings reduced to zero.
 - Concept schema hygiene; alias collisions guarded and broad spiritual fields separated.
 - Configurable ranking weights and train/held-out evaluation split.
+- False activation reduction through harmonic evidence gating and ranking calibration.
 
 Current git status before this handoff:
 
 ```text
-## main...origin/main [ahead 30]
+## main...origin/main [ahead 32]
 ```
 
 Architect correction:
@@ -65,27 +66,33 @@ Architect correction:
 - Remaining validation warnings are now a single explicit seed-label category: `name == id` for uncurated display labels.
 - That seed-label warning category is accepted as visible curation debt for now; it must not be hidden, but it no longer blocks ranking work.
 - Pi completed ranking weights and held-out evaluation in commit `b66e47a`.
-- The new metrics are honest and useful: train/held-out examples currently pass `0` because precision is too low.
-- Current combined metrics: concept precision `0.18`, concept recall `0.79`, field precision `0.19`, field recall `0.81`.
-- The next step is not counsellor prose and not new symbolic feature work. It is false-activation reduction.
+- Pi completed false activation reduction in commit `0030020`.
+- Field precision improved without recall collapse:
+  - train field precision `0.23 -> 0.39`, recall `1.00 -> 1.00`
+  - held-out field precision `0.16 -> 0.27`, recall `0.62 -> 0.62`
+  - train pass rate `0/8 -> 8/8`
+  - held-out pass rate `0/8 -> 5/8`
+- The next step is not counsellor prose and not new symbolic feature work. It is review-gated weight suggestion.
 
 ## Current Next Task
 
 Task:
-Reduce false activations through evidence gating and ranking calibration.
+Generate review files for proposed weight changes.
 
 Context:
-The evidence pipeline, harmonic core, training evaluation, validation, channel semantics, identity/provenance model, concept schema guardrails, ranking weights, and held-out evaluation are now in place.
+The evidence pipeline, harmonic core, training evaluation, validation, channel semantics, identity/provenance model, concept schema guardrails, ranking weights, held-out evaluation, and false-activation gating are now in place.
 
-The held-out evaluation is exposing the real architectural problem: Socrates finds many expected fields, but activates too many extra fields.
+Socrates can now evaluate ranking behavior and expose train/held-out metrics. The next long-horizon need is controlled learning: the system may suggest weight changes, but it must not silently rewrite active knowledge or active runtime weights.
+
+The goal is a review workflow:
 
 ```text
-Train:   field precision 0.23, field recall 1.00
-HeldOut: field precision 0.16, field recall 0.62
-Combined field precision 0.19, field recall 0.81
+evaluate current weights
+  -> propose candidate weight changes with before/after metrics
+  -> write suggestions to review files
+  -> human accepts/rejects later
+  -> active YAML/config remains unchanged
 ```
-
-The next task is to reduce false activations without destroying recall. Focus on evidence gates, thresholds, and ranking calibration. Do not add new concepts or broaden the knowledge base to make examples pass.
 
 Reference:
 
@@ -102,37 +109,34 @@ Likely files:
 - `training/examples.yaml`
 - `training/weights.yaml`
 - `training/heldout.yaml`
+- new file if useful: `internal/training/weight_suggestions.go`
+- new file if useful: `review/weight_suggestions.yaml`
 
 Instructions:
 
 1. Start with `git status --short --branch` and record it.
 2. Run `go test ./...` before changing code and record the baseline result.
 3. Run the documented validation command and record the result.
-4. Capture baseline train and held-out metrics before changing behavior.
-5. Produce a concise false-activation analysis:
-   - top false activated concepts/fields by frequency
-   - channels or evidence paths most responsible for false activations
-   - whether false activations come from fuzzy matches, graph propagation, weak forms, harmonic profile fan-out, or duplicate evidence
-6. Add evidence gates or ranking calibration to reduce false activations.
-   - Prefer gating weak fuzzy evidence and speculative/structural channels before lowering strong exact evidence.
-   - Prefer limiting graph propagation fan-out/depth before removing valid relations.
-   - Prefer making weak evidence require independent support before it can activate harmonic fields.
-   - Preserve cross-script exact/script evidence.
-7. Tune only through explicit ranking weights or small bounded scoring changes.
-   - Do not hardcode behavior for specific words.
-   - Do not add new active knowledge to make metrics look better.
-   - Do not mutate training examples to hide failures.
-8. Establish an improvement target.
-   - Primary: increase held-out field precision.
-   - Secondary: increase combined field precision.
-   - Guardrail: do not collapse field recall below a documented acceptable floor.
-   - If no safe improvement is possible, report why with evidence-path analysis.
-9. Keep train and held-out metrics separate.
-10. Keep examples separate from active knowledge.
-11. Do not let training mutate active knowledge.
-12. Do not write suggested weights back into active YAML in this task.
-13. Do not add AI, embeddings, counsellor/transmutation fields, UI, or audio in this task.
-14. Preserve completed guardrails:
+4. Capture baseline train and held-out metrics before generating suggestions.
+5. Add a suggestion generator for ranking weights.
+   - It may compare current weights against a small bounded set of candidate changes.
+   - It must report before/after train and held-out metrics.
+   - It must prefer held-out improvement over train-only improvement.
+   - It must reject or flag suggestions that improve train metrics while degrading held-out metrics beyond a documented tolerance.
+6. Write suggestions to a review file, not active runtime YAML/config.
+   - Suggested path: `review/weight_suggestions.yaml` or similar.
+   - Create the review directory if needed.
+   - Include current value, suggested value, metric delta, rationale, and status.
+   - Default status should be pending review.
+7. Add CLI support only if it stays simple.
+   - Example target: `socrates train suggest-weights`
+   - If CLI scope gets large, expose the library/report first and leave CLI for a later task.
+8. Do not auto-apply suggestions.
+9. Do not mutate `training/weights.yaml` in this task except if needed to document schema comments.
+10. Do not mutate active knowledge.
+11. Do not add new active concepts, forms, relations, examples, AI, embeddings, counsellor/transmutation fields, UI, or audio in this task.
+12. Keep train and held-out metrics separate.
+13. Preserve completed guardrails:
    - active YAML validates
    - `knowledge validate` works
    - channel diversity counts active evidence only
@@ -140,24 +144,23 @@ Instructions:
    - multi-concept fuzzy evidence remains complete
    - cross-script love and Hebrew `El` boundary behavior still works
    - concept schema hygiene warnings remain visible and bounded
-15. Keep the implementation light. Prefer explicit thresholds, gates, and reports over a general ML framework.
-16. Add or update tests proving:
-   - weak fuzzy/speculative evidence cannot dominate exact/verified evidence
-   - unsupported weak evidence does not activate harmonic fields alone
-   - graph propagation remains bounded and does not fan out into unrelated fields
-   - train and held-out metrics are reported separately
-   - precision-aware failure still fails noisy runs
-   - cross-script love and Hebrew `El` boundary behavior still works
-17. Run targeted tests while working, then `go test ./...` or `make test`.
-18. Commit the completed false-activation reduction work locally with a clear message. Do not push.
-19. Report final `git status --short --branch`, validation result, tests run, files changed, baseline metrics, final metrics, and a concise explanation of what false activations were reduced.
+14. Keep the implementation light. Prefer deterministic candidate generation and explicit reports over optimization frameworks.
+15. Add or update tests proving:
+   - suggestions are written to review files, not active YAML/config
+   - suggestions include before/after train and held-out metrics
+   - train-only improvements that harm held-out metrics are flagged or rejected
+   - pending review status is present
+   - training still does not mutate active knowledge
+16. Run targeted tests while working, then `go test ./...` or `make test`.
+17. Commit the completed weight-suggestion review workflow locally with a clear message. Do not push.
+18. Report final `git status --short --branch`, validation result, tests run, files changed, and an example suggestion entry.
 
 Acceptance Criteria:
 
-- False activations are analyzed by evidence path/channel, not guessed.
-- Held-out field precision improves or Pi provides a defensible no-safe-improvement explanation.
-- Recall loss, if any, is measured and justified.
-- Weak fuzzy/speculative evidence is gated more strictly than exact/verified evidence.
+- Weight changes can be suggested into review files.
+- Suggested changes include current value, suggested value, rationale, and train/held-out metric deltas.
+- Suggestions are pending review by default.
+- Active YAML/config is not mutated automatically.
 - Train and held-out metrics remain separate and visible.
 - Existing harmonic core, training evaluation, quality gate behavior, identity/provenance hardening, and cross-script convergence still pass.
 - Training does not mutate active knowledge.
@@ -167,7 +170,7 @@ Acceptance Criteria:
 
 ## Next After This
 
-After false activations are reduced, add review-file generation for proposed weight changes. Only after that should Socrates add counsellor/transmutation fields.
+After review-file generation for proposed weight changes is stable, add a human review/apply workflow. Only after that should Socrates add counsellor/transmutation fields.
 
 ## Nice To Have Later
 
