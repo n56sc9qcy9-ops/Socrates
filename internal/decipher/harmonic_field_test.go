@@ -92,7 +92,7 @@ func TestNoProfileNoField(t *testing.T) {
 	// Create passage fields with concepts that have NO frequency profiles
 	// These concepts exist in the knowledge base but have no frequency profiles
 	unknownConcepts := []string{"energy", "truth", "light"}
-	
+
 	// Check which concepts don't have profiles
 	var conceptsWithoutProfiles []string
 	for _, concept := range unknownConcepts {
@@ -198,14 +198,14 @@ func TestHarmonicScoring(t *testing.T) {
 	// Test with concepts that should have compatible profiles
 	pf := PassageFields{
 		&PassageField{
-			Concept:      "breath",
-			Strength:     0.9,
-			Confidence:   "verified",
+			Concept:    "breath",
+			Strength:   0.9,
+			Confidence: "verified",
 		},
 		&PassageField{
-			Concept:      "life",
-			Strength:     0.8,
-			Confidence:   "verified",
+			Concept:    "life",
+			Strength:   0.8,
+			Confidence: "verified",
 		},
 	}
 
@@ -217,7 +217,7 @@ func TestHarmonicScoring(t *testing.T) {
 
 	// Consonance and dissonance should be valid
 	if hf.Consonance+hf.Dissonance > 1.01 {
-		t.Errorf("Consonance (%.2f) + Dissonance (%.2f) should be <= 1.0", 
+		t.Errorf("Consonance (%.2f) + Dissonance (%.2f) should be <= 1.0",
 			hf.Consonance, hf.Dissonance)
 	}
 
@@ -294,9 +294,9 @@ func TestRenderHarmonicField(t *testing.T) {
 
 	pf := PassageFields{
 		&PassageField{
-			Concept:      "breath",
-			Strength:     0.9,
-			Confidence:   "verified",
+			Concept:    "breath",
+			Strength:   0.9,
+			Confidence: "verified",
 		},
 	}
 

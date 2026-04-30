@@ -98,10 +98,10 @@ func BuildHarmonicField(pf PassageFields, kb *knowledge.Knowledge) *HarmonicFiel
 	coherence, consonance, dissonance := calculateHarmonicMetrics(tones)
 
 	return &HarmonicField{
-		Tones:        tones,
-		Coherence:    coherence,
-		Consonance:   consonance,
-		Dissonance:   dissonance,
+		Tones:         tones,
+		Coherence:     coherence,
+		Consonance:    consonance,
+		Dissonance:    dissonance,
 		EvidencePaths: evidencePaths,
 	}
 }

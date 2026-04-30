@@ -26,10 +26,11 @@ func NewEvaluator(engine *decipher.Engine) *Evaluator {
 // Evaluate runs the engine on all examples and returns the evaluation report.
 func (e *Evaluator) Evaluate(examples Examples) *EvaluationResult {
 	result := &EvaluationResult{
-		TotalExamples:    len(examples),
-		ExampleResults:    make([]ExampleResult, 0, len(examples)),
-		AllMissedFields:   make([]string, 0),
-		AllFalseFields:   make([]string, 0),
+		TotalExamples:          len(examples),
+		ExampleResults:         make([]ExampleResult, 0, len(examples)),
+		AllMissedFields:        make([]string, 0),
+		AllFalseFields:         make([]string, 0),
+		MinAcceptablePrecision: 0.4, // 40% precision is minimum acceptable
 	}
 
 	var totalConceptPrecision, totalConceptRecall float64
@@ -75,13 +76,18 @@ func (e *Evaluator) Evaluate(examples Examples) *EvaluationResult {
 	result.QualityAgreements = qualityAgreements
 	result.QualityDisagreements = qualityDisagreements
 
+	// Check for excessive false activations warning
+	if result.AvgFieldPrecision < result.MinAcceptablePrecision {
+		result.FailedExamples++ // Fail the aggregate evaluation if precision is too low
+	}
+
 	return result
 }
 
 // evaluateExample evaluates a single training example.
 func (e *Evaluator) evaluateExample(example Example) ExampleResult {
 	result := ExampleResult{
-		ExampleID:  example.ID,
+		ExampleID: example.ID,
 		Input:     example.Input,
 		Passed:    true, // assume passed until proven otherwise
 	}
@@ -100,7 +106,7 @@ func (e *Evaluator) evaluateExample(example Example) ExampleResult {
 	// Calculate concept metrics
 	result.ConceptHits, result.ConceptMisses, result.ConceptFalsePos =
 		calculateConceptMetrics(example.ExpectedConcepts, activatedConcepts)
-	
+
 	if len(example.ExpectedConcepts) > 0 {
 		result.ConceptRecall = float64(result.ConceptHits) / float64(len(example.ExpectedConcepts))
 	} else {
@@ -147,13 +153,58 @@ func (e *Evaluator) evaluateExample(example Example) ExampleResult {
 	result.EvidencePathsValid = checkEvidencePaths(reading, example.ExpectedFields)
 
 	// Determine if example passed
-	// Must have high recall (found expected items)
-	// Precision is informational but not required for passing in v1
+	// Must have high recall (found expected items) AND acceptable precision (not too many false activations)
+	// Recall-only passing is not acceptable - excessive false activations indicate weak structural noise
+
+	// Recall threshold: must find at least 60% of expected items
 	if result.ConceptRecall < 0.6 && len(example.ExpectedConcepts) > 0 {
 		result.Passed = false
+		result.FailedReason = "low concept recall"
 	}
 	if result.FieldRecall < 0.6 && len(example.ExpectedFields) > 0 {
 		result.Passed = false
+		if result.FailedReason != "" {
+			result.FailedReason += ", low field recall"
+		} else {
+			result.FailedReason = "low field recall"
+		}
+	}
+
+	// Precision threshold: excessive false activations indicate weak structural noise
+	// Precision below 40% means more false positives than true positives - this is not acceptable
+	// unless the example specifically allows for speculative outputs
+	// Only check this if we have activations AND expected items
+	if result.ConceptFalsePos > 0 && len(example.ExpectedConcepts) > 0 {
+		// Calculate precision from actual counts
+		totalActivated := result.ConceptHits + result.ConceptFalsePos
+		if totalActivated > 0 {
+			precision := float64(result.ConceptHits) / float64(totalActivated)
+			if precision < 0.4 && result.ConceptFalsePos > len(example.ExpectedConcepts) {
+				// Too many false positives relative to expected concepts
+				result.Passed = false
+				if result.FailedReason != "" {
+					result.FailedReason += ", excessive false activations"
+				} else {
+					result.FailedReason = "excessive false activations"
+				}
+			}
+		}
+	}
+	if result.FieldFalsePos > 0 && len(example.ExpectedFields) > 0 {
+		// Calculate precision from actual counts
+		totalActivated := result.FieldHits + result.FieldFalsePos
+		if totalActivated > 0 {
+			precision := float64(result.FieldHits) / float64(totalActivated)
+			if precision < 0.4 && result.FieldFalsePos > len(example.ExpectedFields) {
+				// Too many false positives relative to expected fields
+				result.Passed = false
+				if result.FailedReason != "" {
+					result.FailedReason += ", excessive field activations"
+				} else {
+					result.FailedReason = "excessive field activations"
+				}
+			}
+		}
 	}
 
 	return result
@@ -404,19 +455,19 @@ func FormatResult(result *EvaluationResult) string {
 
 // ExampleDetailedResult holds detailed info for formatted output.
 type ExampleDetailedResult struct {
-	ExampleID      string
-	Input          string
-	Passed         bool
-	ConceptHits    int
-	ConceptMisses  int
+	ExampleID       string
+	Input           string
+	Passed          bool
+	ConceptHits     int
+	ConceptMisses   int
 	ConceptFalsePos int
-	ConceptPrec    float64
-	ConceptRec     float64
-	FieldHits      int
-	FieldMisses    int
-	FieldFalsePos  int
-	FieldPrec      float64
-	FieldRec       float64
+	ConceptPrec     float64
+	ConceptRec      float64
+	FieldHits       int
+	FieldMisses     int
+	FieldFalsePos   int
+	FieldPrec       float64
+	FieldRec        float64
 	ExpectedQuality string
 	ActualQuality   string
 	QualityAgreed   bool
@@ -440,7 +491,7 @@ func FormatDetailedResult(result *EvaluationResult, expectedConcepts []string, e
 		}
 
 		s += fmt.Sprintf("[%s] %s: %s\n", status, exID, ex.Input)
-		
+
 		if len(expectedConcepts) > 0 || len(ex.ActivatedConcepts) > 0 {
 			s += fmt.Sprintf("  Concepts: %d hits, %d misses, %d false pos (prec=%.2f, rec=%.2f)\n",
 				ex.ConceptHits, ex.ConceptMisses, ex.ConceptFalsePos,

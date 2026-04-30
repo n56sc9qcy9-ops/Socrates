@@ -239,7 +239,7 @@ type CandidateBounds struct {
 // DefaultCandidateBounds returns sensible defaults for bounded candidate generation.
 func DefaultCandidateBounds() CandidateBounds {
 	return CandidateBounds{
-		MaxCandidates:           50,
+		MaxCandidates:            50,
 		MaxSpeculativeCandidates: 30,
 	}
 }

@@ -16,12 +16,12 @@ func TestValidateFrequencyProfiles_Basic(t *testing.T) {
 		FrequencyProfiles: []FrequencyProfile{
 			{
 				MeaningFrequencyID: "breath-vibration",
-				Concepts:          []string{"breath"},
-				Vector:            []int{1, 2, 1},
-				Ratio:             []int{1, 1},
-				Archetype:         "pythagorean_triple_1",
-				Confidence:        "verified",
-				Weight:            80,
+				Concepts:           []string{"breath"},
+				Vector:             []int{1, 2, 1},
+				Ratio:              []int{1, 1},
+				Archetype:          "pythagorean_triple_1",
+				Confidence:         "verified",
+				Weight:             80,
 			},
 		},
 	}
@@ -238,11 +238,11 @@ func TestValidateFrequencyProfiles_ZeroDenominator(t *testing.T) {
 		FrequencyProfiles: []FrequencyProfile{
 			{
 				MeaningFrequencyID: "breath-vibration",
-				Concepts:          []string{"breath"},
-				Vector:            []int{1, 2, 1},
-				Ratio:             []int{1, 0}, // Zero denominator!
-				Confidence:        "verified",
-				Weight:            80,
+				Concepts:           []string{"breath"},
+				Vector:             []int{1, 2, 1},
+				Ratio:              []int{1, 0}, // Zero denominator!
+				Confidence:         "verified",
+				Weight:             80,
 			},
 		},
 	}
@@ -263,12 +263,12 @@ func TestValidateFrequencyProfiles_InvalidArchetype(t *testing.T) {
 		FrequencyProfiles: []FrequencyProfile{
 			{
 				MeaningFrequencyID: "breath-vibration",
-				Concepts:          []string{"breath"},
-				Vector:            []int{1, 2, 1},
-				Ratio:             []int{1, 1},
-				Archetype:         "unknown_archetype_xyz", // Invalid!
-				Confidence:        "verified",
-				Weight:            80,
+				Concepts:           []string{"breath"},
+				Vector:             []int{1, 2, 1},
+				Ratio:              []int{1, 1},
+				Archetype:          "unknown_archetype_xyz", // Invalid!
+				Confidence:         "verified",
+				Weight:             80,
 			},
 		},
 	}
@@ -300,11 +300,11 @@ func TestValidateFrequencyProfiles_InvalidConfidence(t *testing.T) {
 		FrequencyProfiles: []FrequencyProfile{
 			{
 				MeaningFrequencyID: "breath-vibration",
-				Concepts:          []string{"breath"},
-				Vector:            []int{1, 2, 1},
-				Ratio:             []int{1, 1},
-				Confidence:        "invalid_confidence", // Invalid!
-				Weight:            80,
+				Concepts:           []string{"breath"},
+				Vector:             []int{1, 2, 1},
+				Ratio:              []int{1, 1},
+				Confidence:         "invalid_confidence", // Invalid!
+				Weight:             80,
 			},
 		},
 	}
@@ -324,7 +324,7 @@ func TestValidateFrequencyProfiles_InvalidWeightRange(t *testing.T) {
 		valid  bool
 	}{
 		{"negative", -1, false},
-		{"zero", 0, true},   // Zero is valid (concept exists but has no weight)
+		{"zero", 0, true}, // Zero is valid (concept exists but has no weight)
 		{"below 100", 50, true},
 		{"at 100", 100, true},
 		{"above 100", 101, false},
@@ -581,13 +581,13 @@ func TestValidateFrequencyProfiles_MultipleErrors(t *testing.T) {
 		},
 		FrequencyProfiles: []FrequencyProfile{
 			{
-				MeaningFrequencyID: "", // Error 1: empty ID - validation stops here due to continue
-				Concepts:            []string{}, // Error 2: empty concepts
-				Vector:              []int{1}, // Error 3: wrong vector size
-				Ratio:               []int{1, 0}, // Error 4: zero denom
-				Archetype:           "invalid", // Error 5: unknown archetype
-				Confidence:          "bad", // Error 6: invalid confidence
-				Weight:              999, // Error 7: out of range
+				MeaningFrequencyID: "",          // Error 1: empty ID - validation stops here due to continue
+				Concepts:           []string{},  // Error 2: empty concepts
+				Vector:             []int{1},    // Error 3: wrong vector size
+				Ratio:              []int{1, 0}, // Error 4: zero denom
+				Archetype:          "invalid",   // Error 5: unknown archetype
+				Confidence:         "bad",       // Error 6: invalid confidence
+				Weight:             999,         // Error 7: out of range
 			},
 		},
 	}

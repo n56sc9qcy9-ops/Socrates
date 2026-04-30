@@ -184,7 +184,7 @@ func GenerateCandidateForms(input string, bounds ...CandidateBounds) ([]Candidat
 
 		// Track discarded edit variants
 		discarded += totalDeletions - min2(maxDeletions, totalDeletions)
-		discarded += totalInsertions // All insertions discarded for long inputs
+		discarded += totalInsertions    // All insertions discarded for long inputs
 		discarded += totalSubstitutions // All substitutions discarded for long inputs
 	}
 
@@ -212,7 +212,7 @@ func GenerateCandidateForms(input string, bounds ...CandidateBounds) ([]Candidat
 	// Only generate bigrams for bounded inputs
 	for i := 0; i < len(normalized)-1 && count < maxNgrams; i++ {
 		addCandidate(&candidates, seenForms, CandidateForm{
-			Form:       normalized[i:i+2],
+			Form:       normalized[i : i+2],
 			Method:     "bigram",
 			Distance:   0.5,
 			Confidence: "plausible",

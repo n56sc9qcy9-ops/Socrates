@@ -66,10 +66,10 @@ func main() {
 	case "decipher", "descifer":
 		// Parse flags from command line (after the subcommand)
 		decipherCmd.Parse(os.Args[2:])
-		
+
 		// Get positional args (non-flag arguments)
 		args := decipherCmd.Args()
-		
+
 		var input string
 		if len(args) >= 1 {
 			input = args[0]
@@ -109,8 +109,12 @@ func main() {
 
 	case "knowledge":
 		knowledgeCmd.Parse(os.Args[2:])
-		
-		if *validateCmd {
+
+		// Check for positional subcommand
+		args := knowledgeCmd.Args()
+		if len(args) > 0 && args[0] == "validate" {
+			runKnowledgeValidate(*validateDir)
+		} else if *validateCmd {
 			runKnowledgeValidate(*validateDir)
 		} else {
 			fmt.Println("Knowledge management commands:")
@@ -127,7 +131,7 @@ func main() {
 
 	case "train":
 		trainCmd.Parse(os.Args[2:])
-		
+
 		// Run evaluation (train always evaluates)
 		runTrainEvaluate(*trainExamplesPath, *trainDebugCmd)
 
@@ -158,7 +162,7 @@ func runKnowledgeValidate(dir string) {
 			fmt.Fprintf(os.Stderr, "Error: invalid directory path: %v\n", err)
 			os.Exit(1)
 		}
-		
+
 		kb, err = knowledge.LoadFromDir(absDir)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error loading knowledge from %s: %v\n", absDir, err)
@@ -180,7 +184,7 @@ func runKnowledgeValidate(dir string) {
 
 	// Print results
 	fmt.Println()
-	
+
 	if len(result.Errors) == 0 && len(result.Warnings) == 0 {
 		fmt.Println("✓ Knowledge is valid (no errors or warnings)")
 		os.Exit(0)
@@ -231,7 +235,7 @@ func runTrainEvaluate(examplesPath string, debugMode bool) {
 			fmt.Fprintf(os.Stderr, "Error: invalid examples path: %v\n", err)
 			os.Exit(1)
 		}
-		
+
 		examples, err = loader.LoadFromFile(absPath)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error loading training examples from %s: %v\n", absPath, err)
@@ -241,13 +245,13 @@ func runTrainEvaluate(examplesPath string, debugMode bool) {
 	} else {
 		// Load from default training/examples.yaml
 		defaultPath := "training/examples.yaml"
-		
+
 		if _, err := os.Stat(defaultPath); os.IsNotExist(err) {
 			fmt.Fprintf(os.Stderr, "Error: no examples file specified and %s not found\n", defaultPath)
 			fmt.Println("Use --examples <path> to specify a training examples file")
 			os.Exit(1)
 		}
-		
+
 		examples, err = loader.LoadFromFile(defaultPath)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error loading default training examples: %v\n", err)
@@ -259,7 +263,7 @@ func runTrainEvaluate(examplesPath string, debugMode bool) {
 	// Validate examples against knowledge
 	fmt.Println("\nValidating examples against knowledge base...")
 	validationResult := training.ValidateExamples(examples, kb)
-	
+
 	if !validationResult.IsValid() {
 		fmt.Printf("✗ Found %d validation error(s):\n", len(validationResult.Errors))
 		for _, e := range validationResult.Errors {

@@ -16,7 +16,7 @@ func CalculateScoreComponents(
 	matches []MatchEvidence,
 	expansions map[string][]knowledge.DecipherConceptRelation,
 	convergence ConvergenceResult,
-	channelCount int,
+	channels []ChannelResult,
 ) ScoreComponents {
 	components := ScoreComponents{}
 
@@ -79,14 +79,46 @@ func CalculateScoreComponents(
 		components.MultiMethodBonus = 0.1
 	}
 
-	// Channel diversity bonus
-	if channelCount >= 4 {
+	// Channel diversity bonus - only count channels with ACTIVE meaningful signals
+	activeChannelCount := countActiveChannels(channels)
+	if activeChannelCount >= 4 {
 		components.ChannelDiversityBonus = 0.2
-	} else if channelCount >= 3 {
+	} else if activeChannelCount >= 3 {
 		components.ChannelDiversityBonus = 0.1
 	}
 
 	return components
+}
+
+// countActiveChannels counts only channels with meaningful signals.
+// A channel is active only if it has at least one signal with a non-empty target
+// or non-trivial evidence (not just "no match" or structural observations).
+func countActiveChannels(channels []ChannelResult) int {
+	activeCount := 0
+	for _, ch := range channels {
+		if len(ch.Signals) == 0 {
+			// Empty channel - not active
+			continue
+		}
+		// Check if channel has meaningful signals
+		hasMeaningful := false
+		for _, sig := range ch.Signals {
+			// Skip no-match signals and purely structural observations
+			if sig.Target == "" || sig.Target == "no-match" || sig.Target == "phonetic-observation" {
+				continue
+			}
+			// Skip orthographic-only signals with low weight
+			if sig.Lens == "orthographic" && sig.Weight < 0.3 {
+				continue
+			}
+			hasMeaningful = true
+			break
+		}
+		if hasMeaningful {
+			activeCount++
+		}
+	}
+	return activeCount
 }
 
 // deduplicateMatchEvidence removes duplicate MatchEvidence entries by EvidenceID.

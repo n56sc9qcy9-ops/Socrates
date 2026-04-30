@@ -18,14 +18,14 @@ type examplesDoc struct {
 }
 
 type ExampleEntry struct {
-	ID              string   `yaml:"id"`
-	Input           string   `yaml:"input"`
+	ID               string   `yaml:"id"`
+	Input            string   `yaml:"input"`
 	ExpectedConcepts []string `yaml:"expected_concepts"`
-	ExpectedFields  []string `yaml:"expected_fields"`
-	ExpectedQuality string   `yaml:"expected_quality"`
-	Confidence      string   `yaml:"confidence"`
-	Source          string   `yaml:"source"`
-	Notes           string   `yaml:"notes"`
+	ExpectedFields   []string `yaml:"expected_fields"`
+	ExpectedQuality  string   `yaml:"expected_quality"`
+	Confidence       string   `yaml:"confidence"`
+	Source           string   `yaml:"source"`
+	Notes            string   `yaml:"notes"`
 }
 
 // ToExample converts a YAML entry to internal Example type.

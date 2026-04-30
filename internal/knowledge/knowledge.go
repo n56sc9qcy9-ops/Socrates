@@ -55,35 +55,35 @@ type IntFrequencyLabels struct {
 // This is the main data structure returned by the loader.
 type Knowledge struct {
 	// Raw data
-	Concepts   []Concept
-	Forms      []Form
-	ScriptWords []ScriptWord
-	Relations  []Relation
-	GlyphPatterns []GlyphPattern
+	Concepts          []Concept
+	Forms             []Form
+	ScriptWords       []ScriptWord
+	Relations         []Relation
+	GlyphPatterns     []GlyphPattern
 	FrequencyProfiles []FrequencyProfile
 
 	// Indexes for fast lookup
-	formByText   map[string][]Form
-	formsByConcept map[string][]Form
-	scriptWordsByScript map[string][]ScriptWord
-	conceptsByID map[string]Concept
-	conceptByName map[string]Concept
-	aliasesToConcept map[string]Concept
-	relationsFrom map[string][]Relation
-	relationsTo map[string][]Relation
-	glyphPatternsByScript map[string][]GlyphPattern
-	glyphPatternsByRune map[uint32][]GlyphPattern
+	formByText                 map[string][]Form
+	formsByConcept             map[string][]Form
+	scriptWordsByScript        map[string][]ScriptWord
+	conceptsByID               map[string]Concept
+	conceptByName              map[string]Concept
+	aliasesToConcept           map[string]Concept
+	relationsFrom              map[string][]Relation
+	relationsTo                map[string][]Relation
+	glyphPatternsByScript      map[string][]GlyphPattern
+	glyphPatternsByRune        map[uint32][]GlyphPattern
 	frequencyProfilesByConcept map[string][]FrequencyProfile
-	frequencyProfilesByID map[string]FrequencyProfile
+	frequencyProfilesByID      map[string]FrequencyProfile
 }
 
 // NewKnowledgeBuilder builds a Knowledge struct incrementally.
 type KnowledgeBuilder struct {
-	concepts      []Concept
-	forms         []Form
-	scriptWords   []ScriptWord
-	relations     []Relation
-	glyphPatterns []GlyphPattern
+	concepts          []Concept
+	forms             []Form
+	scriptWords       []ScriptWord
+	relations         []Relation
+	glyphPatterns     []GlyphPattern
 	frequencyProfiles []FrequencyProfile
 }
 
@@ -120,11 +120,11 @@ func (b *KnowledgeBuilder) AddFrequencyProfile(fp FrequencyProfile) {
 // NewKnowledgeBuilder creates a new builder.
 func NewKnowledgeBuilder() *KnowledgeBuilder {
 	return &KnowledgeBuilder{
-		concepts:   make([]Concept, 0),
-		forms:      make([]Form, 0),
-		scriptWords: make([]ScriptWord, 0),
-		relations:  make([]Relation, 0),
-		glyphPatterns: make([]GlyphPattern, 0),
+		concepts:          make([]Concept, 0),
+		forms:             make([]Form, 0),
+		scriptWords:       make([]ScriptWord, 0),
+		relations:         make([]Relation, 0),
+		glyphPatterns:     make([]GlyphPattern, 0),
 		frequencyProfiles: make([]FrequencyProfile, 0),
 	}
 }
@@ -132,26 +132,26 @@ func NewKnowledgeBuilder() *KnowledgeBuilder {
 // Build constructs the final Knowledge struct with indexes.
 func (b *KnowledgeBuilder) Build() *Knowledge {
 	kb := &Knowledge{
-		Concepts:   b.concepts,
-		Forms:      b.forms,
-		ScriptWords: b.scriptWords,
-		Relations:  b.relations,
-		GlyphPatterns: b.glyphPatterns,
+		Concepts:          b.concepts,
+		Forms:             b.forms,
+		ScriptWords:       b.scriptWords,
+		Relations:         b.relations,
+		GlyphPatterns:     b.glyphPatterns,
 		FrequencyProfiles: b.frequencyProfiles,
 
 		// Initialize maps
-		formByText:    make(map[string][]Form),
-		formsByConcept: make(map[string][]Form),
-		scriptWordsByScript: make(map[string][]ScriptWord),
-		conceptsByID:  make(map[string]Concept),
-		conceptByName: make(map[string]Concept),
-		aliasesToConcept: make(map[string]Concept),
-		relationsFrom: make(map[string][]Relation),
-		relationsTo:   make(map[string][]Relation),
-		glyphPatternsByScript: make(map[string][]GlyphPattern),
-		glyphPatternsByRune: make(map[uint32][]GlyphPattern),
+		formByText:                 make(map[string][]Form),
+		formsByConcept:             make(map[string][]Form),
+		scriptWordsByScript:        make(map[string][]ScriptWord),
+		conceptsByID:               make(map[string]Concept),
+		conceptByName:              make(map[string]Concept),
+		aliasesToConcept:           make(map[string]Concept),
+		relationsFrom:              make(map[string][]Relation),
+		relationsTo:                make(map[string][]Relation),
+		glyphPatternsByScript:      make(map[string][]GlyphPattern),
+		glyphPatternsByRune:        make(map[uint32][]GlyphPattern),
 		frequencyProfilesByConcept: make(map[string][]FrequencyProfile),
-		frequencyProfilesByID: make(map[string]FrequencyProfile),
+		frequencyProfilesByID:      make(map[string]FrequencyProfile),
 	}
 
 	// Index concepts
@@ -213,21 +213,21 @@ type Concept struct {
 
 // Form represents a form-to-concept mapping (fragment).
 type Form struct {
-	Form      string
-	Concept   string
-	Lens      string
+	Form       string
+	Concept    string
+	Lens       string
 	Confidence string
-	Weight    float64
+	Weight     float64
 }
 
 // ScriptWord represents a complete word in a specific script.
 type ScriptWord struct {
-	Script    string
-	Word      string
-	Runes     []uint32
-	Meanings  []string
+	Script     string
+	Word       string
+	Runes      []uint32
+	Meanings   []string
 	Confidence string
-	Weight    float64
+	Weight     float64
 }
 
 // Relation represents a directed relation between concepts.
@@ -356,10 +356,10 @@ func (k *Knowledge) GetAllFormsAsAnchors() []AnchorConcept {
 		if !seen[key] {
 			seen[key] = true
 			anchors = append(anchors, AnchorConcept{
-				Form:      f.Form,
-				Concept:   f.Concept,
+				Form:       f.Form,
+				Concept:    f.Concept,
 				Confidence: f.Confidence,
-				Weight:    f.Weight,
+				Weight:     f.Weight,
 			})
 		}
 	}
@@ -384,10 +384,10 @@ func (k *Knowledge) ExpandConceptFromRelation(conceptID string) []Relation {
 
 // AnchorConcept represents a form-to-concept mapping for anchor lookups.
 type AnchorConcept struct {
-	Form      string
-	Concept   string
+	Form       string
+	Concept    string
 	Confidence string
-	Weight    float64
+	Weight     float64
 }
 
 // DecipherConceptRelation is the relation type exposed to the decipher package.

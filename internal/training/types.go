@@ -48,9 +48,10 @@ type Examples []Example
 
 // ExampleResult is the evaluation result for a single example.
 type ExampleResult struct {
-	ExampleID      string
-	Input          string
-	Passed         bool
+	ExampleID    string
+	Input        string
+	Passed       bool
+	FailedReason string // Why the example failed, if any
 
 	// Concept metrics
 	ConceptPrecision float64
@@ -67,29 +68,33 @@ type ExampleResult struct {
 	FieldFalsePos  int
 
 	// Quality agreement
-	QualityAgreed     bool
-	ExpectedQuality   string
-	ActualQuality     string
+	QualityAgreed   bool
+	ExpectedQuality string
+	ActualQuality   string
 
 	// Details for debugging
-	ActivatedConcepts   []string
-	ActivatedFields    []string
+	ActivatedConcepts    []string
+	ActivatedFields      []string
 	MissedExpectedFields []string
 	FalseActivatedFields []string
-	EvidencePathsValid  bool // matched fields have evidence paths
+	EvidencePathsValid   bool // matched fields have evidence paths
 }
 
 // EvaluationResult is the complete evaluation report.
 type EvaluationResult struct {
-	TotalExamples     int
-	PassedExamples    int
-	FailedExamples    int
+	TotalExamples  int
+	PassedExamples int
+	FailedExamples int
 
 	// Aggregate metrics
 	AvgConceptPrecision float64
 	AvgConceptRecall    float64
 	AvgFieldPrecision   float64
 	AvgFieldRecall      float64
+
+	// Precision warning threshold
+	// If AvgFieldPrecision < MinAcceptablePrecision, the evaluation has excessive false activations
+	MinAcceptablePrecision float64
 
 	// Quality agreement
 	QualityAgreements    int
@@ -99,8 +104,8 @@ type EvaluationResult struct {
 	ExampleResults []ExampleResult
 
 	// Summary of missed and false activations
-	AllMissedFields    []string
-	AllFalseFields     []string
+	AllMissedFields []string
+	AllFalseFields  []string
 }
 
 // Metrics returns a human-readable summary of evaluation metrics.

@@ -152,3 +152,13 @@ Acceptance Criteria:
 ## Next After This
 
 After this quality gate is clean, return to configurable ranking weights and a small held-out evaluation split. Only after that should Socrates add counsellor/transmutation fields.
+
+## Nice To Have Later
+
+- CLI ergonomics:
+  - Let root text default to decipher, e.g. `socrates what is the purpose of my life?`.
+  - Join multi-argument root input into one passage so quotes are optional for ordinary questions.
+  - Keep `socrates decipher <text>` as the explicit form.
+  - Make root help show subcommand flags clearly, including debug/training flags.
+  - Consider hiding or eventually removing the typo alias `descifer` after compatibility is no longer useful.
+  - Keep `socrates knowledge validate` working exactly as documented.

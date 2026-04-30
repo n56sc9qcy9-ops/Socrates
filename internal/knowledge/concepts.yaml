@@ -4,32 +4,32 @@
 concepts:
   - id: one
     name: one
-    aliases: [one, unity, single, first, alone]
+    aliases: [one, unity, single, first, alone, whole, echad]
     neighbors: [being, source]
     
   - id: being
     name: being
-    aliases: [being, existence, essence, self]
+    aliases: [being, existence, essence, self, person, human, ren]
     neighbors: [life, truth]
     
   - id: life
     name: life
-    aliases: [life, living, vitality, force]
+    aliases: [life, living, vitality, force, life-force]
     neighbors: [breath, spirit, creation]
     
   - id: breath
     name: breath
-    aliases: [breath, wind, air, spirit, prana, ruach, qi]
+    aliases: [breath, wind, air, spirit, prana, ruach, qi, chi]
     neighbors: [life, spirit, sound]
     
   - id: spirit
     name: spirit
-    aliases: [spirit, soul, essence, wind]
+    aliases: [spirit, soul, essence, wind, atman, pneuma, psyche]
     neighbors: [breath, life, mind]
     
   - id: word
     name: word
-    aliases: [word, speech, logos, utterance, dabar]
+    aliases: [word, speech, logos, utterance, dabar, thing, mantra, sacred-utterance, sacred-sound]
     neighbors: [truth, name, sound]
     
   - id: name
@@ -49,7 +49,7 @@ concepts:
     
   - id: love
     name: love
-    aliases: [love, affection, ahavah]
+    aliases: [love, affection, ahavah, ahava, agape, bliss, ananda]
     neighbors: [heart, truth]
     
   - id: give
@@ -59,12 +59,12 @@ concepts:
     
   - id: path
     name: path
-    aliases: [path, way, road, dao]
+    aliases: [path, way, road, dao, vei]
     neighbors: [word, source]
     
   - id: heart
     name: heart
-    aliases: [heart, center, core, lev]
+    aliases: [heart, center, core, lev, xin]
     neighbors: [love, mind, life]
     
   - id: mind
@@ -79,7 +79,7 @@ concepts:
     
   - id: fire
     name: fire
-    aliases: [fire, flame, agni]
+    aliases: [fire, flame, agni, transformation]
     neighbors: [light, truth, source]
     
   - id: water
@@ -99,10 +99,10 @@ concepts:
     
   - id: source
     name: source
-    aliases: [source, origin, beginning, genesis]
+    aliases: [source, origin, beginning, genesis, god, power, divine, totality]
     neighbors: [one, light, truth]
     
   - id: creation
     name: creation
-    aliases: [creation, making, birth]
+    aliases: [creation, making, birth, sheng]
     neighbors: [life, source, word]

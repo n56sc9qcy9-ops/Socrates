@@ -10,7 +10,7 @@ type PassageField struct {
 	Concept       string
 	Strength      float64
 	Confidence    string
-	Depth         int             // 0 = direct, 1+ = graph-expanded
+	Depth         int            // 0 = direct, 1+ = graph-expanded
 	TokenSources  []string       // Original tokens that activated this field
 	EvidencePaths []EvidencePath // Evidence paths explaining this field
 	RelationPaths []string       // Relation paths through the activation graph

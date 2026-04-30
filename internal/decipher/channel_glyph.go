@@ -151,11 +151,11 @@ func analyzeLatinGlyphs(s string, kb *knowledge.Knowledge) []Signal {
 			consCount++
 		}
 	}
-	
+
 	// Only emit structural signals if curated data explicitly maps them
 	if consCount > 0 {
 		ratio := float64(vowelCount) / float64(consCount)
-		
+
 		// Look for explicit vowel_structure patterns in knowledge base
 		for _, p := range patterns {
 			if p.Lens == "vowel-structure" || p.Lens == "glyph-structure" {

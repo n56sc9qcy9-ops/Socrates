@@ -948,7 +948,7 @@ func TestDuplicateMatchEvidenceDoesNotInflateScore(t *testing.T) {
 	}
 
 	// Verify score calculation uses deduplicated matches
-	components := CalculateScoreComponents(nil, deduped, nil, ConvergenceResult{}, 1)
+	components := CalculateScoreComponents(nil, deduped, nil, ConvergenceResult{}, []ChannelResult{})
 	// With 1 exact match at weight 0.5, exact match score = 0.5
 	if components.ExactMatchScore != 0.5 {
 		t.Errorf("expected ExactMatchScore 0.5, got %f", components.ExactMatchScore)
@@ -1002,8 +1002,8 @@ func TestExactVerifiedEvidenceOutranksRepeatedSpeculativeEvidence(t *testing.T) 
 
 	dedupedSpeculative := deduplicateMatchEvidence(repeatedSpeculative)
 
-	exactComponents := CalculateScoreComponents(nil, exactVerified, nil, ConvergenceResult{}, 1)
-	speculativeComponents := CalculateScoreComponents(nil, dedupedSpeculative, nil, ConvergenceResult{}, 1)
+	exactComponents := CalculateScoreComponents(nil, exactVerified, nil, ConvergenceResult{}, []ChannelResult{})
+	speculativeComponents := CalculateScoreComponents(nil, dedupedSpeculative, nil, ConvergenceResult{}, []ChannelResult{})
 
 	// Exact match score should be higher than fuzzy match score
 	if speculativeComponents.FuzzyMatchScore >= exactComponents.ExactMatchScore {
@@ -1016,8 +1016,8 @@ func TestDeduplicateSignalsFunction(t *testing.T) {
 	// Test the DeduplicateSignals utility function
 	signals := []Signal{
 		{Text: "skal", Target: "truth", Channel: "glyph", Confidence: "verified", Weight: 0.5},
-		{Text: "skal", Target: "truth", Channel: "glyph", Confidence: "verified", Weight: 0.5}, // duplicate
-		{Text: "skal", Target: "truth", Channel: "glyph", Confidence: "verified", Weight: 0.5}, // duplicate
+		{Text: "skal", Target: "truth", Channel: "glyph", Confidence: "verified", Weight: 0.5},  // duplicate
+		{Text: "skal", Target: "truth", Channel: "glyph", Confidence: "verified", Weight: 0.5},  // duplicate
 		{Text: "skal", Target: "truth", Channel: "sound", Confidence: "plausible", Weight: 0.4}, // different channel - independent evidence
 	}
 
@@ -1038,8 +1038,8 @@ func TestDeduplicatePassageSignalsFunction(t *testing.T) {
 	// Test the DeduplicatePassageSignals utility function
 	signals := []PassageSignal{
 		{Token: "in", Concept: "truth", MatchForm: "skal", Weight: 0.5},
-		{Token: "in", Concept: "truth", MatchForm: "skal", Weight: 0.5}, // duplicate
-		{Token: "in", Concept: "truth", MatchForm: "skal", Weight: 0.5}, // duplicate
+		{Token: "in", Concept: "truth", MatchForm: "skal", Weight: 0.5},     // duplicate
+		{Token: "in", Concept: "truth", MatchForm: "skal", Weight: 0.5},     // duplicate
 		{Token: "spirit", Concept: "truth", MatchForm: "skal", Weight: 0.4}, // different token - independent evidence
 	}
 

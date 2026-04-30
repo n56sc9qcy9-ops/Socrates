@@ -301,7 +301,7 @@ func renderDebug(r Reading) string {
 			// Show evidence paths
 			for _, ev := range field.EvidencePaths {
 				sb.WriteString(fmt.Sprintf("    - evidence: %s [%s, %.2f]\n",
-						ev.SourceToken, ev.SourceType, ev.Weight))
+					ev.SourceToken, ev.SourceType, ev.Weight))
 			}
 			// Show relation paths
 			for _, path := range field.RelationPaths {

@@ -356,19 +356,19 @@ func TestEvaluator_SimpleResult(t *testing.T) {
 
 func TestEvaluationResult_Metrics(t *testing.T) {
 	result := &EvaluationResult{
-		TotalExamples:     5,
-		PassedExamples:   4,
-		FailedExamples:   1,
-		AvgConceptPrecision: 0.75,
-		AvgConceptRecall: 0.80,
-		AvgFieldPrecision: 0.60,
-		AvgFieldRecall:   0.90,
-		QualityAgreements: 3,
+		TotalExamples:        5,
+		PassedExamples:       4,
+		FailedExamples:       1,
+		AvgConceptPrecision:  0.75,
+		AvgConceptRecall:     0.80,
+		AvgFieldPrecision:    0.60,
+		AvgFieldRecall:       0.90,
+		QualityAgreements:    3,
 		QualityDisagreements: 1,
 	}
 
 	metrics := result.Metrics()
-	
+
 	// Check that metrics string contains expected values
 	if len(metrics) == 0 {
 		t.Error("expected non-empty metrics string")
@@ -377,14 +377,14 @@ func TestEvaluationResult_Metrics(t *testing.T) {
 
 func TestFormatResult(t *testing.T) {
 	result := &EvaluationResult{
-		TotalExamples:     3,
-		PassedExamples:   2,
-		FailedExamples:   1,
-		AvgConceptPrecision: 0.50,
-		AvgConceptRecall: 0.75,
-		AvgFieldPrecision: 0.40,
-		AvgFieldRecall:   0.80,
-		QualityAgreements: 2,
+		TotalExamples:        3,
+		PassedExamples:       2,
+		FailedExamples:       1,
+		AvgConceptPrecision:  0.50,
+		AvgConceptRecall:     0.75,
+		AvgFieldPrecision:    0.40,
+		AvgFieldRecall:       0.80,
+		QualityAgreements:    2,
 		QualityDisagreements: 0,
 		ExampleResults: []ExampleResult{
 			{

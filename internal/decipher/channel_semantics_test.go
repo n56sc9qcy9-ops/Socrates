@@ -1,9 +1,9 @@
 package decipher
 
 import (
+	"socrates/internal/knowledge"
 	"strings"
 	"testing"
-	"socrates/internal/knowledge"
 )
 
 // TestSpiritNoRepeatedLetterRepetition verifies that "spirit" does not show
@@ -13,10 +13,10 @@ func TestSpiritNoRepeatedLetterRepetition(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error: %v", err)
 	}
-	
+
 	engine := NewEngineWithKnowledge(kb)
 	reading := engine.Analyze("spirit")
-	
+
 	// Find any Glyph channel signals
 	for _, ch := range reading.Channels {
 		if ch.Name == "Glyph" {
@@ -36,11 +36,11 @@ func TestLatinOrthographicRepetitionNotLabeledAsGlyph(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error: %v", err)
 	}
-	
+
 	// Test words with repeated letters
 	words := []string{"balloon", "book", "coffee"}
 	engine := NewEngineWithKnowledge(kb)
-	
+
 	for _, word := range words {
 		reading := engine.Analyze(word)
 		for _, ch := range reading.Channels {
@@ -66,10 +66,10 @@ func TestHebrewAhavaActivatesLove(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error: %v", err)
 	}
-	
+
 	engine := NewEngineWithKnowledge(kb)
 	reading := engine.Analyze("ahava")
-	
+
 	// Check that love is activated via Fragment channel
 	foundLove := false
 	for _, ch := range reading.Channels {
@@ -81,7 +81,7 @@ func TestHebrewAhavaActivatesLove(t *testing.T) {
 			}
 		}
 	}
-	
+
 	if !foundLove {
 		t.Error("ahava should activate love via Fragment channel with Hebrew lens")
 	}
@@ -94,10 +94,10 @@ func TestChineseTraditionalLoveActivatesLove(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error: %v", err)
 	}
-	
+
 	engine := NewEngineWithKnowledge(kb)
 	reading := engine.Analyze("愛")
-	
+
 	// Check that love is activated
 	foundLove := false
 	for _, ch := range reading.Channels {
@@ -109,7 +109,7 @@ func TestChineseTraditionalLoveActivatesLove(t *testing.T) {
 			}
 		}
 	}
-	
+
 	if !foundLove {
 		t.Error("愛 should activate love via Fragment or ScriptWord channel with Han lens")
 	}
@@ -122,10 +122,10 @@ func TestChineseSimplifiedLoveActivatesLove(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error: %v", err)
 	}
-	
+
 	engine := NewEngineWithKnowledge(kb)
 	reading := engine.Analyze("爱")
-	
+
 	// Check that love is activated
 	foundLove := false
 	for _, ch := range reading.Channels {
@@ -137,7 +137,7 @@ func TestChineseSimplifiedLoveActivatesLove(t *testing.T) {
 			}
 		}
 	}
-	
+
 	if !foundLove {
 		t.Error("爱 should activate love via Fragment or ScriptWord channel with Han lens")
 	}
@@ -151,10 +151,10 @@ func TestLoveConvergence(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error: %v", err)
 	}
-	
+
 	engine := NewEngineWithKnowledge(kb)
 	words := []string{"love", "kjærlighet", "ahava", "ahavah", "愛", "爱"}
-	
+
 	var loveFields []string
 	for _, word := range words {
 		reading := engine.Analyze(word)
@@ -166,7 +166,7 @@ func TestLoveConvergence(t *testing.T) {
 			}
 		}
 	}
-	
+
 	// All words should activate the love field
 	if len(loveFields) < len(words) {
 		t.Errorf("Expected all words to activate love, but only %d did: %v", len(loveFields), loveFields)
@@ -180,10 +180,10 @@ func TestHebrewElDivine(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error: %v", err)
 	}
-	
+
 	engine := NewEngineWithKnowledge(kb)
 	reading := engine.Analyze("אל")
-	
+
 	// Check that god/power/divine is activated via ScriptWord channel
 	foundDivine := false
 	for _, ch := range reading.Channels {
@@ -195,7 +195,7 @@ func TestHebrewElDivine(t *testing.T) {
 			}
 		}
 	}
-	
+
 	if !foundDivine {
 		t.Error("אל should activate divine meaning via ScriptWord channel")
 	}
@@ -209,13 +209,13 @@ func TestEnglishElSubstringNotAutomaticDivine(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error: %v", err)
 	}
-	
+
 	engine := NewEngineWithKnowledge(kb)
 	words := []string{"electricity", "electromagnetism", "television", "element"}
-	
+
 	for _, word := range words {
 		reading := engine.Analyze(word)
-		
+
 		// Check that divine-related concepts are NOT in top concepts
 		for _, ac := range reading.Convergence.TopConcepts {
 			if ac.Concept == "god" || ac.Concept == "divine" {
@@ -231,7 +231,7 @@ func TestHebrewAhavaInForms(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error: %v", err)
 	}
-	
+
 	forms := kb.GetFormsByText("ahava")
 	found := false
 	for _, f := range forms {
@@ -239,7 +239,7 @@ func TestHebrewAhavaInForms(t *testing.T) {
 			found = true
 		}
 	}
-	
+
 	if !found {
 		t.Error("ahava should be in knowledge base as Hebrew love form")
 	}
@@ -251,7 +251,7 @@ func TestChineseLoveInForms(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error: %v", err)
 	}
-	
+
 	// Check traditional
 	forms := kb.GetFormsByText("愛")
 	foundTraditional := false
@@ -260,7 +260,7 @@ func TestChineseLoveInForms(t *testing.T) {
 			foundTraditional = true
 		}
 	}
-	
+
 	// Check simplified
 	forms = kb.GetFormsByText("爱")
 	foundSimplified := false
@@ -269,7 +269,7 @@ func TestChineseLoveInForms(t *testing.T) {
 			foundSimplified = true
 		}
 	}
-	
+
 	if !foundTraditional {
 		t.Error("愛 should be in knowledge base as Han love form")
 	}
@@ -286,11 +286,11 @@ func TestRemovingCuratedDataRemovesConvergence(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error: %v", err)
 	}
-	
+
 	// Test a word that is NOT in curated data
 	engine := NewEngineWithKnowledge(kb)
 	reading := engine.Analyze("lovingly")
-	
+
 	// "lovingly" should NOT have "love" as a direct fragment match
 	hasDirectLove := false
 	for _, ch := range reading.Channels {
@@ -302,7 +302,7 @@ func TestRemovingCuratedDataRemovesConvergence(t *testing.T) {
 			}
 		}
 	}
-	
+
 	if hasDirectLove {
 		t.Error("lovingly should NOT have exact whole-token love match without curated data")
 	}

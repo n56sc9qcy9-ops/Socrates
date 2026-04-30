@@ -10,18 +10,18 @@ import (
 
 // Loader handles loading knowledge data from YAML files.
 type Loader struct {
-	embedFS embed.FS
+	embedFS  embed.FS
 	useEmbed bool
-	baseDir string
+	baseDir  string
 }
 
 // NewLoader creates a new knowledge loader.
 // If useEmbed is true, loads from embedded data; otherwise loads from baseDir.
 func NewLoader(embedFS embed.FS, baseDir string, useEmbed bool) *Loader {
 	return &Loader{
-		embedFS: embedFS,
+		embedFS:  embedFS,
 		useEmbed: useEmbed,
-		baseDir: baseDir,
+		baseDir:  baseDir,
 	}
 }
 
@@ -309,43 +309,43 @@ type formsDoc struct {
 
 // FragmentEntry represents a fragment entry in YAML.
 type FragmentEntry struct {
-	Form       string `yaml:"form"`
-	Concept    string `yaml:"concept"`
-	Lens       string `yaml:"lens"`
-	Confidence string `yaml:"confidence"`
+	Form       string  `yaml:"form"`
+	Concept    string  `yaml:"concept"`
+	Lens       string  `yaml:"lens"`
+	Confidence string  `yaml:"confidence"`
 	Weight     float64 `yaml:"weight"`
 }
 
 // ToFragment converts to internal Form type.
 func (f FragmentEntry) ToFragment() Form {
 	return Form{
-		Form:      f.Form,
-		Concept:   f.Concept,
-		Lens:      f.Lens,
+		Form:       f.Form,
+		Concept:    f.Concept,
+		Lens:       f.Lens,
 		Confidence: f.Confidence,
-		Weight:    f.Weight,
+		Weight:     f.Weight,
 	}
 }
 
 // ScriptWordEntry represents a script word entry in YAML.
 type ScriptWordEntry struct {
-	Script    string   `yaml:"script"`
-	Word      string   `yaml:"word"`
-	Runes     []uint32 `yaml:"runes"`
-	Meanings  []string `yaml:"meanings"`
-	Confidence string  `yaml:"confidence"`
-	Weight    float64  `yaml:"weight"`
+	Script     string   `yaml:"script"`
+	Word       string   `yaml:"word"`
+	Runes      []uint32 `yaml:"runes"`
+	Meanings   []string `yaml:"meanings"`
+	Confidence string   `yaml:"confidence"`
+	Weight     float64  `yaml:"weight"`
 }
 
 // ToScriptWord converts to internal ScriptWord type.
 func (s ScriptWordEntry) ToScriptWord() ScriptWord {
 	return ScriptWord{
-		Script:    s.Script,
-		Word:      s.Word,
-		Runes:     s.Runes,
-		Meanings:  s.Meanings,
+		Script:     s.Script,
+		Word:       s.Word,
+		Runes:      s.Runes,
+		Meanings:   s.Meanings,
 		Confidence: s.Confidence,
-		Weight:    s.Weight,
+		Weight:     s.Weight,
 	}
 }
 
@@ -381,10 +381,10 @@ type glyphsDoc struct {
 }
 
 type LatinGlyphs struct {
-	Bigrams        []LatinBigramEntry   `yaml:"bigrams"`
-	Prefixes       []LatinPrefixEntry   `yaml:"prefixes"`
-	Suffixes       []LatinSuffixEntry   `yaml:"suffixes"`
-	VowelStructure VowelStructureEntry  `yaml:"vowel_structure"`
+	Bigrams         []LatinBigramEntry   `yaml:"bigrams"`
+	Prefixes        []LatinPrefixEntry   `yaml:"prefixes"`
+	Suffixes        []LatinSuffixEntry   `yaml:"suffixes"`
+	VowelStructure  VowelStructureEntry  `yaml:"vowel_structure"`
 	RepeatedLetters []LatinRepeatedEntry `yaml:"repeated_letters"`
 }
 
@@ -434,10 +434,10 @@ type HebrewGlyphs struct {
 }
 
 type HebrewLetterEntry struct {
-	Rune       uint32 `yaml:"rune"`
-	Name       string `yaml:"name"`
-	Concept    string `yaml:"concept"`
-	Confidence string `yaml:"confidence"`
+	Rune       uint32  `yaml:"rune"`
+	Name       string  `yaml:"name"`
+	Concept    string  `yaml:"concept"`
+	Confidence string  `yaml:"confidence"`
 	Weight     float64 `yaml:"weight"`
 }
 
@@ -446,10 +446,10 @@ type DevanagariGlyphs struct {
 }
 
 type DevanagariCharEntry struct {
-	Rune       uint32 `yaml:"rune"`
-	Name       string `yaml:"name"`
-	Concept    string `yaml:"concept"`
-	Confidence string `yaml:"confidence"`
+	Rune       uint32  `yaml:"rune"`
+	Name       string  `yaml:"name"`
+	Concept    string  `yaml:"concept"`
+	Confidence string  `yaml:"confidence"`
 	Weight     float64 `yaml:"weight"`
 }
 
@@ -477,16 +477,16 @@ type frequenciesDoc struct {
 // FrequencyProfileEntry represents a frequency profile entry in YAML.
 // All values are integer-based for harmonic precision.
 type FrequencyProfileEntry struct {
-	MeaningFrequencyID string           `yaml:"meaning_frequency_id"`
-	Concepts           []string         `yaml:"concepts"`
-	Vector             []int            `yaml:"vector"`
-	Ratio              []int            `yaml:"ratio"`
-	Archetype          string           `yaml:"archetype"`
-	Labels             YAMLIntLabels    `yaml:"labels"`
-	Confidence         string           `yaml:"confidence"`
-	Source             string           `yaml:"source"`
-	Lens               string           `yaml:"lens"`
-	Weight             int              `yaml:"weight"`
+	MeaningFrequencyID string        `yaml:"meaning_frequency_id"`
+	Concepts           []string      `yaml:"concepts"`
+	Vector             []int         `yaml:"vector"`
+	Ratio              []int         `yaml:"ratio"`
+	Archetype          string        `yaml:"archetype"`
+	Labels             YAMLIntLabels `yaml:"labels"`
+	Confidence         string        `yaml:"confidence"`
+	Source             string        `yaml:"source"`
+	Lens               string        `yaml:"lens"`
+	Weight             int           `yaml:"weight"`
 }
 
 // YAMLIntLabels is used for YAML unmarshaling of integer labels.

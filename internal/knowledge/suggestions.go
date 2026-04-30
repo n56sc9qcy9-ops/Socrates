@@ -7,26 +7,26 @@ type Suggestion struct {
 	Type string
 
 	// Proposed data
-	ProposedID    string   // For concepts
-	ProposedName  string   // For concepts
-	ProposedForm  string   // For forms
-	ProposedWord  string   // For script words
-	ProposedFrom  string   // For relations
-	ProposedTo    string   // For relations
-	ProposedType  string   // For relations
+	ProposedID   string // For concepts
+	ProposedName string // For concepts
+	ProposedForm string // For forms
+	ProposedWord string // For script words
+	ProposedFrom string // For relations
+	ProposedTo   string // For relations
+	ProposedType string // For relations
 
 	// Source and evidence
-	Source      string   // Where this suggestion came from (e.g., "user-input:skall", "pattern:phonetic")
-	Evidence    string   // Evidence for this suggestion
-	Confidence  string   // "verified", "plausible", or "speculative"
-	Weight      float64  // Suggested weight
+	Source     string  // Where this suggestion came from (e.g., "user-input:skall", "pattern:phonetic")
+	Evidence   string  // Evidence for this suggestion
+	Confidence string  // "verified", "plausible", or "speculative"
+	Weight     float64 // Suggested weight
 
 	// Review metadata
-	Rationale   string   // Why this might be valid
-	Notes       string   // Additional notes
-	Reviewed    bool     // Whether this has been reviewed
-	Accepted    bool     // Whether this was accepted (set after review)
-	ReviewedBy  string   // Who reviewed this
+	Rationale  string // Why this might be valid
+	Notes      string // Additional notes
+	Reviewed   bool   // Whether this has been reviewed
+	Accepted   bool   // Whether this was accepted (set after review)
+	ReviewedBy string // Who reviewed this
 }
 
 // SuggestionReviewer provides functionality for reviewing suggestions.
@@ -104,13 +104,13 @@ func SuggestionForWeaklyMatchedInput(input string, matches []Form, kb *Knowledge
 	// If input only weakly matches, suggest it might need a new form
 	if len(matches) == 0 || (len(matches) == 1 && matches[0].Weight < 0.5) {
 		suggestions = append(suggestions, Suggestion{
-			Type:      "form",
+			Type:         "form",
 			ProposedForm: input,
-			Source:    "weak-match",
-			Evidence:  "input matched no or very weak forms",
-			Confidence: "speculative",
-			Weight:    0.3,
-			Rationale: "suggest adding explicit form mapping for this input",
+			Source:       "weak-match",
+			Evidence:     "input matched no or very weak forms",
+			Confidence:   "speculative",
+			Weight:       0.3,
+			Rationale:    "suggest adding explicit form mapping for this input",
 		})
 	}
 
@@ -175,7 +175,7 @@ func formatSuggestion(index int, s Suggestion) string {
 			result += "Status: REJECTED by " + s.ReviewedBy + "\n"
 		}
 	} else {
-	result += "Status: PENDING REVIEW\n"
+		result += "Status: PENDING REVIEW\n"
 	}
 
 	return result
@@ -193,10 +193,10 @@ type MinimumReviewRecord struct {
 	Aliases     []string
 
 	// For form additions
-	Form      string
-	Concept   string
-	Lens      string
-	Weight    float64
+	Form       string
+	Concept    string
+	Lens       string
+	Weight     float64
 	Confidence string
 
 	// For relation additions
@@ -206,11 +206,11 @@ type MinimumReviewRecord struct {
 	RelWeight float64
 
 	// Review metadata
-	EvidenceSource string
+	EvidenceSource  string
 	ConfidenceLevel string
-	WeightValue     float64  // Using WeightValue to avoid confusion with field weights
-	Rationale      string
-	Notes          string
-	Accepted       bool
-	ReviewedBy     string
+	WeightValue     float64 // Using WeightValue to avoid confusion with field weights
+	Rationale       string
+	Notes           string
+	Accepted        bool
+	ReviewedBy      string
 }

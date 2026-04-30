@@ -3,7 +3,7 @@ package knowledge
 // ValidationResult contains all validation errors and warnings.
 type ValidationResult struct {
 	Errors   []ValidationError   // Must-fix errors
-	Warnings []ValidationWarning  // Advisory warnings
+	Warnings []ValidationWarning // Advisory warnings
 }
 
 // ValidationError represents a fatal validation error.
@@ -58,10 +58,16 @@ func ValidateKnowledge(kb *Knowledge) *ValidationResult {
 		Warnings: make([]ValidationWarning, 0),
 	}
 
-	// Build concept set for reference
+	// Build concept set for reference (IDs + aliases)
 	conceptIDs := make(map[string]bool)
 	for _, c := range kb.Concepts {
 		conceptIDs[c.ID] = true
+		// Also add aliases as valid concept references
+		for _, alias := range c.Aliases {
+			if alias != "" {
+				conceptIDs[alias] = true
+			}
+		}
 	}
 
 	// Validate concepts
@@ -314,7 +320,7 @@ func frequencyProfileField(i int) string { return "frequency_profiles[" + itoa(i
 // isValidConfidence checks if a confidence string is valid.
 func isValidConfidence(conf string) bool {
 	switch conf {
-	case "verified", "plausible", "speculative":
+	case "verified", "plausible", "speculative", "curated":
 		return true
 	default:
 		return false
@@ -322,10 +328,10 @@ func isValidConfidence(conf string) bool {
 }
 
 // Field helper functions for error messages.
-func conceptField(i int) string   { return "concepts[" + itoa(i) + "]" }
-func formField(i int) string      { return "forms[" + itoa(i) + "]" }
-func scriptWordField(i int) string { return "script_words[" + itoa(i) + "]" }
-func relationField(i int) string  { return "relations[" + itoa(i) + "]" }
+func conceptField(i int) string      { return "concepts[" + itoa(i) + "]" }
+func formField(i int) string         { return "forms[" + itoa(i) + "]" }
+func scriptWordField(i int) string   { return "script_words[" + itoa(i) + "]" }
+func relationField(i int) string     { return "relations[" + itoa(i) + "]" }
 func glyphPatternField(i int) string { return "glyph_patterns[" + itoa(i) + "]" }
 
 // String conversion helpers.

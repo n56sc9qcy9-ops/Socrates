@@ -16,7 +16,7 @@ type EvidencePath struct {
 	SourceType  string // "direct_channel", "fuzzy_match", "passage_signal", "graph_expansion"
 
 	// Match information
-	MatchForm string
+	MatchForm  string
 	MatchScore float64
 
 	// Relation information (for edge evidence)
@@ -50,15 +50,15 @@ type ActivationNode struct {
 	Concept string
 
 	// Activation metrics
-	Strength    float64 // Accumulated activation strength
+	Strength     float64 // Accumulated activation strength
 	BaseStrength float64 // Initial activation from direct evidence
-	Confidence  string // Highest confidence among evidence
+	Confidence   string  // Highest confidence among evidence
 
 	// Evidence tracking (deduplicated by EvidenceID)
 	Evidence []EvidencePath
 
 	// Graph position
-	Depth int // Distance from direct evidence (0 = direct)
+	Depth   int  // Distance from direct evidence (0 = direct)
 	Visited bool // For cycle detection during propagation
 }
 
@@ -82,8 +82,8 @@ func (n *ActivationNode) AddEvidence(evidence EvidencePath) bool {
 
 // ActivationEdge represents a relation edge between concepts.
 type ActivationEdge struct {
-	From        string
-	To          string
+	From         string
+	To           string
 	RelationType string
 	Weight       float64 // From YAML knowledge base
 	Strength     float64 // Propagated strength (with decay)
@@ -103,12 +103,12 @@ type ActivationGraph struct {
 	Edges []*ActivationEdge
 
 	// Configuration
-	MaxDepth int // Maximum propagation depth (default: 2)
+	MaxDepth    int     // Maximum propagation depth (default: 2)
 	DecayFactor float64 // Decay per depth level (default: 0.5)
 
 	// Metrics
 	TotalStrength float64
-	DirectCount int // Number of directly activated concepts
+	DirectCount   int // Number of directly activated concepts
 }
 
 // NewActivationGraph creates a new activation graph with defaults.
@@ -161,13 +161,13 @@ func (g *ActivationGraph) AddEdge(from, to, relationType string, weight float64,
 	}
 
 	edge := &ActivationEdge{
-		From:          from,
-		To:            to,
-		RelationType:  relationType,
-		Weight:        weight,
-		Strength:      weight, // Initial strength is the YAML weight
-		Confidence:    confidence,
-		Evidence:      make([]EvidencePath, 0),
+		From:         from,
+		To:           to,
+		RelationType: relationType,
+		Weight:       weight,
+		Strength:     weight, // Initial strength is the YAML weight
+		Confidence:   confidence,
+		Evidence:     make([]EvidencePath, 0),
 	}
 	g.Edges = append(g.Edges, edge)
 	return edge
@@ -251,8 +251,8 @@ func BuildGraphFromEvidence(
 							SourceToken: sig.Text,
 							SourceForm:  ch.Name + "|" + sig.Text,
 							SourceType:  "direct_channel",
-							Confidence: sig.Confidence,
-							Weight:     sig.Weight,
+							Confidence:  sig.Confidence,
+							Weight:      sig.Weight,
 						}
 					}
 					if sig.Confidence == ConfidenceVerified {
@@ -605,11 +605,11 @@ func (g *ActivationGraph) ToConvergenceResult() ConvergenceResult {
 // GraphStats returns summary statistics for the graph.
 func (g *ActivationGraph) GraphStats() map[string]interface{} {
 	return map[string]interface{}{
-		"node_count":      g.NodeCount(),
-		"edge_count":      g.EdgeCount(),
-		"total_strength":  g.TotalStrength,
-		"direct_count":    g.DirectCount,
-		"max_depth":       g.MaxDepth,
-		"decay_factor":    g.DecayFactor,
+		"node_count":     g.NodeCount(),
+		"edge_count":     g.EdgeCount(),
+		"total_strength": g.TotalStrength,
+		"direct_count":   g.DirectCount,
+		"max_depth":      g.MaxDepth,
+		"decay_factor":   g.DecayFactor,
 	}
 }

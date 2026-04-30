@@ -244,7 +244,7 @@ func TestEvidencePath_EvidenceID(t *testing.T) {
 	}
 
 	graphEv := EvidencePath{
-		SourceType:  "graph_expansion",
+		SourceType:   "graph_expansion",
 		RelationType: "related_to",
 		RelationFrom: "spirit",
 		RelationTo:   "breath",
@@ -436,7 +436,7 @@ func TestPropagateActivation_BoundedDepth(t *testing.T) {
 
 func TestPropagateActivation_CyclePrevention(t *testing.T) {
 	g := NewActivationGraph()
-	g.MaxDepth = 2 // Limited depth
+	g.MaxDepth = 2      // Limited depth
 	g.DecayFactor = 0.5 // Decay to prevent inflation
 
 	// A -> B -> A cycle
@@ -446,13 +446,12 @@ func TestPropagateActivation_CyclePrevention(t *testing.T) {
 	g.AddEdge("a", "b", "related", 0.8, ConfidencePlausible)
 	g.AddEdge("b", "a", "related", 0.8, ConfidencePlausible)
 
-
 	g.PropagateActivation()
 
 	// Node 'a' should only have its original strength plus limited re-propagation
 	// The Visited flag prevents infinite loops, but allows one re-entry per path
 	aNode := g.GetNode("a")
-	
+
 	// Expected behavior: 'a' starts at 1.0, then:
 	// - Propagate a->b: b gets 1.0 * 0.8 * 0.5 = 0.4
 	// - Propagate b->a: a gets additional 0.4 * 0.8 * 0.5 = 0.16 (1 cycle allowed)
@@ -461,7 +460,7 @@ func TestPropagateActivation_CyclePrevention(t *testing.T) {
 	if aNode.Strength > 1.2 {
 		t.Errorf("node 'a' should not have inflated strength from cycles, got %f (expected ~1.16 with 1 allowed cycle)", aNode.Strength)
 	}
-	
+
 	if aNode.Strength < 1.0 {
 		t.Errorf("node 'a' should retain at least original strength, got %f", aNode.Strength)
 	}
@@ -830,7 +829,6 @@ func TestAddEdge_DeduplicatesByIdentity(t *testing.T) {
 	g.AddNode("a", 1.0, ConfidenceVerified)
 	g.AddNode("b", 0.8, ConfidenceVerified)
 
-
 	// Add edge first time
 	e1 := g.AddEdge("a", "b", "related", 0.8, ConfidencePlausible)
 
@@ -855,7 +853,6 @@ func TestAddEdge_DeduplicatesByIdentity(t *testing.T) {
 
 func TestAddEdge_DifferentRelationTypesNotDuplicates(t *testing.T) {
 	g := NewActivationGraph()
-
 
 	g.AddNode("a", 1.0, ConfidenceVerified)
 	g.AddNode("b", 0.8, ConfidenceVerified)
@@ -897,10 +894,9 @@ func TestAddEdge_DifferentToNotDuplicate(t *testing.T) {
 
 func TestActivationNode_AddEvidence_DeduplicatesByID(t *testing.T) {
 	node := &ActivationNode{
-		Concept: "test",
+		Concept:  "test",
 		Evidence: make([]EvidencePath, 0),
 	}
-
 
 	// Add first evidence
 	evidence1 := EvidencePath{
@@ -933,7 +929,7 @@ func TestActivationNode_AddEvidence_DeduplicatesByID(t *testing.T) {
 
 func TestActivationNode_AddEvidence_DifferentIDNotDuplicates(t *testing.T) {
 	node := &ActivationNode{
-		Concept: "test",
+		Concept:  "test",
 		Evidence: make([]EvidencePath, 0),
 	}
 

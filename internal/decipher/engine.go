@@ -54,7 +54,7 @@ func (e *Engine) Analyze(input string) Reading {
 
 	// Analyze passage-level convergence using the activation graph
 	passageSignals := AnalyzePassageTokens(forms.Tokens, e.Knowledge)
-	
+
 	// Build and propagate through the activation graph
 	activationGraph := BuildGraphFromEvidence(channels, passageSignals, fuzzyMatches, conceptExpansions, e.Knowledge)
 	activationGraph.PropagateActivation()
@@ -84,7 +84,7 @@ func (e *Engine) Analyze(input string) Reading {
 	converging, weakSignals := findPatterns(signalGraph)
 
 	// Calculate scores
-	scoreComponents := CalculateScoreComponents(candidates, fuzzyMatches, conceptExpansions, convergence, len(channels))
+	scoreComponents := CalculateScoreComponents(candidates, fuzzyMatches, conceptExpansions, convergence, channels)
 	baseScore := calculateOverallScore(channels, converging, allSignals)
 	discoveryScore := CalculateFinalScore(scoreComponents)
 	finalScore := (baseScore.Overall + discoveryScore) / 2.0
@@ -96,24 +96,24 @@ func (e *Engine) Analyze(input string) Reading {
 	warnings := generateWarnings(input, converging, weakSignals)
 
 	return Reading{
-		Input:               input,
-		Forms:               forms,
-		Candidates:          candidates,
-		FuzzyMatches:        fuzzyMatches,
-		ConceptExpansions:   conceptExpansions,
-		PassageSignals:      passageSignals,
-		Convergence:         convergence,
-		PassageFields:       passageFields,
-		HarmonicField:       harmonicField,
-		Channels:            channels,
+		Input:              input,
+		Forms:              forms,
+		Candidates:         candidates,
+		FuzzyMatches:       fuzzyMatches,
+		ConceptExpansions:  conceptExpansions,
+		PassageSignals:     passageSignals,
+		Convergence:        convergence,
+		PassageFields:      passageFields,
+		HarmonicField:      harmonicField,
+		Channels:           channels,
 		ConvergingPatterns: converging,
-		WeakSignals:         weakSignals,
+		WeakSignals:        weakSignals,
 		Score: Score{
 			Overall:    finalScore,
 			ByChannel:  calculateChannelScores(channels),
 			Components: scoreComponents,
 		},
-		ConciseReading:        reading,
+		ConciseReading:       reading,
 		Warnings:             warnings,
 		DiscardedCandidates:  discardedCand,
 		DiscardedComparisons: discardedComp,
