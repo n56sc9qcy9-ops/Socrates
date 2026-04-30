@@ -19,6 +19,11 @@ func runFragmentChannel(forms Forms, kb *knowledge.Knowledge) ChannelResult {
 	exactSignals := runWholeTokenMatching(forms, kb)
 	signals = append(signals, exactSignals...)
 
+	// For non-Latin scripts (but not Han, Hebrew, Devanagari which use ScriptWord)
+	// check if the whole form matches a fragment seed (e.g., transliterated words)
+	nonLatinSignals := runNonLatinWholeTokenMatching(forms, kb)
+	signals = append(signals, nonLatinSignals...)
+
 	// Second: fragment path analysis (knowledge base only)
 	for _, path := range forms.Fragments {
 		for _, part := range path.Parts {
@@ -74,6 +79,42 @@ func runWholeTokenMatching(forms Forms, kb *knowledge.Knowledge) []Signal {
 	// Only process Latin script - non-Latin scripts use runScriptWordChannel
 	script := forms.Script
 	if script != ScriptLatin {
+		return signals
+	}
+
+	input := forms.Normalized
+
+	// Check fragment seeds for exact whole-token match from knowledge base
+	seeds := knowledgeBasedFragmentLookup(input, kb)
+	for _, seed := range seeds {
+		if seed.Fragment == input {
+			for _, lens := range seed.Lenses {
+				signals = append(signals, Signal{
+					Text:       "exact whole-token match: " + input,
+					Target:     lens.Target,
+					Channel:    "Fragment",
+					Lens:       lens.Lens,
+					Confidence: lens.Confidence,
+					Weight:     lens.BaseWeight,
+				})
+			}
+		}
+	}
+
+	return signals
+}
+
+// runNonLatinWholeTokenMatching checks non-Latin script whole-token matches.
+// This handles exact matches for non-Latin forms stored as fragments in the knowledge base.
+// Unlike runWholeTokenMatching which only handles Latin script, this handles forms
+// like Han 愛, Hebrew transliterated words, etc. that are stored in the fragment
+// section of forms.yaml rather than as ScriptWords.
+func runNonLatinWholeTokenMatching(forms Forms, kb *knowledge.Knowledge) []Signal {
+	signals := make([]Signal, 0)
+
+	// Only process non-Latin scripts
+	script := forms.Script
+	if script == ScriptLatin {
 		return signals
 	}
 

@@ -164,6 +164,7 @@ func (l *Loader) loadGlyphs(kb *KnowledgeBuilder) error {
 		Concept:    doc.Latin.VowelStructure.Heavy.Concept,
 		Confidence: doc.Latin.VowelStructure.Heavy.Confidence,
 		Weight:     doc.Latin.VowelStructure.Heavy.Weight,
+		Lens:       "vowel-structure",
 	})
 	kb.AddGlyphPattern(GlyphPattern{
 		Script:     "latin",
@@ -171,7 +172,18 @@ func (l *Loader) loadGlyphs(kb *KnowledgeBuilder) error {
 		Concept:    doc.Latin.VowelStructure.Light.Concept,
 		Confidence: doc.Latin.VowelStructure.Light.Confidence,
 		Weight:     doc.Latin.VowelStructure.Light.Weight,
+		Lens:       "vowel-structure",
 	})
+	for _, e := range doc.Latin.RepeatedLetters {
+		kb.AddGlyphPattern(GlyphPattern{
+			Script:     "latin",
+			Pattern:    e.Pattern,
+			Concept:    e.Concept,
+			Confidence: e.Confidence,
+			Weight:     e.Weight,
+			Lens:       "repetition",
+		})
+	}
 	for _, e := range doc.Hebrew.Letters {
 		kb.AddGlyphPattern(GlyphPattern{
 			Script:     "hebrew",
@@ -372,7 +384,8 @@ type LatinGlyphs struct {
 	Bigrams        []LatinBigramEntry   `yaml:"bigrams"`
 	Prefixes       []LatinPrefixEntry   `yaml:"prefixes"`
 	Suffixes       []LatinSuffixEntry   `yaml:"suffixes"`
-	VowelStructure VowelStructureEntry `yaml:"vowel_structure"`
+	VowelStructure VowelStructureEntry  `yaml:"vowel_structure"`
+	RepeatedLetters []LatinRepeatedEntry `yaml:"repeated_letters"`
 }
 
 type LatinBigramEntry struct {
@@ -396,6 +409,14 @@ type LatinSuffixEntry struct {
 	Weight     float64 `yaml:"weight"`
 }
 
+type LatinRepeatedEntry struct {
+	Pattern    string  `yaml:"pattern"`
+	Concept    string  `yaml:"concept"`
+	Confidence string  `yaml:"confidence"`
+	Weight     float64 `yaml:"weight"`
+	Lens       string  `yaml:"lens"`
+}
+
 type VowelStructureEntry struct {
 	Heavy VowelStructureItem `yaml:"heavy"`
 	Light VowelStructureItem `yaml:"light"`
@@ -405,6 +426,7 @@ type VowelStructureItem struct {
 	Concept    string  `yaml:"concept"`
 	Confidence string  `yaml:"confidence"`
 	Weight     float64 `yaml:"weight"`
+	Lens       string  `yaml:"lens"`
 }
 
 type HebrewGlyphs struct {

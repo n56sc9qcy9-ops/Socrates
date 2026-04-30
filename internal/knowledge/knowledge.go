@@ -245,6 +245,7 @@ type GlyphPattern struct {
 	Pattern    string
 	Concept    string
 	Readings   []string
+	Lens       string
 	Confidence string
 	Weight     float64
 }

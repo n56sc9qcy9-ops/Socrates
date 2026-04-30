@@ -81,15 +81,38 @@ latin:
       weight: 0.3
 
   # Vowel structure targets
+  # These represent curated observations about orthographic patterns
+  # NOT automatic spiritual/breath meaning - only activated if explicitly mapped
   vowel_structure:
     heavy:
-      concept: breath
+      concept: vowel-heavy-orthography
       confidence: speculative
-      weight: 0.2
+      weight: 0.1  # Low weight - this is orthographic, not glyph meaning
+      lens: vowel-structure
     light:
-      concept: ground
+      concept: consonant-heavy-orthography
       confidence: speculative
-      weight: 0.2
+      weight: 0.1  # Low weight - this is orthographic, not glyph meaning
+      lens: vowel-structure
+
+  # Repeated letter patterns
+  # Only emit if explicitly curated - not automatic repetition = meaning
+  repeated_letters:
+    - pattern: "ii"
+      concept: repeated-letter-observation
+      confidence: speculative
+      weight: 0.1
+      lens: repetition
+    - pattern: "ee"
+      concept: repeated-letter-observation
+      confidence: speculative
+      weight: 0.1
+      lens: repetition
+    - pattern: "oo"
+      concept: repeated-letter-observation
+      confidence: speculative
+      weight: 0.1
+      lens: repetition
 
 # Hebrew letter associations (Unicode codepoints)
 hebrew:

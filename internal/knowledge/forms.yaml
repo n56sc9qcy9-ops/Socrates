@@ -417,6 +417,37 @@ fragments:
     lens: greek
     confidence: verified
     weight: 0.6
+    
+  # Love in multiple languages
+  - form: "kjærlighet"
+    concept: love
+    lens: norwegian
+    confidence: curated
+    weight: 0.7
+    
+  - form: "愛"
+    concept: love
+    lens: han
+    confidence: verified
+    weight: 0.8
+    
+  - form: "爱"
+    concept: love
+    lens: han
+    confidence: verified
+    weight: 0.8
+    
+  - form: "ahava"
+    concept: love
+    lens: hebrew
+    confidence: curated
+    weight: 0.7
+    
+  - form: "ahavah"
+    concept: love
+    lens: hebrew
+    confidence: curated
+    weight: 0.7
 
 # Script words - exact whole-word matches for non-Latin scripts
 script_words:
@@ -467,6 +498,13 @@ script_words:
     word: "חיים"
     runes: [0x05D7, 0x05D9, 0x05DD]
     meanings: [life]
+    confidence: verified
+    weight: 0.8
+    
+  - script: hebrew
+    word: "אהבה"
+    runes: [0x05D0, 0x05D4, 0x05D1, 0x05D4]
+    meanings: [love]
     confidence: verified
     weight: 0.8
     
@@ -546,5 +584,11 @@ script_words:
     word: "心"
     runes: [0x5FC3]
     meanings: [heart, xin]
+    confidence: verified
+    weight: 0.8    
+  - script: hebrew
+    word: "אל"
+    runes: [0x05D0, 0x05DC]
+    meanings: [god, power, divine]
     confidence: verified
     weight: 0.8

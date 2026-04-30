@@ -15,6 +15,7 @@ func knowledgeBasedGlyphLookup(script ScriptType, kb *knowledge.Knowledge) []Gly
 			Pattern:    p.Pattern,
 			Rune:       p.Rune,
 			Concept:    p.Concept,
+			Lens:       p.Lens,
 			Confidence: p.Confidence,
 			Weight:     p.Weight,
 		})
@@ -27,6 +28,7 @@ type GlyphPatternSpec struct {
 	Pattern    string
 	Rune       uint32
 	Concept    string
+	Lens       string
 	Confidence string
 	Weight     float64
 }

@@ -143,9 +143,10 @@ func TestConfidenceValues(t *testing.T) {
 	}
 
 	validConfidences := map[string]bool{
-		"verified":   true,
-		"plausible": true,
+		"verified":    true,
+		"plausible":   true,
 		"speculative": true,
+		"curated":     true, // curated data from authoritative sources
 	}
 
 	// Check forms have valid confidence

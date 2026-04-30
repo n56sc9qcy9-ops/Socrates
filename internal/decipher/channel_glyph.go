@@ -42,6 +42,8 @@ func runGlyphChannel(forms Forms, kb *knowledge.Knowledge) ChannelResult {
 
 // analyzeLatinGlyphs analyzes Latin letter patterns.
 // Uses knowledge-based glyph lookup when available.
+// Orthographic observations (repeated letters, vowel/consonant structure)
+// are ONLY emitted if curated glyph data explicitly supports that pattern.
 func analyzeLatinGlyphs(s string, kb *knowledge.Knowledge) []Signal {
 	signals := make([]Signal, 0)
 
@@ -49,40 +51,42 @@ func analyzeLatinGlyphs(s string, kb *knowledge.Knowledge) []Signal {
 		return signals
 	}
 
-	// Character frequency - only count letters, not spaces or punctuation
-	charFreq := make(map[rune]int)
-	for _, r := range s {
-		if isLetter(r) {
-			charFreq[r]++
+	// Get ALL patterns from knowledge base first
+	patterns := knowledgeBasedGlyphLookup(ScriptLatin, kb)
+	patternsMap := make(map[string]GlyphPatternSpec)
+	for _, p := range patterns {
+		patternsMap[p.Pattern] = p
+	}
+
+	// Build set of consecutive repeated-letter bigrams actually present in the word
+	// Only patterns like "ii", "ee", "oo" that appear consecutively in the word qualify
+	// NOT automatic: only emit if glyph data explicitly maps repeated letters to concepts
+	presentRepeatedBigrams := make(map[string]bool)
+	for i := 0; i < len(s)-1; i++ {
+		bigram := s[i : i+2]
+		if bigram[0] == bigram[1] {
+			// This is a consecutive repeated-letter bigram (like "ii")
+			presentRepeatedBigrams[bigram] = true
 		}
 	}
 
-	// Repeated letters - deduplicate to single repetition signal
-	// Only letters (not whitespace or punctuation) trigger repetition evidence
-	hasRepetition := false
-	for _, count := range charFreq {
-		if count > 1 && !hasRepetition {
-			// Only emit one repetition signal per word (not per character)
-			hasRepetition = true
+	// Check for curated repeated-letter patterns ONLY if they actually exist in the word
+	for repeatedBigram := range presentRepeatedBigrams {
+		if spec, ok := patternsMap[repeatedBigram]; ok {
 			signals = append(signals, Signal{
 				Text:       "repeated letters detected",
-				Target:     "repetition",
+				Target:     spec.Concept,
 				Channel:    "Glyph",
 				Lens:       "glyph",
-				Confidence: ConfidencePlausible,
-				Weight:     0.3,
+				Confidence: spec.Confidence,
+				Weight:     spec.Weight,
 			})
 		}
+		// If no curated pattern exists for this repeated bigram, emit nothing
 	}
 
-	// N-grams (bigrams and trigrams) - use knowledge base lookup
+	// N-grams (bigrams) - use knowledge base lookup only
 	if len(s) >= 2 {
-		patterns := knowledgeBasedGlyphLookup(ScriptLatin, kb)
-		patternsMap := make(map[string]GlyphPatternSpec)
-		for _, p := range patterns {
-			patternsMap[p.Pattern] = p
-		}
-
 		for i := 0; i < len(s)-1; i++ {
 			bigram := s[i : i+2]
 			if p, ok := patternsMap[bigram]; ok {
@@ -98,9 +102,8 @@ func analyzeLatinGlyphs(s string, kb *knowledge.Knowledge) []Signal {
 		}
 	}
 
-	// Prefix/suffix analysis - use knowledge base lookup
+	// Prefix/suffix analysis - use knowledge base lookup only
 	if len(s) >= 3 {
-		patterns := knowledgeBasedGlyphLookup(ScriptLatin, kb)
 		for _, p := range patterns {
 			if len(p.Pattern) >= 3 && len(p.Pattern) <= len(s) {
 				prefix := s[:len(p.Pattern)]
@@ -119,7 +122,6 @@ func analyzeLatinGlyphs(s string, kb *knowledge.Knowledge) []Signal {
 	}
 
 	if len(s) >= 2 {
-		patterns := knowledgeBasedGlyphLookup(ScriptLatin, kb)
 		for _, p := range patterns {
 			if len(p.Pattern) == 2 {
 				suffix := s[len(s)-2:]
@@ -137,7 +139,8 @@ func analyzeLatinGlyphs(s string, kb *knowledge.Knowledge) []Signal {
 		}
 	}
 
-	// Vowel/consonant structure - use knowledge base patterns
+	// Vowel/consonant structure - ONLY emit if knowledge base has explicit structural patterns
+	// NOT automatic: orthographic observations are NOT glyph meaning by default
 	vowels := "aeiouAEIOU"
 	vowelCount := 0
 	consCount := 0
@@ -148,36 +151,39 @@ func analyzeLatinGlyphs(s string, kb *knowledge.Knowledge) []Signal {
 			consCount++
 		}
 	}
+	
+	// Only emit structural signals if curated data explicitly maps them
 	if consCount > 0 {
 		ratio := float64(vowelCount) / float64(consCount)
-		patterns := knowledgeBasedGlyphLookup(ScriptLatin, kb)
-		patternsMap := make(map[string]GlyphPatternSpec)
+		
+		// Look for explicit vowel_structure patterns in knowledge base
 		for _, p := range patterns {
-			patternsMap[p.Pattern] = p
-		}
-		if ratio > 0.5 {
-			if p, ok := patternsMap["heavy"]; ok {
-				signals = append(signals, Signal{
-					Text:       "vowel-heavy structure",
-					Target:     p.Concept,
-					Channel:    "Glyph",
-					Lens:       "glyph",
-					Confidence: p.Confidence,
-					Weight:     p.Weight,
-				})
+			if p.Lens == "vowel-structure" || p.Lens == "glyph-structure" {
+				if ratio > 0.5 && (p.Pattern == "heavy" || p.Pattern == "vowel-heavy") {
+					signals = append(signals, Signal{
+						Text:       "vowel-heavy structure",
+						Target:     p.Concept,
+						Channel:    "Glyph",
+						Lens:       "glyph",
+						Confidence: p.Confidence,
+						Weight:     p.Weight,
+					})
+					break
+				}
+				if ratio <= 0.5 && (p.Pattern == "light" || p.Pattern == "consonant-heavy") {
+					signals = append(signals, Signal{
+						Text:       "consonant-heavy structure",
+						Target:     p.Concept,
+						Channel:    "Glyph",
+						Lens:       "glyph",
+						Confidence: p.Confidence,
+						Weight:     p.Weight,
+					})
+					break
+				}
 			}
-		} else {
-			if p, ok := patternsMap["light"]; ok {
-				signals = append(signals, Signal{
-					Text:       "consonant-heavy structure",
-					Target:     p.Concept,
-					Channel:    "Glyph",
-					Lens:       "glyph",
-					Confidence: p.Confidence,
-					Weight:     p.Weight,
-				})
-			}
 		}
+		// If no curated structural patterns exist, emit nothing
 	}
 
 	return signals
