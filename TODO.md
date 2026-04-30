@@ -43,90 +43,107 @@ Completed and committed locally:
 - First knowledge validation/suggestion pipeline.
 - Data-backed harmonic frequency profiles and harmonic field scoring.
 - Training/evaluation layer for supervised ranking over evidence paths.
+- Channel semantics correction and cross-script meaning-frequency convergence.
 
 Current git status before this handoff:
 
 ```text
-## main...origin/main [ahead 20]
+## main...origin/main [ahead 22]
 ```
 
 Architect correction:
 
-- Socrates can now evaluate curated examples separately from active knowledge.
-- The next step is not counsellor prose yet.
-- The next step is ranking-weight hardening: make evidence-path scores configurable, measurable, and auditable.
-- Weight changes must be judged by training evaluation, not by subjective output preference.
+- Socrates can now evaluate curated examples and can converge English, Norwegian, Hebrew, and Chinese love forms on a shared harmonic field.
+- The next step is not counsellor prose and not new symbolic feature work.
+- External review found several architecture guardrail issues that must be fixed before ranking-weight tuning.
+- The priority is validity and evidence integrity: active YAML must validate, channels must not inflate scores, training must fail on excessive false activations, and multi-concept evidence paths must remain complete.
 
 ## Current Next Task
 
 Task:
-Add configurable ranking weights and harden training evaluation.
+Architecture quality gate: fix validation, scoring, evaluation, and evidence-path integrity.
 
 Context:
-Socrates now has a committed training/evaluation layer. It can load curated examples, validate them against active knowledge, run `Engine.Analyze`, and report concept/field precision and recall.
+Pi completed the channel semantics and cross-script convergence task in commit `240c958`. Before adding ranking weights, counsellor fields, or more symbolic knowledge, the existing architecture must pass its own integrity gates.
 
-The next step is to make the ranking model explicit. Current scoring weights still live inside engine logic. Move the weight assumptions into a configurable structure and make evaluation show whether a weight change improves or degrades the curated examples.
+Known review findings to address:
+
+- P1: Active embedded knowledge must pass `knowledge validate`. Current YAML has references such as `living`, `vitality`, `prana`, or `qi` being treated as concept IDs when they may be aliases or undefined concepts.
+- P2: Glyph pattern kinds must stay separated before matching. Bigrams, prefixes, suffixes, and structural observations must not collapse into one flat matcher that activates arbitrary substrings.
+- P2: Channel diversity must be based on channels with active meaningful evidence, not on configured channels that emitted nothing.
+- P2: Training evaluation must fail or clearly fail quality gates on excessive false activations, not only on low recall.
+- P2: Fuzzy evidence for multi-mapped anchor forms must preserve all mapped concepts, not only the first form mapping.
+- P3: The documented validation command must work as advertised: `socrates knowledge validate`.
 
 Reference:
 
 - `TRAINING_MODEL.md`
+- `docs/KNOWLEDGE_CURATION.md`
+- `HARMONIC_DATA_MODEL.md`
 
 Likely files:
 
 - `cmd/socrates/main.go`
-- `internal/decipher/types.go`
+- `internal/decipher/activation_graph.go`
+- `internal/decipher/channel_glyph.go`
+- `internal/decipher/glyphs.go`
 - `internal/decipher/scoring.go`
-- `internal/decipher/*`
+- `internal/decipher/*_test.go`
+- `internal/knowledge/*.yaml`
+- `internal/knowledge/validate.go`
+- `internal/knowledge/validate_test.go`
 - `internal/training/*`
 - `training/examples.yaml`
-- new file if useful: `internal/decipher/ranking_weights.go`
-- new file if useful: `internal/training/report.go`
-- new file if useful: `training/weights.yaml`
 
 Instructions:
 
 1. Start with `git status --short --branch` and record it.
 2. Run `go test ./...` before changing code and record the baseline result.
-3. Review the committed training implementation and record any correctness issues before changing behavior.
-4. Add a `RankingWeights` or equivalent structure for evidence-path scoring assumptions.
-5. Include weights for at least:
-   - exact form match
-   - fuzzy form match
-   - phonetic/script/glyph evidence if currently scored
-   - confidence labels
-   - graph relation support
-   - propagation depth penalty
-   - passage co-activation
-   - harmonic profile support
-   - harmonic ratio/archetype compatibility
-   - duplicate/noise penalty
-   - dissonance penalty
-6. Provide default weights that preserve current behavior as closely as practical.
-7. Allow evaluation to run with default weights.
-8. Add optional `--weights <path>` support if the implementation shape is clear.
-9. Evaluation output must show which weight set was used.
-10. Add a detailed/debug report that shows feature contributions for expected and false activations.
-11. Keep training examples separate from active knowledge.
-12. Do not let training mutate active knowledge.
-13. Do not add AI or embeddings in this task.
-14. Do not add automatic optimization yet unless it is isolated behind a separate explicit command and deterministic.
-15. Fix any discovered training CLI mismatch or evaluator correctness issue while staying scoped.
-16. Add tests proving:
-   - default weights preserve baseline evaluation behavior
-   - invalid weight files fail validation if `--weights` is added
-   - evaluation reports the active weight set
-   - expected activations expose feature/evidence contributions in debug/report mode
-   - training still does not mutate active knowledge
-17. Run targeted tests while working, then `go test ./...`.
-18. Commit the completed ranking-weight work locally with a clear message. Do not push.
-19. Report final `git status --short --branch`, tests run, files changed, and an example weighted evaluation output.
+3. Run the documented validation command before changing code and record the result:
+   - `./socrates knowledge validate`
+   - If the binary is stale, also verify through the Go command path Pi normally uses.
+4. Fix active embedded YAML so it passes validation without weakening validation rules.
+   - Prefer adding or correcting compact concept IDs/forms/relations over teaching the validator to ignore bad data.
+   - If a value is an alias, map it through a form or alias field; do not pretend it is a concept ID.
+5. Fix the documented CLI so `socrates knowledge validate` works. `--validate` may remain as compatibility, but the documented positional command must validate.
+6. Preserve glyph pattern kind boundaries.
+   - Bigrams should match only as bigrams.
+   - Prefixes should match only at the start.
+   - Suffixes should match only at the end.
+   - Structural/orthographic observations must not be flattened into semantic glyph patterns.
+7. Fix channel diversity scoring so only channels with active meaningful signals can contribute to diversity.
+   - Empty configured channels must not increase confidence.
+   - Weak/unknown/no-op signals should not count as full independent evidence.
+8. Fix training evaluation so excessive false activations can fail an example or fail an aggregate quality gate.
+   - Recall-only passing is not acceptable.
+   - Precision thresholds should be explicit and documented in code/tests.
+   - Keep examples separate from active knowledge.
+9. Fix fuzzy evidence path construction for anchor forms with multiple concept mappings.
+   - If a matched anchor form maps to multiple concepts, preserve all valid mapped concepts and evidence paths.
+   - Do not stop at the first matching form.
+10. Do not add new symbolic concepts, counsellor/transmutation fields, ranking-weight systems, AI, embeddings, UI, or audio in this task.
+11. Keep the implementation light. Prefer small focused fixes over new abstractions unless they remove real duplication or protect an architecture boundary.
+12. Add or update tests proving:
+   - active embedded knowledge validates successfully
+   - `socrates knowledge validate` runs the validator
+   - glyph bigram/prefix/suffix/structure patterns do not cross-match outside their kind
+   - empty channels do not earn channel diversity
+   - training/evaluation fails or flags excessive false activations
+   - multi-mapped fuzzy anchor forms preserve all expected concepts
+   - existing cross-script love and Hebrew `El` boundary behavior still works
+13. Run targeted tests while working, then `go test ./...`.
+14. Commit the completed quality-gate work locally with a clear message. Do not push.
+15. Report final `git status --short --branch`, validation result, tests run, files changed, and before/after metrics for training precision/recall.
 
 Acceptance Criteria:
 
-- Ranking weights are explicit and inspectable.
-- Default weights preserve current behavior as closely as practical.
-- Training evaluation reports which weights were used.
-- Debug/report output shows evidence or feature contributions for activations.
+- Active embedded YAML passes the project validator.
+- The documented `socrates knowledge validate` command works.
+- Glyph pattern matching preserves pattern kind boundaries.
+- Channel diversity only rewards active meaningful evidence.
+- Training evaluation cannot pass cleanly while producing excessive false activations.
+- Multi-concept forms preserve complete fuzzy evidence paths.
+- Existing harmonic core, training evaluation, and cross-script convergence still pass.
 - Training does not mutate active knowledge.
 - No black-box truth model is introduced.
 - `go test ./...` passes.
@@ -134,4 +151,4 @@ Acceptance Criteria:
 
 ## Next After This
 
-After ranking weights are explicit and measurable, add a small held-out evaluation split. Only after that should Socrates add counsellor/transmutation fields.
+After this quality gate is clean, return to configurable ranking weights and a small held-out evaluation split. Only after that should Socrates add counsellor/transmutation fields.
