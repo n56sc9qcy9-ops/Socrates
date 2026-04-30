@@ -44,106 +44,105 @@ Completed and committed locally:
 - Data-backed harmonic frequency profiles and harmonic field scoring.
 - Training/evaluation layer for supervised ranking over evidence paths.
 - Channel semantics correction and cross-script meaning-frequency convergence.
+- Architecture quality gate for validation, scoring, evaluation, and evidence-path integrity.
 
 Current git status before this handoff:
 
 ```text
-## main...origin/main [ahead 22]
+## main...origin/main [ahead 24]
 ```
 
 Architect correction:
 
 - Socrates can now evaluate curated examples and can converge English, Norwegian, Hebrew, and Chinese love forms on a shared harmonic field.
-- The next step is not counsellor prose and not new symbolic feature work.
-- External review found several architecture guardrail issues that must be fixed before ranking-weight tuning.
-- The priority is validity and evidence integrity: active YAML must validate, channels must not inflate scores, training must fail on excessive false activations, and multi-concept evidence paths must remain complete.
+- Pi completed the quality gate, including active-channel diversity, positional `knowledge validate`, precision-aware training evaluation, and multi-concept fuzzy evidence handling.
+- The next step is not counsellor prose, not new symbolic feature work, and not ranking-weight tuning yet.
+- The quality gate summary surfaced a deeper schema question: concept IDs, aliases, confidence, and provenance must be kept distinct before more knowledge is added.
+- Aliases may help resolve references, but active data should still preserve canonical concept identity and evidence paths.
+- `curated` sounds like provenance/source, not confidence, unless the project explicitly defines it as a confidence level with semantics distinct from `verified`, `plausible`, and `speculative`.
 
 ## Current Next Task
 
 Task:
-Architecture quality gate: fix validation, scoring, evaluation, and evidence-path integrity.
+Harden knowledge identity, alias resolution, and confidence/provenance semantics.
 
 Context:
-Pi completed the channel semantics and cross-script convergence task in commit `240c958`. Before adding ranking weights, counsellor fields, or more symbolic knowledge, the existing architecture must pass its own integrity gates.
+Pi completed the architecture quality gate in commit `b6051fb`. The reported implementation made aliases valid concept references and added `curated` as a valid confidence value. Those changes may be practical, but they must be architecturally explicit so Socrates does not blur identity, source, and confidence.
 
-Known review findings to address:
+Before ranking-weight tuning, lock down the knowledge semantics:
 
-- P1: Active embedded knowledge must pass `knowledge validate`. Current YAML has references such as `living`, `vitality`, `prana`, or `qi` being treated as concept IDs when they may be aliases or undefined concepts.
-- P2: Glyph pattern kinds must stay separated before matching. Bigrams, prefixes, suffixes, and structural observations must not collapse into one flat matcher that activates arbitrary substrings.
-- P2: Channel diversity must be based on channels with active meaningful evidence, not on configured channels that emitted nothing.
-- P2: Training evaluation must fail or clearly fail quality gates on excessive false activations, not only on low recall.
-- P2: Fuzzy evidence for multi-mapped anchor forms must preserve all mapped concepts, not only the first form mapping.
-- P3: The documented validation command must work as advertised: `socrates knowledge validate`.
+- Concept IDs are canonical identities.
+- Aliases are surface names or alternate labels that resolve to canonical concept IDs.
+- Forms/script words/glyphs are evidence surfaces.
+- Confidence describes truth/support level, such as `verified`, `plausible`, or `speculative`.
+- Provenance/source/lens describes where the mapping came from, such as `curated`, `human_review`, `traditional`, or `physics`.
 
 Reference:
 
-- `TRAINING_MODEL.md`
 - `docs/KNOWLEDGE_CURATION.md`
 - `HARMONIC_DATA_MODEL.md`
+- `TRAINING_MODEL.md`
 
 Likely files:
 
-- `cmd/socrates/main.go`
-- `internal/decipher/activation_graph.go`
-- `internal/decipher/channel_glyph.go`
-- `internal/decipher/glyphs.go`
-- `internal/decipher/scoring.go`
-- `internal/decipher/*_test.go`
 - `internal/knowledge/*.yaml`
 - `internal/knowledge/validate.go`
 - `internal/knowledge/validate_test.go`
+- `internal/knowledge/knowledge.go`
+- `internal/knowledge/loader.go`
+- `internal/decipher/*`
 - `internal/training/*`
 - `training/examples.yaml`
+- `docs/KNOWLEDGE_CURATION.md`
 
 Instructions:
 
 1. Start with `git status --short --branch` and record it.
 2. Run `go test ./...` before changing code and record the baseline result.
-3. Run the documented validation command before changing code and record the result:
-   - `./socrates knowledge validate`
-   - If the binary is stale, also verify through the Go command path Pi normally uses.
-4. Fix active embedded YAML so it passes validation without weakening validation rules.
-   - Prefer adding or correcting compact concept IDs/forms/relations over teaching the validator to ignore bad data.
-   - If a value is an alias, map it through a form or alias field; do not pretend it is a concept ID.
-5. Fix the documented CLI so `socrates knowledge validate` works. `--validate` may remain as compatibility, but the documented positional command must validate.
-6. Preserve glyph pattern kind boundaries.
-   - Bigrams should match only as bigrams.
-   - Prefixes should match only at the start.
-   - Suffixes should match only at the end.
-   - Structural/orthographic observations must not be flattened into semantic glyph patterns.
-7. Fix channel diversity scoring so only channels with active meaningful signals can contribute to diversity.
-   - Empty configured channels must not increase confidence.
-   - Weak/unknown/no-op signals should not count as full independent evidence.
-8. Fix training evaluation so excessive false activations can fail an example or fail an aggregate quality gate.
-   - Recall-only passing is not acceptable.
-   - Precision thresholds should be explicit and documented in code/tests.
-   - Keep examples separate from active knowledge.
-9. Fix fuzzy evidence path construction for anchor forms with multiple concept mappings.
-   - If a matched anchor form maps to multiple concepts, preserve all valid mapped concepts and evidence paths.
-   - Do not stop at the first matching form.
-10. Do not add new symbolic concepts, counsellor/transmutation fields, ranking-weight systems, AI, embeddings, UI, or audio in this task.
-11. Keep the implementation light. Prefer small focused fixes over new abstractions unless they remove real duplication or protect an architecture boundary.
+3. Run the documented validation command and record it:
+   - `make test` if using the new Makefile
+   - `./bin/socrates knowledge validate` if `make create` was used
+   - `./socrates knowledge validate` only if the repo-root binary has been rebuilt
+4. Decide and document the confidence vocabulary.
+   - Preferred: keep confidence to `verified`, `plausible`, `speculative`.
+   - Treat `curated` as `source`, `provenance`, or `review_status`, not confidence.
+   - If `curated` remains a confidence value, define exactly what it means and how it ranks against the others.
+5. Decide and document alias-reference behavior.
+   - Active runtime identities should resolve to canonical concept IDs.
+   - If YAML references an alias, validation should either normalize it or report the canonical target clearly.
+   - Evidence paths should show both the surface/alias and the canonical concept when useful.
+6. Update validation so it distinguishes:
+   - direct canonical concept ID reference
+   - alias reference resolved to a canonical concept ID
+   - invalid unknown reference
+7. Ensure meaning-frequency profiles, relations, and training expectations use canonical concept IDs unless there is a deliberate alias-resolution test.
+8. Keep cross-linguistic forms like `ruach`, `prana`, `qi`, `ahava`, `pneuma`, `psyche`, `dao`, `de`, `ren`, `xin`, `echad`, and `ananda` as forms/aliases that resolve cleanly to canonical concepts.
+9. Do not add broad new concept packs in this task. Only adjust data needed to clarify identity/provenance semantics.
+10. Preserve the completed quality-gate behavior:
+   - active YAML validates
+   - `knowledge validate` works
+   - channel diversity counts active evidence only
+   - training evaluation is precision-aware
+   - multi-concept fuzzy evidence remains complete
+   - cross-script love and Hebrew `El` boundary behavior still works
+11. Keep the implementation light. Prefer small schema/validation clarifications over new architecture.
 12. Add or update tests proving:
-   - active embedded knowledge validates successfully
-   - `socrates knowledge validate` runs the validator
-   - glyph bigram/prefix/suffix/structure patterns do not cross-match outside their kind
-   - empty channels do not earn channel diversity
-   - training/evaluation fails or flags excessive false activations
-   - multi-mapped fuzzy anchor forms preserve all expected concepts
-   - existing cross-script love and Hebrew `El` boundary behavior still works
-13. Run targeted tests while working, then `go test ./...`.
-14. Commit the completed quality-gate work locally with a clear message. Do not push.
-15. Report final `git status --short --branch`, validation result, tests run, files changed, and before/after metrics for training precision/recall.
+   - `curated` is not silently treated as confidence unless explicitly documented and tested
+   - aliases resolve to canonical concept IDs without hiding unknown references
+   - validator error/warning messages distinguish alias resolution from invalid references
+   - frequency profiles and relations keep canonical IDs
+   - training examples validate against canonical IDs or explicit alias-resolution cases
+13. Run targeted tests while working, then `go test ./...` or `make test`.
+14. Commit the completed identity/provenance hardening locally with a clear message. Do not push.
+15. Report final `git status --short --branch`, validation result, tests run, files changed, and the final confidence/provenance decision.
 
 Acceptance Criteria:
 
-- Active embedded YAML passes the project validator.
-- The documented `socrates knowledge validate` command works.
-- Glyph pattern matching preserves pattern kind boundaries.
-- Channel diversity only rewards active meaningful evidence.
-- Training evaluation cannot pass cleanly while producing excessive false activations.
-- Multi-concept forms preserve complete fuzzy evidence paths.
-- Existing harmonic core, training evaluation, and cross-script convergence still pass.
+- Confidence and provenance are not blurred.
+- Alias references resolve to canonical concept IDs in a visible, test-protected way.
+- Unknown concept references still fail validation.
+- Frequency profiles, relations, and training examples remain identity-clean.
+- Existing harmonic core, training evaluation, quality gate behavior, and cross-script convergence still pass.
 - Training does not mutate active knowledge.
 - No black-box truth model is introduced.
 - `go test ./...` passes.
@@ -151,7 +150,7 @@ Acceptance Criteria:
 
 ## Next After This
 
-After this quality gate is clean, return to configurable ranking weights and a small held-out evaluation split. Only after that should Socrates add counsellor/transmutation fields.
+After identity/provenance semantics are clean, return to configurable ranking weights and a small held-out evaluation split. Only after that should Socrates add counsellor/transmutation fields.
 
 ## Nice To Have Later
 
@@ -162,3 +161,4 @@ After this quality gate is clean, return to configurable ranking weights and a s
   - Make root help show subcommand flags clearly, including debug/training flags.
   - Consider hiding or eventually removing the typo alias `descifer` after compatibility is no longer useful.
   - Keep `socrates knowledge validate` working exactly as documented.
+  - Make build/run paths obvious: `make create` currently builds `bin/socrates`, while some manual testing has used repo-root `./socrates`.
