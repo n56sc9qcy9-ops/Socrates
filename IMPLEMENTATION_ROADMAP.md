@@ -210,13 +210,16 @@ Tasks:
 
 - Export candidate matches and graph paths.
 - Save proposed knowledge changes to review files.
+- Save proposed weight changes to review files.
 - Track proposed, accepted, and rejected data.
 - Keep rejected data out of active analysis.
+- Never silently write training or AI suggestions into active runtime YAML.
 
 Done when:
 
 - humans can curate resonance knowledge
 - the engine remains deterministic without AI
+- accepted changes have a review trail before they enter active knowledge
 
 ## Phase 9: Supervised Ranking And Verification
 
@@ -231,12 +234,15 @@ Tasks:
 - Report precision, recall, missed fields, false activations, and evidence-path validity.
 - Add configurable ranking weights for evidence channels.
 - Tune weights only after evaluation reports are stable.
+- Suggest improved form/relation/profile weights from training results.
+- Write suggested weight changes to review files, not active knowledge.
 
 Done when:
 
 - `socrates train` can prove whether a knowledge/ranking change improved or degraded readings
 - expected fields are ranked above false activations for curated examples
 - every training result still shows the evidence paths that caused it
+- proposed weight changes include before/after metrics and require human acceptance before active YAML changes
 
 ## Phase 10: Optional AI Assistance
 

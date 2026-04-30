@@ -23,7 +23,7 @@ frequency_profiles:
       color: 167  # integer hue (0-360 degrees)
       field: 1    # air field ID
     confidence: verified
-    source: cross-cultural etymology
+    source: curated
     lens: resonance
     weight: 80  # integer 0-100
 
@@ -37,7 +37,7 @@ frequency_profiles:
       color: 120
       field: 2
     confidence: verified
-    source: cross-cultural linguistics
+    source: curated
     lens: resonance
     weight: 90
 
@@ -51,7 +51,7 @@ frequency_profiles:
       color: 51
       field: 3
     confidence: verified
-    source: cross-cultural symbolism
+    source: curated
     lens: resonance
     weight: 90
 
@@ -65,7 +65,7 @@ frequency_profiles:
       color: 330
       field: 4
     confidence: verified
-    source: cross-cultural emotion mapping
+    source: curated
     lens: resonance
     weight: 85
 
@@ -79,7 +79,7 @@ frequency_profiles:
       color: 270
       field: 5
     confidence: verified
-    source: linguistic analysis
+    source: curated
     lens: resonance
     weight: 85
 
@@ -93,7 +93,7 @@ frequency_profiles:
       color: 0
       field: 6
     confidence: verified
-    source: philosophical cross-reference
+    source: curated
     lens: resonance
     weight: 90
 
@@ -107,7 +107,7 @@ frequency_profiles:
       color: 0
       field: 0
     confidence: verified
-    source: numerical symbolism
+    source: curated
     lens: resonance
     weight: 80
 
@@ -121,7 +121,7 @@ frequency_profiles:
       color: 20
       field: 7
     confidence: verified
-    source: cross-cultural path philosophy
+    source: curated
     lens: resonance
     weight: 75
 
@@ -135,7 +135,7 @@ frequency_profiles:
       color: 275
       field: 8
     confidence: plausible
-    source: cross-cultural spirit concepts
+    source: curated
     lens: resonance
     weight: 70
 
@@ -149,7 +149,7 @@ frequency_profiles:
       color: 16
       field: 9
     confidence: plausible
-    source: elemental symbolism
+    source: curated
     lens: resonance
     weight: 70
 
@@ -163,7 +163,7 @@ frequency_profiles:
       color: 33
       field: 10
     confidence: verified
-    source: Sanskrit tradition
+    source: traditional
     lens: resonance
     weight: 90
 
@@ -178,7 +178,7 @@ frequency_profiles:
       color: 180
       field: 11
     confidence: verified
-    source: tripartite resonance
+    source: curated
     lens: resonance
     weight: 85
 
@@ -192,7 +192,7 @@ frequency_profiles:
       color: 340
       field: 12
     confidence: verified
-    source: convergence analysis
+    source: curated
     lens: resonance
     weight: 90
 

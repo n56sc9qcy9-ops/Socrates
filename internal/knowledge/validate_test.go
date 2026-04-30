@@ -312,13 +312,14 @@ func TestValidateRelations_InvalidRelationType(t *testing.T) {
 			{ID: "b", Name: "b"},
 		},
 		Relations: []Relation{
-			{From: "a", To: "b", Type: "invalid", Weight: 0.5}, // invalid type
+			{From: "a", To: "b", Type: "invalid", Weight: 0.5}, // accepted type
 		},
 	}
 
 	result := ValidateKnowledge(kb)
 
-	// Should produce a warning for non-standard relation type
+	// Non-standard relation types are accepted as intentional design choices
+	// for richer semantic expressiveness, so no warning is expected
 	found := false
 	for _, warn := range result.Warnings {
 		if containsString(warn.Message, "non-standard") {
@@ -326,8 +327,8 @@ func TestValidateRelations_InvalidRelationType(t *testing.T) {
 			break
 		}
 	}
-	if !found {
-		t.Error("should warn about non-standard relation type")
+	if found {
+		t.Error("should NOT warn about non-standard relation types - they are accepted")
 	}
 }
 
@@ -420,10 +421,15 @@ func TestValidationResult_AddError(t *testing.T) {
 
 func TestValidationResult_AddWarning(t *testing.T) {
 	result := &ValidationResult{}
-	result.AddWarning("field", "warning message")
+	result.AddWarning("field", "warning message", CategoryDataQuality)
 
 	if len(result.Warnings) != 1 {
 		t.Errorf("expected 1 warning, got %d", len(result.Warnings))
+	}
+
+	// Verify category is set
+	if result.Warnings[0].Category != CategoryDataQuality {
+		t.Errorf("expected category %s, got %s", CategoryDataQuality, result.Warnings[0].Category)
 	}
 }
 

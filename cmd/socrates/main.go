@@ -199,20 +199,60 @@ func runKnowledgeValidate(dir string) {
 	}
 
 	if len(result.Warnings) > 0 {
-		fmt.Printf("⚠ Found %d warning(s):\n", len(result.Warnings))
-		for _, w := range result.Warnings {
-			fmt.Printf("  %s: %s\n", w.Field, w.Message)
+		// Group warnings by category
+		counts := result.WarningCountByCategory()
+		categoryNames := map[knowledge.WarningCategory]string{
+			knowledge.CategoryDuplicateForm:      "duplicate forms",
+			knowledge.CategoryAliasResolution:    "alias resolutions",
+			knowledge.CategoryUnknownConcept:     "unknown concepts",
+			knowledge.CategoryUnusualProvenance:  "unusual provenance",
+			knowledge.CategoryNonStandardRelation: "non-standard relations",
+			knowledge.CategoryDataQuality:         "data quality issues",
+		}
+
+		fmt.Printf("⚠ Found %d warning(s) in %d categories:\n", len(result.Warnings), len(counts))
+		for cat, count := range counts {
+			name := categoryNames[cat]
+			if name == "" {
+				name = string(cat)
+			}
+			fmt.Printf("  %s: %d\n", name, count)
 		}
 		fmt.Println()
+
+		// Group and print warnings by category
+		warningsByCategory := make(map[knowledge.WarningCategory][]string)
+		for _, w := range result.Warnings {
+			warningsByCategory[w.Category] = append(warningsByCategory[w.Category], fmt.Sprintf("  %s: %s", w.Field, w.Message))
+		}
+
+		// Print warnings grouped by category
+		for cat := range counts {
+			name := categoryNames[cat]
+			if name == "" {
+				name = string(cat)
+			}
+			fmt.Printf("[%s]\n", name)
+			for _, msg := range warningsByCategory[cat] {
+				fmt.Println(msg)
+			}
+			fmt.Println()
+		}
 	}
 
 	if len(result.Errors) > 0 {
 		fmt.Println("Validation FAILED")
 		os.Exit(1)
-	} else {
-		fmt.Println("Validation passed with warnings")
-		os.Exit(0)
 	}
+
+	// Final report
+	if len(result.Warnings) == 0 {
+		fmt.Println("✓ Validation passed with no warnings")
+	} else {
+		catCount := len(result.WarningCountByCategory())
+		fmt.Printf("✓ Validation passed with %d warning(s) in %d categories\n", len(result.Warnings), catCount)
+	}
+	os.Exit(0)
 }
 
 // runTrainEvaluate runs the training evaluation command.

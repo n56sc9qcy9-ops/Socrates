@@ -9,9 +9,9 @@ import (
 func TestValidateFrequencyProfiles_Basic(t *testing.T) {
 	kb := &Knowledge{
 		Concepts: []Concept{
-			{ID: "breath", Name: "Breath"},
-			{ID: "spirit", Name: "Spirit"},
-			{ID: "life", Name: "Life"},
+			{ID: "breath", Name: "Breath", Aliases: []string{"breath"}},
+			{ID: "spirit", Name: "Spirit", Aliases: []string{"spirit"}},
+			{ID: "life", Name: "Life", Aliases: []string{"life"}},
 		},
 		FrequencyProfiles: []FrequencyProfile{
 			{
@@ -25,8 +25,11 @@ func TestValidateFrequencyProfiles_Basic(t *testing.T) {
 			},
 		},
 	}
+	kb.BuildIndexes()
 
-	result := ValidateKnowledge(kb)
+	kb.BuildIndexes()
+
+		result := ValidateKnowledge(kb)
 
 	if !result.IsValid() {
 		t.Errorf("Valid profile should pass validation: %v", result.Errors)
@@ -37,7 +40,7 @@ func TestValidateFrequencyProfiles_Basic(t *testing.T) {
 func TestValidateFrequencyProfiles_DuplicateID(t *testing.T) {
 	kb := &Knowledge{
 		Concepts: []Concept{
-			{ID: "breath", Name: "Breath"},
+			{ID: "breath", Name: "Breath", Aliases: []string{"breath"}},
 		},
 		FrequencyProfiles: []FrequencyProfile{
 			{
@@ -59,7 +62,9 @@ func TestValidateFrequencyProfiles_DuplicateID(t *testing.T) {
 		},
 	}
 
-	result := ValidateKnowledge(kb)
+	kb.BuildIndexes()
+
+		result := ValidateKnowledge(kb)
 
 	if result.IsValid() {
 		t.Error("Duplicate meaning_frequency_id should fail validation")
@@ -81,7 +86,7 @@ func TestValidateFrequencyProfiles_DuplicateID(t *testing.T) {
 func TestValidateFrequencyProfiles_EmptyID(t *testing.T) {
 	kb := &Knowledge{
 		Concepts: []Concept{
-			{ID: "breath", Name: "Breath"},
+			{ID: "breath", Name: "Breath", Aliases: []string{"breath"}},
 		},
 		FrequencyProfiles: []FrequencyProfile{
 			{
@@ -95,7 +100,9 @@ func TestValidateFrequencyProfiles_EmptyID(t *testing.T) {
 		},
 	}
 
-	result := ValidateKnowledge(kb)
+	kb.BuildIndexes()
+
+		result := ValidateKnowledge(kb)
 
 	if result.IsValid() {
 		t.Error("Empty meaning_frequency_id should fail validation")
@@ -106,7 +113,7 @@ func TestValidateFrequencyProfiles_EmptyID(t *testing.T) {
 func TestValidateFrequencyProfiles_EmptyConcepts(t *testing.T) {
 	kb := &Knowledge{
 		Concepts: []Concept{
-			{ID: "breath", Name: "Breath"},
+			{ID: "breath", Name: "Breath", Aliases: []string{"breath"}},
 		},
 		FrequencyProfiles: []FrequencyProfile{
 			{
@@ -120,7 +127,9 @@ func TestValidateFrequencyProfiles_EmptyConcepts(t *testing.T) {
 		},
 	}
 
-	result := ValidateKnowledge(kb)
+	kb.BuildIndexes()
+
+		result := ValidateKnowledge(kb)
 
 	if result.IsValid() {
 		t.Error("Empty concepts list should fail validation")
@@ -131,7 +140,7 @@ func TestValidateFrequencyProfiles_EmptyConcepts(t *testing.T) {
 func TestValidateFrequencyProfiles_UnknownConcept(t *testing.T) {
 	kb := &Knowledge{
 		Concepts: []Concept{
-			{ID: "breath", Name: "Breath"},
+			{ID: "breath", Name: "Breath", Aliases: []string{"breath"}},
 		},
 		FrequencyProfiles: []FrequencyProfile{
 			{
@@ -145,7 +154,9 @@ func TestValidateFrequencyProfiles_UnknownConcept(t *testing.T) {
 		},
 	}
 
-	result := ValidateKnowledge(kb)
+	kb.BuildIndexes()
+
+		result := ValidateKnowledge(kb)
 
 	if result.IsValid() {
 		t.Error("Unknown concept should fail validation")
@@ -168,7 +179,7 @@ func TestValidateFrequencyProfiles_InvalidVector(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			kb := &Knowledge{
 				Concepts: []Concept{
-					{ID: "breath", Name: "Breath"},
+					{ID: "breath", Name: "Breath", Aliases: []string{"breath"}},
 				},
 				FrequencyProfiles: []FrequencyProfile{
 					{
@@ -182,7 +193,9 @@ func TestValidateFrequencyProfiles_InvalidVector(t *testing.T) {
 				},
 			}
 
-			result := ValidateKnowledge(kb)
+			kb.BuildIndexes()
+
+		result := ValidateKnowledge(kb)
 
 			if result.IsValid() {
 				t.Errorf("Vector with %d elements should fail validation", len(tc.vector))
@@ -206,7 +219,7 @@ func TestValidateFrequencyProfiles_InvalidRatio(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			kb := &Knowledge{
 				Concepts: []Concept{
-					{ID: "breath", Name: "Breath"},
+					{ID: "breath", Name: "Breath", Aliases: []string{"breath"}},
 				},
 				FrequencyProfiles: []FrequencyProfile{
 					{
@@ -220,7 +233,9 @@ func TestValidateFrequencyProfiles_InvalidRatio(t *testing.T) {
 				},
 			}
 
-			result := ValidateKnowledge(kb)
+			kb.BuildIndexes()
+
+		result := ValidateKnowledge(kb)
 
 			if result.IsValid() {
 				t.Errorf("Ratio with %d elements should fail validation", len(tc.ratio))
@@ -233,7 +248,7 @@ func TestValidateFrequencyProfiles_InvalidRatio(t *testing.T) {
 func TestValidateFrequencyProfiles_ZeroDenominator(t *testing.T) {
 	kb := &Knowledge{
 		Concepts: []Concept{
-			{ID: "breath", Name: "Breath"},
+			{ID: "breath", Name: "Breath", Aliases: []string{"breath"}},
 		},
 		FrequencyProfiles: []FrequencyProfile{
 			{
@@ -247,7 +262,9 @@ func TestValidateFrequencyProfiles_ZeroDenominator(t *testing.T) {
 		},
 	}
 
-	result := ValidateKnowledge(kb)
+	kb.BuildIndexes()
+
+		result := ValidateKnowledge(kb)
 
 	if result.IsValid() {
 		t.Error("Zero denominator should fail validation")
@@ -258,7 +275,7 @@ func TestValidateFrequencyProfiles_ZeroDenominator(t *testing.T) {
 func TestValidateFrequencyProfiles_InvalidArchetype(t *testing.T) {
 	kb := &Knowledge{
 		Concepts: []Concept{
-			{ID: "breath", Name: "Breath"},
+			{ID: "breath", Name: "Breath", Aliases: []string{"breath"}},
 		},
 		FrequencyProfiles: []FrequencyProfile{
 			{
@@ -273,7 +290,9 @@ func TestValidateFrequencyProfiles_InvalidArchetype(t *testing.T) {
 		},
 	}
 
-	result := ValidateKnowledge(kb)
+	kb.BuildIndexes()
+
+		result := ValidateKnowledge(kb)
 
 	if result.IsValid() {
 		t.Error("Unknown archetype should fail validation")
@@ -295,7 +314,7 @@ func TestValidateFrequencyProfiles_InvalidArchetype(t *testing.T) {
 func TestValidateFrequencyProfiles_InvalidConfidence(t *testing.T) {
 	kb := &Knowledge{
 		Concepts: []Concept{
-			{ID: "breath", Name: "Breath"},
+			{ID: "breath", Name: "Breath", Aliases: []string{"breath"}},
 		},
 		FrequencyProfiles: []FrequencyProfile{
 			{
@@ -309,7 +328,9 @@ func TestValidateFrequencyProfiles_InvalidConfidence(t *testing.T) {
 		},
 	}
 
-	result := ValidateKnowledge(kb)
+	kb.BuildIndexes()
+
+		result := ValidateKnowledge(kb)
 
 	if result.IsValid() {
 		t.Error("Invalid confidence should fail validation")
@@ -335,7 +356,7 @@ func TestValidateFrequencyProfiles_InvalidWeightRange(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			kb := &Knowledge{
 				Concepts: []Concept{
-					{ID: "breath", Name: "Breath"},
+					{ID: "breath", Name: "Breath", Aliases: []string{"breath"}},
 				},
 				FrequencyProfiles: []FrequencyProfile{
 					{
@@ -349,7 +370,9 @@ func TestValidateFrequencyProfiles_InvalidWeightRange(t *testing.T) {
 				},
 			}
 
-			result := ValidateKnowledge(kb)
+			kb.BuildIndexes()
+
+		result := ValidateKnowledge(kb)
 
 			if tc.valid && !result.IsValid() {
 				t.Errorf("Weight %d should pass validation", tc.weight)
@@ -383,7 +406,7 @@ func TestValidateFrequencyProfiles_AllValidArchetypes(t *testing.T) {
 		t.Run(archetype, func(t *testing.T) {
 			kb := &Knowledge{
 				Concepts: []Concept{
-					{ID: "breath", Name: "Breath"},
+					{ID: "breath", Name: "Breath", Aliases: []string{"breath"}},
 				},
 				FrequencyProfiles: []FrequencyProfile{
 					{
@@ -398,7 +421,9 @@ func TestValidateFrequencyProfiles_AllValidArchetypes(t *testing.T) {
 				},
 			}
 
-			result := ValidateKnowledge(kb)
+			kb.BuildIndexes()
+
+		result := ValidateKnowledge(kb)
 
 			if !result.IsValid() {
 				t.Errorf("Archetype %s should be valid: %v", archetype, result.Errors)
@@ -419,7 +444,7 @@ func TestValidateFrequencyProfiles_AllValidConfidence(t *testing.T) {
 		t.Run(conf, func(t *testing.T) {
 			kb := &Knowledge{
 				Concepts: []Concept{
-					{ID: "breath", Name: "Breath"},
+					{ID: "breath", Name: "Breath", Aliases: []string{"breath"}},
 				},
 				FrequencyProfiles: []FrequencyProfile{
 					{
@@ -433,7 +458,9 @@ func TestValidateFrequencyProfiles_AllValidConfidence(t *testing.T) {
 				},
 			}
 
-			result := ValidateKnowledge(kb)
+			kb.BuildIndexes()
+
+		result := ValidateKnowledge(kb)
 
 			if !result.IsValid() {
 				t.Errorf("Confidence %s should be valid: %v", conf, result.Errors)
@@ -456,7 +483,7 @@ func TestValidateFrequencyProfiles_IntegerVectors(t *testing.T) {
 		t.Run(strings.Join(strings.Fields(string(rune('0'+i))), ""), func(t *testing.T) {
 			kb := &Knowledge{
 				Concepts: []Concept{
-					{ID: "breath", Name: "Breath"},
+					{ID: "breath", Name: "Breath", Aliases: []string{"breath"}},
 				},
 				FrequencyProfiles: []FrequencyProfile{
 					{
@@ -470,7 +497,9 @@ func TestValidateFrequencyProfiles_IntegerVectors(t *testing.T) {
 				},
 			}
 
-			result := ValidateKnowledge(kb)
+			kb.BuildIndexes()
+
+		result := ValidateKnowledge(kb)
 
 			if !result.IsValid() {
 				t.Errorf("Valid vector %v should pass: %v", vector, result.Errors)
@@ -495,7 +524,7 @@ func TestValidateFrequencyProfiles_IntegerRatios(t *testing.T) {
 		t.Run(strings.Join(strings.Fields(string(rune('0'+i))), ""), func(t *testing.T) {
 			kb := &Knowledge{
 				Concepts: []Concept{
-					{ID: "breath", Name: "Breath"},
+					{ID: "breath", Name: "Breath", Aliases: []string{"breath"}},
 				},
 				FrequencyProfiles: []FrequencyProfile{
 					{
@@ -509,7 +538,9 @@ func TestValidateFrequencyProfiles_IntegerRatios(t *testing.T) {
 				},
 			}
 
-			result := ValidateKnowledge(kb)
+			kb.BuildIndexes()
+
+		result := ValidateKnowledge(kb)
 
 			if !result.IsValid() {
 				t.Errorf("Valid ratio %v should pass: %v", ratio, result.Errors)
@@ -565,7 +596,9 @@ func TestValidateFrequencyProfiles_EmptyKnowledgeWithProfiles(t *testing.T) {
 		},
 	}
 
-	result := ValidateKnowledge(kb)
+	kb.BuildIndexes()
+
+		result := ValidateKnowledge(kb)
 
 	// Should fail because concepts list is empty (but not because concepts don't exist)
 	if result.IsValid() {
@@ -577,7 +610,7 @@ func TestValidateFrequencyProfiles_EmptyKnowledgeWithProfiles(t *testing.T) {
 func TestValidateFrequencyProfiles_MultipleErrors(t *testing.T) {
 	kb := &Knowledge{
 		Concepts: []Concept{
-			{ID: "breath", Name: "Breath"},
+			{ID: "breath", Name: "Breath", Aliases: []string{"breath"}},
 		},
 		FrequencyProfiles: []FrequencyProfile{
 			{
@@ -592,7 +625,9 @@ func TestValidateFrequencyProfiles_MultipleErrors(t *testing.T) {
 		},
 	}
 
-	result := ValidateKnowledge(kb)
+	kb.BuildIndexes()
+
+		result := ValidateKnowledge(kb)
 
 	// The validator uses `continue` after empty ID, so only one error may be reported
 	// This is expected behavior - we just need at least one error

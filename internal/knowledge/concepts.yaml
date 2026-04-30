@@ -106,3 +106,310 @@ concepts:
     name: creation
     aliases: [creation, making, birth, sheng]
     neighbors: [life, source, word]
+    
+  # Basic spatial/conceptual primitives
+  - id: in
+    name: in
+    aliases: [in, inward, inside, within]
+    neighbors: [being, path]
+    
+  - id: into
+    name: into
+    aliases: [into, enter, enter_toward]
+    neighbors: [path, being]
+    
+  - id: is_are
+    name: is/are
+    aliases: [is_are, be, exist]
+    neighbors: [being, truth]
+    
+  - id: action
+    name: action
+    aliases: [action, doing, act]
+    neighbors: [give, word]
+    
+  # Body parts
+  - id: head
+    name: head
+    aliases: [head, skull, back_of_head]
+    neighbors: [mind, being]
+    
+  - id: eye
+    name: eye
+    aliases: [eye, seeing]
+    neighbors: [light, truth]
+    
+  - id: mouth
+    name: mouth
+    aliases: [mouth, speaking]
+    neighbors: [word, sound]
+    
+  - id: tooth
+    name: tooth
+    aliases: [tooth, teeth]
+    neighbors: [body, food]
+    
+  - id: palm
+    name: palm
+    aliases: [palm, hand]
+    neighbors: [give, being]
+    
+  # Animals
+  - id: serpent
+    name: serpent
+    aliases: [serpent, snake]
+    neighbors: [wisdom, earth]
+    
+  - id: camel
+    name: camel
+    aliases: [camel]
+    neighbors: [journey, desert]
+    
+  # Objects
+  - id: door
+    name: door
+    aliases: [door, doorway]
+    neighbors: [path, house]
+    
+  - id: window
+    name: window
+    aliases: [window]
+    neighbors: [house, light]
+    
+  - id: fence
+    name: fence
+    aliases: [fence, hedge]
+    neighbors: [boundary, earth]
+    
+  - id: weapon
+    name: weapon
+    aliases: [weapon, spear]
+    neighbors: [action, war]
+    
+  - id: goad
+    name: goad
+    aliases: [goad, stick]
+    neighbors: [action, guidance]
+    
+  - id: seed
+    name: seed
+    aliases: [seed, grain]
+    neighbors: [life, growth]
+    
+  # Container/concept
+  - id: container
+    name: container
+    aliases: [container, vessel]
+    neighbors: [holding, water]
+    
+  - id: shell
+    name: shell
+    aliases: [shell, covering]
+    neighbors: [body, protection]
+    
+  - id: scale
+    name: scale
+    aliases: [scale, balance]
+    neighbors: [weight, truth]
+    
+  # Support/structure
+  - id: support
+    name: support
+    aliases: [support, foundation]
+    neighbors: [earth, being]
+    
+  # Hunt/journey
+  - id: hunt
+    name: hunt
+    aliases: [hunt, hunting]
+    neighbors: [action, life]
+    
+  # Mark/symbol
+  - id: mark
+    name: mark
+    aliases: [mark, sign, letter]
+    neighbors: [word, name]
+    
+  # Linguistic concepts
+  - id: nasalization
+    name: nasalization
+    aliases: [nasalization, nasal]
+    neighbors: [sound, breath]
+    
+  - id: exhalation
+    name: exhalation
+    aliases: [exhalation, breathing_out]
+    neighbors: [breath, sound]
+    
+  - id: virtue
+    name: virtue
+    aliases: [virtue, goodness]
+    neighbors: [truth, good]
+    
+  # Foreign/transliterated terms
+  - id: christos
+    name: christos
+    aliases: [christos, christ]
+    neighbors: [anointed, sacred]
+    
+  - id: liv
+    name: liv
+    aliases: [liv, life_swedish]
+    neighbors: [life]
+    
+  - id: instrument_of_thought
+    name: instrument of thought
+    aliases: [instrument_of_thought, instrument-of-thought, organ]
+    neighbors: [mind, body]
+    
+
+  # Orthographic concepts
+  - id: consonant_heavy_orthography
+    name: consonant-heavy orthography
+    aliases: [consonant_heavy_orthography, consonant-heavy-orthography]
+    neighbors: [writing, language]
+    
+  - id: vowel_heavy_orthography
+    name: vowel-heavy orthography
+    aliases: [vowel_heavy_orthography, vowel-heavy-orthography]
+    neighbors: [writing, language]
+    
+  - id: repeated_letter_observation
+    name: repeated-letter observation
+    aliases: [repeated_letter_observation, repeated-letter-observation]
+    neighbors: [writing, pattern]
+    
+  - id: connection
+    name: connection
+    aliases: [connection, linking]
+    neighbors: [being, relation]
+    
+  # Missing concepts referenced in forms and glyphs
+  - id: back_of_head
+    name: back of head
+    aliases: [back_of_head, back-of-head]
+    neighbors: [head, body]
+    
+  - id: heart_mind
+    name: heart-mind
+    aliases: [heart_mind, heart-mind]
+    neighbors: [heart, mind]
+    
+  - id: reason
+    name: reason
+    aliases: [reason, reasoning]
+    neighbors: [mind, truth]
+    
+  - id: account
+    name: account
+    aliases: [account, story, narrative]
+    neighbors: [word, truth]    
+  - id: desert
+    name: desert
+    aliases: [desert, arid]
+    neighbors: [journey, earth]
+    
+  - id: house
+    name: house
+    aliases: [house, dwelling]
+    neighbors: [being, shelter]
+    
+  - id: boundary
+    name: boundary
+    aliases: [boundary, edge]
+    neighbors: [being, path]
+    
+  - id: war
+    name: war
+    aliases: [war, conflict]
+    neighbors: [action, being]
+    
+  - id: guidance
+    name: guidance
+    aliases: [guidance, leading]
+    neighbors: [path, word]
+    
+  - id: growth
+    name: growth
+    aliases: [growth, development]
+    neighbors: [life, being]
+    
+  - id: holding
+    name: holding
+    aliases: [holding, containing]
+    neighbors: [being, action]
+    
+  - id: protection
+    name: protection
+    aliases: [protection, shield]
+    neighbors: [being, life]
+    
+  - id: weight
+    name: weight
+    aliases: [weight, mass]
+    neighbors: [truth, measure]
+    
+  - id: good
+    name: good
+    aliases: [good, beneficial]
+    neighbors: [truth, being]
+    
+  - id: anointed
+    name: anointed
+    aliases: [anointed, chosen]
+    neighbors: [sacred, action]
+    
+  - id: sacred
+    name: sacred
+    aliases: [sacred, holy]
+    neighbors: [source, truth]
+    
+  - id: writing
+    name: writing
+    aliases: [writing, script]
+    neighbors: [word, mark]
+    
+  - id: language
+    name: language
+    aliases: [language, tongue]
+    neighbors: [word, sound]
+    
+  - id: pattern
+    name: pattern
+    aliases: [pattern, form]
+    neighbors: [word, being]
+    
+  - id: relation
+    name: relation
+    aliases: [relation, relationship]
+    neighbors: [being, word]
+    
+  - id: body
+    name: body
+    aliases: [body, flesh, liv]
+    neighbors: [being, life]
+    
+  - id: shelter
+    name: shelter
+    aliases: [shelter, home]
+    neighbors: [house, being]
+    
+  - id: measure
+    name: measure
+    aliases: [measure, measurement]
+    neighbors: [truth, word]
+    
+  - id: food
+    name: food
+    aliases: [food, sustenance]
+    neighbors: [life, body]
+    
+  - id: wisdom
+    name: wisdom
+    aliases: [wisdom, understanding]
+    neighbors: [truth, mind]
+    
+  - id: journey
+    name: journey
+    aliases: [journey, travel]
+    neighbors: [path, life]

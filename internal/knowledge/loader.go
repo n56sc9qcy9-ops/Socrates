@@ -312,6 +312,7 @@ type FragmentEntry struct {
 	Form       string  `yaml:"form"`
 	Concept    string  `yaml:"concept"`
 	Lens       string  `yaml:"lens"`
+	Source     string  `yaml:"source"`
 	Confidence string  `yaml:"confidence"`
 	Weight     float64 `yaml:"weight"`
 }
@@ -322,6 +323,7 @@ func (f FragmentEntry) ToFragment() Form {
 		Form:       f.Form,
 		Concept:    f.Concept,
 		Lens:       f.Lens,
+		Source:     f.Source,
 		Confidence: f.Confidence,
 		Weight:     f.Weight,
 	}
@@ -333,6 +335,7 @@ type ScriptWordEntry struct {
 	Word       string   `yaml:"word"`
 	Runes      []uint32 `yaml:"runes"`
 	Meanings   []string `yaml:"meanings"`
+	Source     string   `yaml:"source"`
 	Confidence string   `yaml:"confidence"`
 	Weight     float64  `yaml:"weight"`
 }
@@ -344,6 +347,7 @@ func (s ScriptWordEntry) ToScriptWord() ScriptWord {
 		Word:       s.Word,
 		Runes:      s.Runes,
 		Meanings:   s.Meanings,
+		Source:     s.Source,
 		Confidence: s.Confidence,
 		Weight:     s.Weight,
 	}
@@ -359,6 +363,7 @@ type RelationEntry struct {
 	From   string  `yaml:"from"`
 	To     string  `yaml:"to"`
 	Type   string  `yaml:"type"`
+	Source string  `yaml:"source"`
 	Weight float64 `yaml:"weight"`
 }
 
@@ -368,6 +373,7 @@ func (r RelationEntry) ToRelation() Relation {
 		From:   r.From,
 		To:     r.To,
 		Type:   r.Type,
+		Source: r.Source,
 		Weight: r.Weight,
 	}
 }
@@ -476,6 +482,8 @@ type frequenciesDoc struct {
 
 // FrequencyProfileEntry represents a frequency profile entry in YAML.
 // All values are integer-based for harmonic precision.
+// Source describes provenance (e.g., "curated", "human_review", "physics").
+// Confidence describes truth/support level: "verified", "plausible", or "speculative".
 type FrequencyProfileEntry struct {
 	MeaningFrequencyID string        `yaml:"meaning_frequency_id"`
 	Concepts           []string      `yaml:"concepts"`

@@ -199,6 +199,66 @@ func (b *KnowledgeBuilder) Build() *Knowledge {
 	return kb
 }
 
+// BuildIndexes rebuilds the lookup indexes from the current data.
+// Call this after directly constructing a Knowledge struct (not via KnowledgeBuilder).
+func (kb *Knowledge) BuildIndexes() {
+	// Initialize maps
+	kb.formByText = make(map[string][]Form)
+	kb.formsByConcept = make(map[string][]Form)
+	kb.scriptWordsByScript = make(map[string][]ScriptWord)
+	kb.conceptsByID = make(map[string]Concept)
+	kb.conceptByName = make(map[string]Concept)
+	kb.aliasesToConcept = make(map[string]Concept)
+	kb.relationsFrom = make(map[string][]Relation)
+	kb.relationsTo = make(map[string][]Relation)
+	kb.glyphPatternsByScript = make(map[string][]GlyphPattern)
+	kb.glyphPatternsByRune = make(map[uint32][]GlyphPattern)
+	kb.frequencyProfilesByConcept = make(map[string][]FrequencyProfile)
+	kb.frequencyProfilesByID = make(map[string]FrequencyProfile)
+
+	// Index concepts
+	for _, c := range kb.Concepts {
+		kb.conceptsByID[c.ID] = c
+		kb.conceptByName[c.Name] = c
+		for _, alias := range c.Aliases {
+			kb.aliasesToConcept[alias] = c
+		}
+	}
+
+	// Index forms by text and concept
+	for _, f := range kb.Forms {
+		kb.formByText[f.Form] = append(kb.formByText[f.Form], f)
+		kb.formsByConcept[f.Concept] = append(kb.formsByConcept[f.Concept], f)
+	}
+
+	// Index script words by script
+	for _, w := range kb.ScriptWords {
+		kb.scriptWordsByScript[w.Script] = append(kb.scriptWordsByScript[w.Script], w)
+	}
+
+	// Index relations
+	for _, r := range kb.Relations {
+		kb.relationsFrom[r.From] = append(kb.relationsFrom[r.From], r)
+		kb.relationsTo[r.To] = append(kb.relationsTo[r.To], r)
+	}
+
+	// Index glyph patterns
+	for _, g := range kb.GlyphPatterns {
+		kb.glyphPatternsByScript[g.Script] = append(kb.glyphPatternsByScript[g.Script], g)
+		if g.Rune != 0 {
+			kb.glyphPatternsByRune[g.Rune] = append(kb.glyphPatternsByRune[g.Rune], g)
+		}
+	}
+
+	// Index frequency profiles
+	for _, fp := range kb.FrequencyProfiles {
+		kb.frequencyProfilesByID[fp.MeaningFrequencyID] = fp
+		for _, concept := range fp.Concepts {
+			kb.frequencyProfilesByConcept[concept] = append(kb.frequencyProfilesByConcept[concept], fp)
+		}
+	}
+}
+
 // ============================================================
 // Core Types
 // ============================================================
@@ -212,39 +272,50 @@ type Concept struct {
 }
 
 // Form represents a form-to-concept mapping (fragment).
+// Source describes provenance (e.g., "curated", "traditional", "human_review").
+// Confidence describes truth/support level: "verified", "plausible", or "speculative".
 type Form struct {
 	Form       string
 	Concept    string
 	Lens       string
+	Source     string
 	Confidence string
 	Weight     float64
 }
 
 // ScriptWord represents a complete word in a specific script.
+// Source describes provenance (e.g., "curated", "traditional").
+// Confidence describes truth/support level: "verified", "plausible", or "speculative".
 type ScriptWord struct {
 	Script     string
 	Word       string
 	Runes      []uint32
 	Meanings   []string
+	Source     string
 	Confidence string
 	Weight     float64
 }
 
 // Relation represents a directed relation between concepts.
+// Source describes provenance.
 type Relation struct {
 	From   string
 	To     string
 	Type   string
+	Source string
 	Weight float64
 }
 
 // GlyphPattern represents a glyph/script pattern mapping.
+// Source describes provenance (e.g., "curated", "traditional").
+// Confidence describes truth/support level: "verified", "plausible", or "speculative".
 type GlyphPattern struct {
 	Script     string
 	Rune       uint32
 	Pattern    string
 	Concept    string
 	Readings   []string
+	Source     string
 	Lens       string
 	Confidence string
 	Weight     float64
