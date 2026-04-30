@@ -45,124 +45,113 @@ Completed and committed locally:
 - Training/evaluation layer for supervised ranking over evidence paths.
 - Channel semantics correction and cross-script meaning-frequency convergence.
 - Architecture quality gate for validation, scoring, evaluation, and evidence-path integrity.
+- Knowledge identity/provenance hardening; validation warnings reduced to zero.
 
 Current git status before this handoff:
 
 ```text
-## main...origin/main [ahead 24]
+## main...origin/main [ahead 26]
 ```
 
 Architect correction:
 
 - Socrates can now evaluate curated examples and can converge English, Norwegian, Hebrew, and Chinese love forms on a shared harmonic field.
 - Pi completed the quality gate, including active-channel diversity, positional `knowledge validate`, precision-aware training evaluation, and multi-concept fuzzy evidence handling.
-- Pi began identity/provenance hardening, but the reported validation output still shows `239 warning(s)`.
-- A warning count that high means the knowledge layer is still noisy. It is not an acceptable resting state before ranking weights or counsellor work.
+- Pi completed identity/provenance hardening: confidence is `verified`, `plausible`, `speculative`; provenance/source is `curated`, `traditional`, `human_review`, `physics`; `curated` is not confidence.
+- Validation warning debt was reduced to zero.
 - The next step is not counsellor prose, not new symbolic feature work, and not ranking-weight tuning yet.
-- Concept IDs, aliases, confidence, and provenance must be kept distinct before more knowledge is added.
-- Aliases may help resolve references, but active data should still preserve canonical concept identity and evidence paths.
-- `curated` sounds like provenance/source, not confidence, unless the project explicitly defines it as a confidence level with semantics distinct from `verified`, `plausible`, and `speculative`.
+- The remaining schema risk is concept hygiene: `id`, `name`, `aliases`, and broad spiritual equivalences must not collapse distinct fields.
 
 ## Current Next Task
 
 Task:
-Finish knowledge identity hardening and reduce validation warning debt.
+Audit concept schema hygiene and guard broad spiritual identities.
 
 Context:
-Pi completed the architecture quality gate in commit `b6051fb` and began identity/provenance hardening. The reported implementation added `Source` fields, structured concept-reference resolution, valid source values, and `BuildIndexes()`. That direction is good.
+Pi completed identity/provenance hardening in commit `3ef62c0`. Validation now reaches zero warnings. That is good, but clean validation does not prove that the concept model is spiritually or semantically clean.
 
-However, the reported validator output was:
+Observed issue:
 
-```text
-Validation passed with warnings
-239 warning(s)
+```yaml
+- id: source
+  name: source
+  aliases: [source, origin, beginning, genesis, god, power, divine, totality]
 ```
 
-That is too noisy. A valid knowledge layer should not require humans to ignore hundreds of warnings. The next task is to finish this hardening by making validation output actionable and compact.
+This blurs canonical identity, display label, aliases, and neighboring concepts. It also risks collapsing distinct spiritual fields such as `source`, `god`, `divine`, and `power`.
 
-Before ranking-weight tuning, lock down the knowledge semantics:
+Before ranking-weight tuning, audit the concept schema itself:
 
 - Concept IDs are canonical identities.
-- Aliases are surface names or alternate labels that resolve to canonical concept IDs.
-- Forms/script words/glyphs are evidence surfaces.
-- Confidence describes truth/support level, such as `verified`, `plausible`, or `speculative`.
-- Provenance/source/lens describes where the mapping came from, such as `curated`, `human_review`, `traditional`, or `physics`.
+- Names are human display labels.
+- Aliases are alternate surface labels, not a place to store neighboring concepts.
+- Broad spiritual terms may resonate through relations without being flattened into one alias bucket.
 
 Reference:
 
 - `docs/KNOWLEDGE_CURATION.md`
 - `HARMONIC_DATA_MODEL.md`
-- `TRAINING_MODEL.md`
+- `ARCHITECTURE.md`
 
 Likely files:
 
-- `internal/knowledge/*.yaml`
+- `internal/knowledge/concepts.yaml`
 - `internal/knowledge/validate.go`
 - `internal/knowledge/validate_test.go`
 - `internal/knowledge/knowledge.go`
-- `internal/knowledge/loader.go`
-- `internal/decipher/*`
-- `internal/training/*`
-- `training/examples.yaml`
 - `docs/KNOWLEDGE_CURATION.md`
 
 Instructions:
 
 1. Start with `git status --short --branch` and record it.
 2. Run `go test ./...` before changing code and record the baseline result.
-3. Run the documented validation command and record it:
-   - `make test` if using the new Makefile
-   - `./bin/socrates knowledge validate` if `make create` was used
-   - `./socrates knowledge validate` only if the repo-root binary has been rebuilt
-4. Report the current warning categories and counts before changing behavior.
-   - Group warnings by cause, such as unknown concept, alias resolution, duplicate form, missing source, invalid confidence, etc.
-   - Do not paste hundreds of repeated warning lines into the final report.
-5. Decide and document the confidence vocabulary.
-   - Preferred: keep confidence to `verified`, `plausible`, `speculative`.
-   - Treat `curated` as `source`, `provenance`, or `review_status`, not confidence.
-   - If `curated` remains a confidence value, define exactly what it means and how it ranks against the others.
-6. Decide and document alias-reference behavior.
-   - Active runtime identities should resolve to canonical concept IDs.
-   - If YAML references an alias, validation should either normalize it or report the canonical target clearly.
-   - Evidence paths should show both the surface/alias and the canonical concept when useful.
-7. Update validation so it distinguishes:
-   - direct canonical concept ID reference
-   - alias reference resolved to a canonical concept ID
-   - invalid unknown reference
-8. Reduce validation warning debt.
-   - Unknown concept warnings should be fixed or intentionally marked external/speculative according to the project rules.
-   - Alias-resolution warnings should not flood normal validation if the alias resolves cleanly and this behavior is accepted.
-   - Duplicate form warnings should be deduplicated, justified, or made more specific so intentional multi-concept mappings are not treated as noise.
-   - The target is zero warnings if practical. If not practical, the remaining warnings must be few, categorized, and intentionally accepted.
-9. Ensure meaning-frequency profiles, relations, and training expectations use canonical concept IDs unless there is a deliberate alias-resolution test.
-10. Keep cross-linguistic forms like `ruach`, `prana`, `qi`, `ahava`, `pneuma`, `psyche`, `dao`, `de`, `ren`, `xin`, `echad`, and `ananda` as forms/aliases that resolve cleanly to canonical concepts.
-11. Do not add broad new concept packs in this task. Only adjust data needed to clarify identity/provenance semantics and warning debt.
-12. Preserve the completed quality-gate behavior:
+3. Run the documented validation command and record the result.
+4. Audit `concepts.yaml` for concept hygiene issues:
+   - `name` exactly equals `id`
+   - alias equals own `id`
+   - alias equals another concept's `id`
+   - duplicate aliases across concepts
+   - broad spiritual terms stored as aliases where relations would be more accurate
+5. Add validator warnings or failures for the hygiene issues above.
+   - Do not make seed-data convenience silently acceptable.
+   - If `name == id` is temporarily accepted, it must be visible as a warning category until curated.
+6. Clean the most important concept entries, especially broad spiritual fields:
+   - `source`
+   - `god`
+   - `divine`
+   - `power`
+   - `one`
+   - `light`
+   - `truth`
+   - `love`
+7. Prefer relations over aliases when concepts are distinct but resonant.
+   - Example: `source` may relate to `god`, `divine`, or `power`, but they should not automatically be identical aliases unless deliberately documented.
+8. Do not do a broad concept-pack expansion in this task.
+9. Preserve the completed quality-gate behavior:
    - active YAML validates
    - `knowledge validate` works
    - channel diversity counts active evidence only
    - training evaluation is precision-aware
    - multi-concept fuzzy evidence remains complete
    - cross-script love and Hebrew `El` boundary behavior still works
-13. Keep the implementation light. Prefer small schema/validation clarifications over new architecture.
-14. Add or update tests proving:
-   - `curated` is not silently treated as confidence unless explicitly documented and tested
-   - aliases resolve to canonical concept IDs without hiding unknown references
-   - validator error/warning messages distinguish alias resolution from invalid references
-   - frequency profiles and relations keep canonical IDs
-   - training examples validate against canonical IDs or explicit alias-resolution cases
-   - validation warning count is zero or intentionally bounded and categorized
-15. Run targeted tests while working, then `go test ./...` or `make test`.
-16. Commit the completed identity/provenance hardening locally with a clear message. Do not push.
-17. Report final `git status --short --branch`, validation result, warning category counts before/after, tests run, files changed, and the final confidence/provenance decision.
+10. Keep the implementation light. Prefer validator guardrails and focused curation over large refactors.
+11. Add or update tests proving:
+   - alias cannot equal own concept ID without warning/failure
+   - alias cannot equal another concept ID without warning/failure
+   - duplicate aliases are detected
+   - broad spiritual identities are represented through relations when distinct
+   - validation remains compact and actionable
+12. Run targeted tests while working, then `go test ./...` or `make test`.
+13. Commit the completed concept schema hygiene work locally with a clear message. Do not push.
+14. Report final `git status --short --branch`, validation result, concept hygiene warnings before/after, tests run, and files changed.
 
 Acceptance Criteria:
 
-- Confidence and provenance are not blurred.
-- Alias references resolve to canonical concept IDs in a visible, test-protected way.
-- Unknown concept references still fail validation.
-- Validation output is compact and actionable; hundreds of warnings are not acceptable.
-- Frequency profiles, relations, and training examples remain identity-clean.
+- Concept `id`, `name`, `aliases`, and relations have distinct meanings.
+- Own-ID aliases are detected and removed or explicitly warned.
+- Cross-concept alias collisions are detected.
+- Broad spiritual fields are not silently flattened into aliases.
+- Validation remains compact and actionable.
 - Existing harmonic core, training evaluation, quality gate behavior, and cross-script convergence still pass.
 - Training does not mutate active knowledge.
 - No black-box truth model is introduced.
@@ -171,7 +160,7 @@ Acceptance Criteria:
 
 ## Next After This
 
-After identity/provenance semantics are clean, return to configurable ranking weights and a small held-out evaluation split. Only after that should Socrates add counsellor/transmutation fields.
+After concept schema hygiene is clean, return to configurable ranking weights and a small held-out evaluation split. Only after that should Socrates add counsellor/transmutation fields.
 
 ## Nice To Have Later
 
