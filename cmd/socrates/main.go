@@ -145,8 +145,17 @@ func main() {
 	case "train":
 		trainCmd.Parse(os.Args[2:])
 
-		// Run evaluation (train always evaluates)
-		runTrainEvaluate(*trainExamplesPath, *trainHeldOutPath, *trainWeightsPath, *trainDebugCmd)
+		// Check for suggest-weights subcommand
+		args := trainCmd.Args()
+		if len(args) > 0 && args[0] == "suggest-weights" {
+			runSuggestWeights()
+		} else {
+			runTrainEvaluate(*trainExamplesPath, *trainHeldOutPath, *trainWeightsPath, *trainDebugCmd)
+		}
+
+	case "suggest-weights":
+		// Direct suggest-weights command
+		runSuggestWeights()
 
 	case "help", "-h", "--help":
 		flag.Usage()
@@ -265,6 +274,99 @@ func runKnowledgeValidate(dir string) {
 		catCount := len(result.WarningCountByCategory())
 		fmt.Printf("✓ Validation passed with %d warning(s) in %d categories\n", len(result.Warnings), catCount)
 	}
+	os.Exit(0)
+}
+
+// runSuggestWeights generates weight change suggestions and writes them to review files.
+func runSuggestWeights() {
+	// Load knowledge base
+	kb, err := knowledge.LoadFromEmbed()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error loading knowledge: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Load ranking weights
+	weights := decipher.DefaultRankingWeights()
+
+	// Create engine and suggester
+	engine := decipher.NewEngineWithKnowledge(kb)
+	suggester := training.NewWeightSuggester(engine, weights)
+	suggester.SetReviewPath("review/weight_suggestions.yaml")
+
+	// Load training examples
+	loader := training.NewLoader()
+	trainExamples, err := loader.LoadFromFile("training/examples.yaml")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error loading training examples: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Load held-out examples (optional)
+	heldOutExamples, err := loader.LoadHeldOutFromFile("training/heldout.yaml")
+	if err != nil {
+		// No held-out examples is OK - we'll just use train
+		heldOutExamples = training.Examples{}
+		fmt.Println("Note: No held-out examples found, using train only")
+	}
+
+	fmt.Printf("Loaded %d train examples, %d held-out examples\n", len(trainExamples), len(heldOutExamples))
+
+	// Get baseline metrics by evaluating with current weights
+	eval := training.NewEvaluatorWithWeights(engine, weights, "baseline")
+	report := eval.EvaluateWithReport(trainExamples)
+
+	baseTrainMetrics := training.MetricsDelta{
+		ConceptPrecision: report.Train.ConceptPrec,
+		ConceptRecall:    report.Train.ConceptRec,
+		FieldPrecision:   report.Train.FieldPrec,
+		FieldRecall:      report.Train.FieldRec,
+	}
+
+	var baseHeldOutMetrics training.MetricsDelta
+	if len(heldOutExamples) > 0 {
+		heldOutReport := &training.EvaluationReport{}
+		eval.EvaluateHeldOut(heldOutExamples, heldOutReport)
+		heldOutReport.Finalize()
+		baseHeldOutMetrics = training.MetricsDelta{
+			ConceptPrecision: heldOutReport.HeldOut.ConceptPrec,
+			ConceptRecall:    heldOutReport.HeldOut.ConceptRec,
+			FieldPrecision:   heldOutReport.HeldOut.FieldPrec,
+			FieldRecall:      heldOutReport.HeldOut.FieldRec,
+		}
+	}
+
+	fmt.Println("\nBaseline metrics:")
+	fmt.Printf("  Train: precision=%.4f, recall=%.4f\n", baseTrainMetrics.FieldPrecision, baseTrainMetrics.FieldRecall)
+	fmt.Printf("  HeldOut: precision=%.4f, recall=%.4f\n", baseHeldOutMetrics.FieldPrecision, baseHeldOutMetrics.FieldRecall)
+
+	// Generate suggestions
+	fmt.Println("\nGenerating weight change suggestions...")
+	candidates := suggester.GenerateSuggestions(trainExamples, heldOutExamples, baseTrainMetrics, baseHeldOutMetrics)
+
+	fmt.Printf("Generated %d candidate changes\n", len(candidates))
+
+	if len(candidates) == 0 {
+		fmt.Println("No suggestions found. Current weights are acceptable.")
+	} else {
+		fmt.Println("\nSuggestions:")
+		for i, c := range candidates {
+			fmt.Printf("  [%d] %s: %v -> %v\n", i+1, c.Path, c.Current, c.Suggested)
+			fmt.Printf("       rationale: %s\n", c.Rationale)
+			fmt.Printf("       heldout delta: fp=%.4f, rec=%.4f\n", c.HeldOutDelta.FieldPrecision, c.HeldOutDelta.FieldRecall)
+		}
+	}
+
+	// Write to review file
+	if err := suggester.WriteSuggestions(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error writing suggestions: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("\n✓ Suggestions written to %s\n", suggester.ReviewPath)
+	fmt.Println("Review and manually apply accepted changes.")
+	fmt.Println("Do NOT auto-apply - review each suggestion first.")
+
 	os.Exit(0)
 }
 

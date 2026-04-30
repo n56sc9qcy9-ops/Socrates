@@ -1,0 +1,33 @@
+# Weight Suggestions Review File
+# Generated: 2026-04-30T17:52:31+02:00
+#
+# This file contains proposed weight changes.
+# Each suggestion has:
+#   - path: dot-path to the weight parameter
+#   - current: current value
+#   - suggested: proposed value
+#   - rationale: why this change is suggested
+#   - train_delta: metric changes on train set
+#   - heldout_delta: metric changes on held-out set
+#   - status: "pending", "accepted", or "rejected"
+#
+# Do NOT auto-apply these changes. Review and accept/reject manually.
+#
+# =============================================================================
+
+version: "1.0"
+generated: "2026-04-30T17:52:31+02:00"
+
+suggestions:
+  - message: "No suggestions generated. Current weights are acceptable."
+    status: "none"
+
+
+# =============================================================================
+# Review Instructions
+# =============================================================================
+# 1. Examine each suggestion's heldout_delta (held-out metrics).
+# 2. Accept suggestions that improve held-out metrics.
+# 3. Reject suggestions that improve train but degrade held-out metrics.
+# 4. Update status to "accepted" or "rejected" after review.
+# 5. Do NOT delete this file after accepting - keep for audit trail.
