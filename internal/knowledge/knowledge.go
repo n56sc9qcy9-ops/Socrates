@@ -253,6 +253,18 @@ type GlyphPattern struct {
 // Lookup Methods (Index-based, fast)
 // ============================================================
 
+// HasConcept returns true if the concept exists in the knowledge base.
+func (k *Knowledge) HasConcept(conceptID string) bool {
+	_, ok := k.conceptsByID[conceptID]
+	return ok
+}
+
+// HasFrequencyProfile returns true if the frequency profile exists.
+func (k *Knowledge) HasFrequencyProfile(id string) bool {
+	_, ok := k.frequencyProfilesByID[id]
+	return ok
+}
+
 // GetConceptByID returns a concept by its ID.
 func (k *Knowledge) GetConceptByID(id string) (Concept, bool) {
 	c, ok := k.conceptsByID[id]

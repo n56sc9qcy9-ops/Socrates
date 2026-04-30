@@ -1,0 +1,116 @@
+# Training Examples
+# These examples are curated separately from active knowledge.
+# They verify the engine; they are NOT automatically added as truth.
+# 
+# expected_concepts: must reference concept IDs from concepts.yaml
+# expected_fields: must reference meaning_frequency_id from frequencies.yaml
+# expected_quality: consonant, dissonant, or unresolved_tension
+
+examples:
+  # Example 1: spirit concept - activates breath, spirit, and air concepts
+  - id: ex.spirit.1
+    input: spirit
+    expected_concepts:
+      - spirit
+      - breath
+      - air
+    expected_fields:
+      - breath-vibration
+      - spirit-soul-essence
+    expected_quality: consonant
+    confidence: curated
+    source: human_review
+    notes: "spirit activates concepts around breath and air, forms coherent harmonic field"
+
+  # Example 2: breath concept - activates life and spirit
+  - id: ex.breath.1
+    input: breath
+    expected_concepts:
+      - breath
+      - life
+      - spirit
+    expected_fields:
+      - breath-vibration
+      - breath-life-spirit
+    expected_quality: consonant
+    confidence: curated
+    source: human_review
+
+  # Example 3: love concept - activates heart
+  - id: ex.love.1
+    input: love
+    expected_concepts:
+      - love
+      - heart
+    expected_fields:
+      - love-heart-union
+    expected_quality: consonant
+    confidence: curated
+    source: human_review
+
+  # Example 4: light concept - activates truth and fire
+  - id: ex.light.1
+    input: light
+    expected_concepts:
+      - light
+      - truth
+      - fire
+    expected_fields:
+      - truth-light-illumination
+    expected_quality: consonant
+    confidence: curated
+    source: human_review
+
+  # Example 5: truth concept - may form unresolved harmonic field
+  - id: ex.truth.1
+    input: truth
+    expected_concepts:
+      - truth
+      - light
+      - being
+    expected_fields:
+      - truth-light-illumination
+    expected_quality: consonant
+    confidence: curated
+    source: human_review
+    notes: "truth forms coherent light field"
+
+  # Example 6: word concept (from John 1 - in the beginning was the word)
+  - id: ex.word.1
+    input: word
+    expected_concepts:
+      - word
+      - sound
+      - name
+    expected_fields:
+      - word-speech-logos
+    expected_quality: consonant
+    confidence: curated
+    source: human_review
+    notes: "word as creative speech"
+
+  # Example 7: life concept - activates breath and creation
+  - id: ex.life.1
+    input: life
+    expected_concepts:
+      - life
+      - breath
+      - creation
+    expected_fields:
+      - life-force-vitality
+      - breath-life-spirit
+    expected_quality: consonant
+    confidence: curated
+    source: human_review
+
+  # Example 8: fire concept
+  - id: ex.fire.1
+    input: fire
+    expected_concepts:
+      - fire
+      - light
+    expected_fields:
+      - fire-flame-transformation
+    expected_quality: consonant
+    confidence: curated
+    source: human_review

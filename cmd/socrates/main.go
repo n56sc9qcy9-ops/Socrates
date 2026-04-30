@@ -8,6 +8,7 @@ import (
 
 	"socrates/internal/decipher"
 	"socrates/internal/knowledge"
+	"socrates/internal/training"
 )
 
 func main() {
@@ -20,6 +21,11 @@ func main() {
 	knowledgeCmd := flag.NewFlagSet("knowledge", flag.ExitOnError)
 	validateCmd := knowledgeCmd.Bool("validate", false, "validate knowledge data")
 	validateDir := knowledgeCmd.String("dir", "", "directory containing knowledge YAML files to validate")
+
+	// Training subcommand
+	trainCmd := flag.NewFlagSet("train", flag.ExitOnError)
+	trainExamplesPath := trainCmd.String("examples", "", "path to training examples YAML file")
+	trainDebugCmd := trainCmd.Bool("debug", false, "show detailed evaluation output")
 
 	flag.Usage = func() {
 		fmt.Println("Socrates Language-Resonance Engine")
@@ -119,6 +125,12 @@ func main() {
 			os.Exit(1)
 		}
 
+	case "train":
+		trainCmd.Parse(os.Args[2:])
+		
+		// Run evaluation (train always evaluates)
+		runTrainEvaluate(*trainExamplesPath, *trainDebugCmd)
+
 	case "help", "-h", "--help":
 		flag.Usage()
 
@@ -195,6 +207,96 @@ func runKnowledgeValidate(dir string) {
 		os.Exit(1)
 	} else {
 		fmt.Println("Validation passed with warnings")
+		os.Exit(0)
+	}
+}
+
+// runTrainEvaluate runs the training evaluation command.
+func runTrainEvaluate(examplesPath string, debugMode bool) {
+	// Load knowledge base
+	kb, err := knowledge.LoadFromEmbed()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error loading knowledge: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Load training examples
+	loader := training.NewLoader()
+	var examples training.Examples
+
+	if examplesPath != "" {
+		// Load from specified file
+		absPath, err := filepath.Abs(examplesPath)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: invalid examples path: %v\n", err)
+			os.Exit(1)
+		}
+		
+		examples, err = loader.LoadFromFile(absPath)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error loading training examples from %s: %v\n", absPath, err)
+			os.Exit(1)
+		}
+		fmt.Printf("Loaded %d examples from %s\n", len(examples), absPath)
+	} else {
+		// Load from default training/examples.yaml
+		defaultPath := "training/examples.yaml"
+		
+		if _, err := os.Stat(defaultPath); os.IsNotExist(err) {
+			fmt.Fprintf(os.Stderr, "Error: no examples file specified and %s not found\n", defaultPath)
+			fmt.Println("Use --examples <path> to specify a training examples file")
+			os.Exit(1)
+		}
+		
+		examples, err = loader.LoadFromFile(defaultPath)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error loading default training examples: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("Loaded %d examples from default file\n", len(examples))
+	}
+
+	// Validate examples against knowledge
+	fmt.Println("\nValidating examples against knowledge base...")
+	validationResult := training.ValidateExamples(examples, kb)
+	
+	if !validationResult.IsValid() {
+		fmt.Printf("✗ Found %d validation error(s):\n", len(validationResult.Errors))
+		for _, e := range validationResult.Errors {
+			fmt.Printf("  [%s] %s: %s\n", e.ExampleID, e.Field, e.Message)
+		}
+		fmt.Println("\nFix validation errors before running evaluation")
+		os.Exit(1)
+	}
+	fmt.Printf("✓ All %d examples validated\n", len(examples))
+
+	// Create engine and evaluator
+	engine, err := decipher.NewEngine()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error creating engine: %v\n", err)
+		os.Exit(1)
+	}
+
+	evaluator := training.NewEvaluator(engine)
+
+	// Run evaluation
+	fmt.Println("\nRunning evaluation...")
+	result := evaluator.Evaluate(examples)
+
+	// Print concise summary by default
+	fmt.Print(training.FormatResult(result))
+
+	// Print detailed results in debug mode
+	if debugMode {
+		fmt.Print(result.FormatDetailedResults(examples))
+	}
+
+	// Exit with appropriate code
+	if result.FailedExamples > 0 {
+		fmt.Printf("\n%d example(s) failed evaluation\n", result.FailedExamples)
+		os.Exit(1)
+	} else {
+		fmt.Println("\n✓ All examples passed evaluation")
 		os.Exit(0)
 	}
 }
