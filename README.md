@@ -126,6 +126,8 @@ SQLite can be considered later if YAML becomes too limited.
 
 The concise integer target schema is documented in [HARMONIC_DATA_MODEL.md](/Users/bot/Socrates/HARMONIC_DATA_MODEL.md).
 
+Training and verification should use a supervised ranking model over evidence paths, documented in [TRAINING_MODEL.md](/Users/bot/Socrates/TRAINING_MODEL.md).
+
 ## Current Status
 
 The active implementation checklist is [TODO.md](/Users/bot/Socrates/TODO.md).

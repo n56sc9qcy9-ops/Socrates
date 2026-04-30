@@ -218,7 +218,27 @@ Done when:
 - humans can curate resonance knowledge
 - the engine remains deterministic without AI
 
-## Phase 9: Optional AI Assistance
+## Phase 9: Supervised Ranking And Verification
+
+Goal: make Socrates trainable and measurable without turning it into a black-box authority.
+
+Tasks:
+
+- Add curated training examples outside active knowledge.
+- Define expected concepts, meaning-frequency fields, and harmonic qualities.
+- Extract evidence-path features from `Reading`.
+- Evaluate current rankings against expected fields.
+- Report precision, recall, missed fields, false activations, and evidence-path validity.
+- Add configurable ranking weights for evidence channels.
+- Tune weights only after evaluation reports are stable.
+
+Done when:
+
+- `socrates train` can prove whether a knowledge/ranking change improved or degraded readings
+- expected fields are ranked above false activations for curated examples
+- every training result still shows the evidence paths that caused it
+
+## Phase 10: Optional AI Assistance
 
 Goal: use AI only as a hypothesis generator.
 
@@ -231,7 +251,7 @@ AI may suggest:
 
 AI must not silently write active knowledge. Suggestions should be speculative until reviewed.
 
-## Phase 10: Harmonic Rendering Layer
+## Phase 11: Harmonic Rendering Layer
 
 Goal: render coherent activation fields as listenable harmonics.
 
@@ -258,7 +278,7 @@ Done when:
 - stored meaning-frequency values are integer-only
 - the user can inspect the evidence before listening
 
-## Phase 11: Optional Storage And Interface
+## Phase 12: Optional Storage And Interface
 
 SQLite, UI, light, and hardware are later concerns.
 
