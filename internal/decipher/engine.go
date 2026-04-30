@@ -70,6 +70,9 @@ func (e *Engine) Analyze(input string) Reading {
 		passageFields = BuildPassageFieldsFromGraph(activationGraph)
 	}
 
+	// Build harmonic field from passage fields using frequency profiles
+	harmonicField := BuildHarmonicField(passageFields, e.Knowledge)
+
 	// Collect all signals and deduplicate before scoring
 	allSignals := collectAllSignals(channels)
 	allSignals = DeduplicateSignals(allSignals)
@@ -101,6 +104,7 @@ func (e *Engine) Analyze(input string) Reading {
 		PassageSignals:      passageSignals,
 		Convergence:         convergence,
 		PassageFields:       passageFields,
+		HarmonicField:       harmonicField,
 		Channels:            channels,
 		ConvergingPatterns: converging,
 		WeakSignals:         weakSignals,

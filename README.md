@@ -6,7 +6,9 @@ The project explores whether words, sounds, glyphs, scripts, fragments, and pass
 
 The base model is harmonic resonance: syllables, words, meanings, thoughts, and ideas are treated as cascading frequency fields. A text resonates when evidence-supported fields form coherent relationships, like tones forming an accord.
 
-Socrates' target language is music: frequency, harmony, vibration. In the project model, meaning is the frequency field. Words from any language are surface forms that may point to the same underlying harmonic identity.
+Socrates' target language is music, light, frequency, harmony, vibration, and electromagnetic correspondence. In the project model, meaning is the frequency field. Words from any language are surface forms that may point to the same underlying harmonic identity.
+
+The target meaning model is integer based. Harmonic identities should use integer vectors, integer ratios, Pythagorean triples, Phi integer sequences/approximants, and geometry IDs. They should not use floating-point frequency values as the stored meaning.
 
 The engine should still show evidence first: activated concepts, graph paths, frequency fields, convergence scores, and uncertainty. Generated forms, candidate lists, and full similarity matches should be available when debugging.
 
@@ -33,9 +35,9 @@ Go code must not:
 - branch on specific words for meaning
 - make examples pass through hardcoded behavior
 - claim symbolic readings are proven facts
-- hardcode concept-to-frequency, concept-to-color, concept-to-chakra, concept-to-note, or concept-to-instrument mappings
+- hardcode concept-to-frequency, concept-to-color, concept-to-chakra, concept-to-note, concept-to-electromagnetic, or concept-to-instrument mappings
 
-All linguistic, symbolic, spiritual, harmonic, musical, and cross-language knowledge belongs in data.
+All linguistic, symbolic, spiritual, harmonic, musical, electromagnetic, and cross-language knowledge belongs in data.
 
 ## Resonance
 
@@ -43,7 +45,7 @@ Resonance means frequency coherence.
 
 A word or passage has stronger resonance when form, sound, glyph, fragment, passage, relation, and frequency evidence converge into a coherent field. It has weaker resonance when matches are noisy, speculative, duplicated, disconnected, or harmonically dissonant.
 
-The activation graph is the evidence layer. It determines which concepts and relations are active. The harmonic layer turns those activations into frequency fields, colors, intervals, chords, rhythm, or audio when curated data exists.
+The activation graph is the evidence layer. It determines which concepts and relations are active. The harmonic layer turns those activations into frequency fields, colors, light/electromagnetic correspondences, intervals, chords, rhythm, or audio when curated data exists.
 
 The long-term aim is that a meaning can be heard as tone, chord, or melody. The sound should communicate the vibrational character of the meaning beneath ordinary language, while the engine still records the evidence, lens, source, and confidence for every mapping.
 
@@ -114,11 +116,15 @@ Suggested structure:
 knowledge/concepts.yaml
 knowledge/forms.yaml
 knowledge/relations.yaml
+knowledge/frequencies.yaml
+knowledge/archetypes.yaml
 knowledge/lenses.yaml
 knowledge/confidence.yaml
 ```
 
 SQLite can be considered later if YAML becomes too limited.
+
+The concise integer target schema is documented in [HARMONIC_DATA_MODEL.md](/Users/bot/Socrates/HARMONIC_DATA_MODEL.md).
 
 ## Current Status
 

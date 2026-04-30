@@ -1,0 +1,249 @@
+# frequencies.yaml - Integer-based meaning-frequency profiles
+# Meaning is frequency. These profiles define the harmonic identity of concepts.
+# All values are integers (weight 0-100, ratios as [num, denom], vectors as integers).
+# No concept-to-frequency mappings should live in Go code.
+
+# FrequencyProfile is a stable identity that can be shared across language forms.
+# For example: "breath" in English, "prana" in Sanskrit, and "ruach" in Hebrew
+# may all converge on the same meaning-frequency identity.
+
+frequency_profiles:
+  # Core concepts - foundational meaning frequencies
+  # Vector format: [Tone1, Tone2, Tone3] - all integers
+  # Ratio format: [numerator, denominator]
+  # Archetypes: pythagorean_triple_{id}, phi_approximant_{n}, metatron_node_{id}
+
+  - meaning_frequency_id: breath-vibration
+    concepts: [breath, wind, spirit]
+    vector: [1, 2, 1]
+    ratio: [1, 1]
+    archetype: pythagorean_triple_1  # 1:1:1 triangular
+    labels:
+      note: 12  # integer note index (0-11 semitones)
+      color: 167  # integer hue (0-360 degrees)
+      field: 1    # air field ID
+    confidence: verified
+    source: cross-cultural etymology
+    lens: resonance
+    weight: 80  # integer 0-100
+
+  - meaning_frequency_id: life-force-vitality
+    concepts: [life, living, vitality, force, prana, qi, chi]
+    vector: [3, 2, 1]
+    ratio: [3, 2]
+    archetype: pythagorean_triple_2  # 3:4:5 triangular
+    labels:
+      note: 7
+      color: 120
+      field: 2
+    confidence: verified
+    source: cross-cultural linguistics
+    lens: resonance
+    weight: 90
+
+  - meaning_frequency_id: truth-light-illumination
+    concepts: [truth, light, real, illumination, emet, or]
+    vector: [4, 3, 2]
+    ratio: [4, 3]
+    archetype: pythagorean_triple_3  # 4:5:6 triangular
+    labels:
+      note: 4
+      color: 51
+      field: 3
+    confidence: verified
+    source: cross-cultural symbolism
+    lens: resonance
+    weight: 90
+
+  - meaning_frequency_id: love-heart-union
+    concepts: [love, heart, affection, ahavah, lev, agape]
+    vector: [5, 4, 1]
+    ratio: [5, 4]
+    archetype: phi_approximant_1  # 1:1.618
+    labels:
+      note: 0
+      color: 330
+      field: 4
+    confidence: verified
+    source: cross-cultural emotion mapping
+    lens: resonance
+    weight: 85
+
+  - meaning_frequency_id: word-speech-logos
+    concepts: [word, speech, logos, utterance, dabar, utterance]
+    vector: [2, 1, 2]
+    ratio: [2, 1]
+    archetype: pythagorean_triple_4  # 2:3:4 triangular
+    labels:
+      note: 7
+      color: 270
+      field: 5
+    confidence: verified
+    source: linguistic analysis
+    lens: resonance
+    weight: 85
+
+  - meaning_frequency_id: being-existence-essence
+    concepts: [being, existence, essence, self, atman]
+    vector: [1, 1, 1]
+    ratio: [1, 1]
+    archetype: pythagorean_triple_1  # 1:1:1 unity
+    labels:
+      note: 9
+      color: 0
+      field: 6
+    confidence: verified
+    source: philosophical cross-reference
+    lens: resonance
+    weight: 90
+
+  - meaning_frequency_id: one-unity-whole
+    concepts: [one, unity, single, whole, echad]
+    vector: [1, 0, 0]
+    ratio: [1, 1]
+    archetype: pythagorean_triple_1  # monad
+    labels:
+      note: 0
+      color: 0
+      field: 0
+    confidence: verified
+    source: numerical symbolism
+    lens: resonance
+    weight: 80
+
+  - meaning_frequency_id: path-way-dao
+    concepts: [path, way, road, dao, vei]
+    vector: [3, 4, 2]
+    ratio: [3, 4]
+    archetype: phi_approximant_2  # 3:5
+    labels:
+      note: 2
+      color: 20
+      field: 7
+    confidence: verified
+    source: cross-cultural path philosophy
+    lens: resonance
+    weight: 75
+
+  - meaning_frequency_id: spirit-soul-essence
+    concepts: [spirit, soul, essence, pneuma, psyche]
+    vector: [5, 3, 2]
+    ratio: [5, 3]
+    archetype: pythagorean_triple_5  # 5:12:13
+    labels:
+      note: 11
+      color: 275
+      field: 8
+    confidence: plausible
+    source: cross-cultural spirit concepts
+    lens: resonance
+    weight: 70
+
+  - meaning_frequency_id: fire-flame-transformation
+    concepts: [fire, flame, transformation, agni]
+    vector: [8, 5, 3]
+    ratio: [8, 5]
+    archetype: pythagorean_triple_6  # 8:15:17
+    labels:
+      note: 5
+      color: 16
+      field: 9
+    confidence: plausible
+    source: elemental symbolism
+    lens: resonance
+    weight: 70
+
+  - meaning_frequency_id: sacred-sound-om
+    concepts: [sacred-sound, om, mantra]
+    vector: [1, 2, 4]
+    ratio: [1, 2]
+    archetype: pythagorean_triple_1  # octave
+    labels:
+      note: 12
+      color: 33
+      field: 10
+    confidence: verified
+    source: Sanskrit tradition
+    lens: resonance
+    weight: 90
+
+  # Composite/convergent meaning frequencies
+  - meaning_frequency_id: breath-life-spirit
+    concepts: [breath, life, spirit]
+    vector: [2, 3, 1]
+    ratio: [2, 3]
+    archetype: phi_approximant_1  # golden ratio connection
+    labels:
+      note: 7
+      color: 180
+      field: 11
+    confidence: verified
+    source: tripartite resonance
+    lens: resonance
+    weight: 85
+
+  - meaning_frequency_id: love-truth-light
+    concepts: [love, truth, light]
+    vector: [5, 4, 3]
+    ratio: [5, 4]
+    archetype: phi_approximant_2  # extended golden
+    labels:
+      note: 4
+      color: 340
+      field: 12
+    confidence: verified
+    source: convergence analysis
+    lens: resonance
+    weight: 90
+
+# Archetype definitions (reference only - IDs used in profiles above)
+archetype_definitions:
+  - id: pythagorean_triple_1
+    name: Monad
+    description: 1:1:1 unity triangle
+
+  - id: pythagorean_triple_2
+    name: Triangular
+    description: 3:4:5 right triangle
+
+  - id: pythagorean_triple_3
+    name: Triangular
+    description: 4:5:6 triangular
+
+  - id: pythagorean_triple_4
+    name: Triangular
+    description: 2:3:4 triangular
+
+  - id: pythagorean_triple_5
+    name: Primitive
+    description: 5:12:13 primitive triple
+
+  - id: pythagorean_triple_6
+    name: Primitive
+    description: 8:15:17 primitive triple
+
+  - id: phi_approximant_1
+    name: Golden Ratio
+    description: 1:1.618 or 5:8 approximation
+
+  - id: phi_approximant_2
+    name: Extended Golden
+    description: 3:5 or 5:8 continuation
+
+  - id: metatron_node_1
+    name: Metatron Node
+    description: First node in Metatron's Cube sequence
+
+# Harmonic system definitions (reference for ratio validation)
+harmonic_systems:
+  - name: pythagorean
+    description: Pythagorean tuning - pure fifths (3:2 ratio base)
+    base_ratio: [3, 2]
+
+  - name: just
+    description: Just intonation - pure major thirds (5:4 ratio base)
+    base_ratio: [5, 4]
+
+  - name: equal
+    description: Equal temperament - 12-tone equal division
+    base_ratio: [12, 1]  # semitone

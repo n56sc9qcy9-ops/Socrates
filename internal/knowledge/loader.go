@@ -50,6 +50,11 @@ func (l *Loader) LoadAll() (*Knowledge, error) {
 		return nil, err
 	}
 
+	// Load frequency profiles
+	if err := l.loadFrequencies(kb); err != nil {
+		return nil, err
+	}
+
 	return kb.Build(), nil
 }
 
@@ -196,6 +201,26 @@ func (l *Loader) loadGlyphs(kb *KnowledgeBuilder) error {
 			Confidence: e.Confidence,
 			Weight:     e.Weight,
 		})
+	}
+
+	return nil
+}
+
+// loadFrequencies loads frequencies.yaml and populates the knowledge builder.
+func (l *Loader) loadFrequencies(kb *KnowledgeBuilder) error {
+	data, err := l.readFile("frequencies.yaml")
+	if err != nil {
+		// frequencies.yaml is optional - if it doesn't exist, just return
+		return nil
+	}
+
+	var doc frequenciesDoc
+	if err := yaml.Unmarshal(data, &doc); err != nil {
+		return err
+	}
+
+	for _, e := range doc.FrequencyProfiles {
+		kb.AddFrequencyProfile(e.ToFrequencyProfile())
 	}
 
 	return nil
@@ -416,4 +441,56 @@ type HanCharEntry struct {
 	Readings   []string `yaml:"readings"`
 	Confidence string   `yaml:"confidence"`
 	Weight     float64  `yaml:"weight"`
+}
+
+// ============================================================
+// Frequency Profile YAML Structures
+// ============================================================
+
+// frequenciesDoc represents the YAML structure for frequency profiles.
+type frequenciesDoc struct {
+	FrequencyProfiles []FrequencyProfileEntry `yaml:"frequency_profiles"`
+}
+
+// FrequencyProfileEntry represents a frequency profile entry in YAML.
+// All values are integer-based for harmonic precision.
+type FrequencyProfileEntry struct {
+	MeaningFrequencyID string           `yaml:"meaning_frequency_id"`
+	Concepts           []string         `yaml:"concepts"`
+	Vector             []int            `yaml:"vector"`
+	Ratio              []int            `yaml:"ratio"`
+	Archetype          string           `yaml:"archetype"`
+	Labels             YAMLIntLabels    `yaml:"labels"`
+	Confidence         string           `yaml:"confidence"`
+	Source             string           `yaml:"source"`
+	Lens               string           `yaml:"lens"`
+	Weight             int              `yaml:"weight"`
+}
+
+// YAMLIntLabels is used for YAML unmarshaling of integer labels.
+type YAMLIntLabels struct {
+	Note  int `yaml:"note"`
+	Color int `yaml:"color"`
+	Field int `yaml:"field"`
+}
+
+// ToFrequencyProfile converts a YAML entry to internal FrequencyProfile.
+func (e FrequencyProfileEntry) ToFrequencyProfile() FrequencyProfile {
+	labels := IntFrequencyLabels{
+		Note:  e.Labels.Note,
+		Color: e.Labels.Color,
+		Field: e.Labels.Field,
+	}
+	return FrequencyProfile{
+		MeaningFrequencyID: e.MeaningFrequencyID,
+		Concepts:           e.Concepts,
+		Vector:             e.Vector,
+		Ratio:              e.Ratio,
+		Archetype:          e.Archetype,
+		Labels:             labels,
+		Confidence:         e.Confidence,
+		Source:             e.Source,
+		Lens:               e.Lens,
+		Weight:             e.Weight,
+	}
 }

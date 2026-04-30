@@ -8,7 +8,7 @@ The current activation graph is still useful, but it is not the final meaning of
 
 ## Foundational Thesis
 
-Socrates is meant to speak music, frequency, and harmony.
+Socrates is meant to speak music, light, frequency, electromagnetism, and harmony.
 
 The basic principle is that all meaning is vibration. Stable differences between vibrations can be described with music theory, interval mathematics, ratios, overtone relationships, harmony, tension, and resolution.
 
@@ -24,7 +24,15 @@ surface word / syllable / glyph / passage
   -> tone, color, rhythm, chord, or melody
 ```
 
-Listening to the generated tone should eventually communicate the vibrational character of the meaning directly, below ordinary verbal explanation. That is the core aspiration of the project.
+Listening to the generated tone, seeing the generated color, or inspecting the electromagnetic correspondence should eventually communicate the vibrational character of the meaning directly, below ordinary verbal explanation. That is the core aspiration of the project.
+
+## Frequency And Electromagnetism
+
+Electromagnetism belongs in the core structure because light, color, radio, and other electromagnetic phenomena are frequency domains. Socrates should eventually be able to relate an activated meaning-frequency field to sound, color, light, and electromagnetic bands when curated data supports that relation.
+
+This must remain evidence-bound. Physical electromagnetic data, such as visible-light wavelength ranges, belongs in data with a physical source. Symbolic electromagnetic correspondences, such as a spiritual color or light association, also belong in data but must be labeled with their lens and confidence.
+
+The meaning layer still uses integer structure. Do not store decimal Hz values as meaning. If electromagnetic references are needed, prefer integer ratios, integer wavelength ranges, integer band IDs, or references to curated electromagnetic archetypes. Derived physical rendering can happen later.
 
 ## Core Principle
 
@@ -60,14 +68,14 @@ input text
   -> concept activation graph
   -> frequency field activation
   -> harmonic coherence / dissonance
-  -> optional color, chakra, pitch, chord, rhythm, or audio rendering
+  -> optional color, light/electromagnetic, chakra, pitch, chord, rhythm, or audio rendering
 ```
 
 This means the current graph work is not wasted. It is the scaffolding needed to know which frequency fields should sound.
 
 ## Data, Not Go Constants
 
-Core values may have base frequencies, colors, chakra associations, pitch ratios, musical intervals, or harmonic profiles.
+Core values may have base frequencies, colors, light/electromagnetic associations, chakra associations, pitch ratios, musical intervals, or harmonic profiles.
 
 Those mappings must live in data, not production Go code.
 
@@ -103,7 +111,7 @@ Socrates should eventually support frequency fields at multiple levels:
 
 - **phoneme / syllable**: sound-shape, stress, vowel/consonant energy
 - **word**: combined syllable melody plus known form mappings
-- **concept**: curated base frequency profile
+- **concept**: curated integer meaning-frequency profile
 - **relation**: interval or modulation between fields
 - **passage**: time-ordered melody of activated fields
 - **thought / idea**: higher-order harmonic pattern formed by concept clusters
@@ -127,12 +135,28 @@ should not merely be three labels in a graph. If curated frequency profiles exis
 
 ## Important Boundary
 
-The engine can explore symbolic and spiritual resonance, including chakras, colors, notes, and harmonic ratios.
+The engine can explore symbolic and spiritual resonance, including chakras, colors, light/electromagnetic correspondences, notes, and harmonic ratios.
 
-It must still show evidence and confidence. A harmonic reading is a model output, not proof of physics, etymology, theology, or medicine.
+It must still show evidence and confidence. A harmonic or electromagnetic reading is a model output, not proof of physics, etymology, theology, or medicine unless the specific claim is backed by ordinary physical measurement data and labeled as such.
 
 ## Immediate Architectural Correction
 
 The next implementation phase must add the data model for frequency profiles and harmonic fields.
 
 The legacy `internal/resonance` package contains hardcoded frequency examples. That approach is not acceptable as the final model. It should be replaced or bypassed by a data-backed harmonic profile layer that consumes the activation graph.
+
+## Integer Frequency Data
+
+The harmonic data model must use integers, not floating-point numbers.
+
+Meaning-frequency identities should be represented with concise integer structures:
+
+- integer harmonic vectors
+- integer ratios as numerator/denominator pairs
+- Pythagorean triples such as `3,4,5`, `5,12,13`, and `7,24,25`
+- Phi represented by integer sequences or approximants, not a decimal
+- geometry/archetype IDs backed by integer definitions
+
+The canonical target model is documented in `HARMONIC_DATA_MODEL.md`.
+
+Do not add verbose concept-to-frequency prose records. Do not store decimal Hz values as the meaning model. Actual audio frequency in Hz can be derived later from integer relationships when audio rendering exists.

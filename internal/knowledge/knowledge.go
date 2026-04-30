@@ -1,5 +1,56 @@
 package knowledge
 
+// ============================================================
+// Frequency Profile Types
+// ============================================================
+
+// FrequencyProfile represents a curated meaning-frequency identity.
+// All values are integer-based for harmonic precision.
+// Multiple language forms can converge on the same profile.
+type FrequencyProfile struct {
+	// MeaningFrequencyID is a stable identity (e.g., "breath-vibration").
+	// Forms from different languages that share this ID converge on the same frequency.
+	MeaningFrequencyID string
+
+	// Concepts is the list of concept IDs that share this meaning-frequency.
+	Concepts []string
+
+	// Vector is a 3D tone vector [Tone1, Tone2, Tone3] as integers.
+	Vector []int
+
+	// Ratio is the foundational frequency ratio as [numerator, denominator].
+	Ratio []int
+
+	// Archetype is the reference archetype ID (e.g., "pythagorean_triple_1").
+	Archetype string
+
+	// Labels provide optional semantic labels as integers.
+	Labels IntFrequencyLabels
+
+	// Confidence indicates the profile's reliability.
+	Confidence string
+
+	// Source describes the provenance of this profile.
+	Source string
+
+	// Lens is the interpretive framework used.
+	Lens string
+
+	// Weight is the importance (0-100, integer).
+	Weight int
+}
+
+// IntFrequencyLabels provides optional semantic labels as integers.
+type IntFrequencyLabels struct {
+	Note  int `yaml:"note"`
+	Color int `yaml:"color"`
+	Field int `yaml:"field"`
+}
+
+// ============================================================
+// Knowledge holds all loaded knowledge data and indexes.
+// ============================================================
+
 // Knowledge holds all loaded knowledge data and indexes.
 // This is the main data structure returned by the loader.
 type Knowledge struct {
@@ -9,6 +60,7 @@ type Knowledge struct {
 	ScriptWords []ScriptWord
 	Relations  []Relation
 	GlyphPatterns []GlyphPattern
+	FrequencyProfiles []FrequencyProfile
 
 	// Indexes for fast lookup
 	formByText   map[string][]Form
@@ -21,6 +73,8 @@ type Knowledge struct {
 	relationsTo map[string][]Relation
 	glyphPatternsByScript map[string][]GlyphPattern
 	glyphPatternsByRune map[uint32][]GlyphPattern
+	frequencyProfilesByConcept map[string][]FrequencyProfile
+	frequencyProfilesByID map[string]FrequencyProfile
 }
 
 // NewKnowledgeBuilder builds a Knowledge struct incrementally.
@@ -30,6 +84,7 @@ type KnowledgeBuilder struct {
 	scriptWords   []ScriptWord
 	relations     []Relation
 	glyphPatterns []GlyphPattern
+	frequencyProfiles []FrequencyProfile
 }
 
 // AddConcept adds a concept to the builder.
@@ -57,6 +112,11 @@ func (b *KnowledgeBuilder) AddGlyphPattern(g GlyphPattern) {
 	b.glyphPatterns = append(b.glyphPatterns, g)
 }
 
+// AddFrequencyProfile adds a frequency profile to the builder.
+func (b *KnowledgeBuilder) AddFrequencyProfile(fp FrequencyProfile) {
+	b.frequencyProfiles = append(b.frequencyProfiles, fp)
+}
+
 // NewKnowledgeBuilder creates a new builder.
 func NewKnowledgeBuilder() *KnowledgeBuilder {
 	return &KnowledgeBuilder{
@@ -65,6 +125,7 @@ func NewKnowledgeBuilder() *KnowledgeBuilder {
 		scriptWords: make([]ScriptWord, 0),
 		relations:  make([]Relation, 0),
 		glyphPatterns: make([]GlyphPattern, 0),
+		frequencyProfiles: make([]FrequencyProfile, 0),
 	}
 }
 
@@ -76,6 +137,7 @@ func (b *KnowledgeBuilder) Build() *Knowledge {
 		ScriptWords: b.scriptWords,
 		Relations:  b.relations,
 		GlyphPatterns: b.glyphPatterns,
+		FrequencyProfiles: b.frequencyProfiles,
 
 		// Initialize maps
 		formByText:    make(map[string][]Form),
@@ -88,6 +150,8 @@ func (b *KnowledgeBuilder) Build() *Knowledge {
 		relationsTo:   make(map[string][]Relation),
 		glyphPatternsByScript: make(map[string][]GlyphPattern),
 		glyphPatternsByRune: make(map[uint32][]GlyphPattern),
+		frequencyProfilesByConcept: make(map[string][]FrequencyProfile),
+		frequencyProfilesByID: make(map[string]FrequencyProfile),
 	}
 
 	// Index concepts
@@ -121,6 +185,14 @@ func (b *KnowledgeBuilder) Build() *Knowledge {
 		kb.glyphPatternsByScript[g.Script] = append(kb.glyphPatternsByScript[g.Script], g)
 		if g.Rune != 0 {
 			kb.glyphPatternsByRune[g.Rune] = append(kb.glyphPatternsByRune[g.Rune], g)
+		}
+	}
+
+	// Index frequency profiles
+	for _, fp := range kb.FrequencyProfiles {
+		kb.frequencyProfilesByID[fp.MeaningFrequencyID] = fp
+		for _, concept := range fp.Concepts {
+			kb.frequencyProfilesByConcept[concept] = append(kb.frequencyProfilesByConcept[concept], fp)
 		}
 	}
 
@@ -372,4 +444,58 @@ func (k *Knowledge) ExpandConcepts(conceptIDs []string, minWeight float64) map[s
 	}
 
 	return result
+}
+
+// ============================================================
+// Frequency Profile Lookup Methods
+// ============================================================
+
+// GetFrequencyProfilesByConcept returns all frequency profiles for a concept.
+func (k *Knowledge) GetFrequencyProfilesByConcept(concept string) []FrequencyProfile {
+	return k.frequencyProfilesByConcept[concept]
+}
+
+// GetFrequencyProfileByID returns a frequency profile by its meaning-frequency ID.
+func (k *Knowledge) GetFrequencyProfileByID(id string) (FrequencyProfile, bool) {
+	fp, ok := k.frequencyProfilesByID[id]
+	return fp, ok
+}
+
+// GetMeaningFrequencyIDForConcept returns the primary meaning-frequency ID for a concept.
+// Returns empty string if no profile exists.
+func (k *Knowledge) GetMeaningFrequencyIDForConcept(concept string) string {
+	profiles := k.GetFrequencyProfilesByConcept(concept)
+	if len(profiles) == 0 {
+		return ""
+	}
+	// Return the profile with highest weight
+	var best FrequencyProfile
+	bestWeight := -1
+	for _, fp := range profiles {
+		if fp.Weight > bestWeight {
+			bestWeight = fp.Weight
+			best = fp
+		}
+	}
+	return best.MeaningFrequencyID
+}
+
+// AllFrequencyProfiles returns all loaded frequency profiles.
+func (k *Knowledge) AllFrequencyProfiles() []FrequencyProfile {
+	return k.FrequencyProfiles
+}
+
+// FrequencyProfilesByConcepts returns frequency profiles for multiple concepts.
+func (k *Knowledge) FrequencyProfilesByConcepts(concepts []string) []FrequencyProfile {
+	seen := make(map[string]bool)
+	var profiles []FrequencyProfile
+	for _, concept := range concepts {
+		for _, fp := range k.GetFrequencyProfilesByConcept(concept) {
+			if !seen[fp.MeaningFrequencyID] {
+				seen[fp.MeaningFrequencyID] = true
+				profiles = append(profiles, fp)
+			}
+		}
+	}
+	return profiles
 }

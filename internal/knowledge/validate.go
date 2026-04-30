@@ -33,6 +33,23 @@ func (r *ValidationResult) AddWarning(field, message string) {
 	r.Warnings = append(r.Warnings, ValidationWarning{Field: field, Message: message})
 }
 
+// ValidArchetypeIDs contains all known archetype IDs for validation.
+var ValidArchetypeIDs = map[string]bool{
+	"pythagorean_triple_1": true,
+	"pythagorean_triple_2": true,
+	"pythagorean_triple_3": true,
+	"pythagorean_triple_4": true,
+	"pythagorean_triple_5": true,
+	"pythagorean_triple_6": true,
+	"pythagorean_triple_7": true,
+	"phi_approximant_1":    true,
+	"phi_approximant_2":    true,
+	"phi_approximant_3":    true,
+	"metatron_node_1":      true,
+	"metatron_node_2":      true,
+	"metatron_node_3":      true,
+}
+
 // ValidateKnowledge runs all validation checks on the knowledge base.
 // This is the main entry point for knowledge validation.
 func ValidateKnowledge(kb *Knowledge) *ValidationResult {
@@ -61,6 +78,9 @@ func ValidateKnowledge(kb *Knowledge) *ValidationResult {
 
 	// Validate glyph patterns - check targets exist
 	validateGlyphPatterns(kb.GlyphPatterns, conceptIDs, result)
+
+	// Validate frequency profiles - check all constraints
+	validateFrequencyProfiles(kb.FrequencyProfiles, conceptIDs, result)
 
 	return result
 }
@@ -224,6 +244,72 @@ func validateGlyphPatterns(patterns []GlyphPattern, conceptIDs map[string]bool, 
 		}
 	}
 }
+
+// validateFrequencyProfiles validates frequency profile definitions.
+func validateFrequencyProfiles(profiles []FrequencyProfile, conceptIDs map[string]bool, result *ValidationResult) {
+	seenIDs := make(map[string]int) // meaning_frequency_id -> first index
+
+	for i, fp := range profiles {
+		field := frequencyProfileField(i)
+
+		// Check meaning_frequency_id is non-empty
+		if fp.MeaningFrequencyID == "" {
+			result.AddError(field+".meaning_frequency_id", "meaning_frequency_id cannot be empty")
+			continue
+		}
+
+		// Check for duplicate IDs
+		if firstIdx, exists := seenIDs[fp.MeaningFrequencyID]; exists {
+			result.AddError(field+".meaning_frequency_id", "duplicate meaning_frequency_id: "+fp.MeaningFrequencyID+" (first at "+frequencyProfileField(firstIdx)+")")
+		} else {
+			seenIDs[fp.MeaningFrequencyID] = i
+		}
+
+		// Check concepts list is non-empty
+		if len(fp.Concepts) == 0 {
+			result.AddError(field+".concepts", "concepts list cannot be empty")
+		}
+
+		// Check all concepts exist
+		for j, concept := range fp.Concepts {
+			if concept != "" && !conceptIDs[concept] {
+				result.AddError(field+".concepts["+itoa(j)+"]", "concept '"+concept+"' does not exist")
+			}
+		}
+
+		// Check vector has exactly 3 integers
+		if len(fp.Vector) != 3 {
+			result.AddError(field+".vector", "vector must have exactly 3 integers; got "+itoa(len(fp.Vector)))
+		}
+
+		// Check ratio has exactly 2 integers (numerator, denominator)
+		if len(fp.Ratio) != 2 {
+			result.AddError(field+".ratio", "ratio must have exactly 2 integers [num, denom]; got "+itoa(len(fp.Ratio)))
+		}
+
+		// Check denominator is not zero
+		if len(fp.Ratio) == 2 && fp.Ratio[1] == 0 {
+			result.AddError(field+".ratio[1]", "ratio denominator cannot be zero")
+		}
+
+		// Check archetype is valid if present
+		if fp.Archetype != "" && !ValidArchetypeIDs[fp.Archetype] {
+			result.AddError(field+".archetype", "unknown archetype: "+fp.Archetype+"; valid IDs: pythagorean_triple_1-7, phi_approximant_1-3, metatron_node_1-3")
+		}
+
+		// Validate confidence
+		if !isValidConfidence(fp.Confidence) {
+			result.AddError(field+".confidence", "invalid confidence: "+fp.Confidence)
+		}
+
+		// Validate weight is integer in 0-100 range
+		if fp.Weight < 0 || fp.Weight > 100 {
+			result.AddError(field+".weight", "weight must be integer in range [0, 100]; got "+itoa(fp.Weight))
+		}
+	}
+}
+
+func frequencyProfileField(i int) string { return "frequency_profiles[" + itoa(i) + "]" }
 
 // isValidConfidence checks if a confidence string is valid.
 func isValidConfidence(conf string) bool {

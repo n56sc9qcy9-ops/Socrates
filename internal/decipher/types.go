@@ -149,6 +149,7 @@ type Reading struct {
 	PassageSignals     []PassageSignal                                // Phase E: Passage-level signals
 	Convergence        ConvergenceResult                              // Phase E: Convergence via generic activation
 	PassageFields      PassageFields                                  // Phase E: Passage fields via activation graph
+	HarmonicField      *HarmonicField                                 // Phase F: Harmonic field from frequency profiles
 	Channels           []ChannelResult
 	ConvergingPatterns []Pattern
 	WeakSignals        []Pattern
@@ -158,6 +159,70 @@ type Reading struct {
 	// Discarded counts for bounded work
 	DiscardedCandidates  int `json:"discardedCandidates,omitempty"`  // Candidates skipped due to bounds
 	DiscardedComparisons int `json:"discardedComparisons,omitempty"` // Fuzzy comparisons skipped due to bounds
+}
+
+// HarmonicField represents the harmonic field derived from active concepts.
+// Built from activated concept frequency profiles - not from hardcoded Go data.
+type HarmonicField struct {
+	// Tones are the individual tones in the harmonic field.
+	Tones []HarmonicTone
+
+	// Coherence is the overall harmonic coherence (0-1).
+	Coherence float64
+
+	// Consonance is the consonance score (compatible ratios).
+	Consonance float64
+
+	// Dissonance is the dissonance score (conflicting ratios).
+	Dissonance float64
+
+	// EvidencePaths trace from activated concepts to field tones.
+	EvidencePaths []HarmonicEvidence
+}
+
+// HarmonicTone represents a single tone in the harmonic field.
+type HarmonicTone struct {
+	// MeaningFrequencyID is the stable identity of this tone.
+	MeaningFrequencyID string
+
+	// SourceConcepts are the activated concepts that contributed to this tone.
+	SourceConcepts []string
+
+	// Vector is the 3D tone vector [Tone1, Tone2, Tone3].
+	Vector [3]int
+
+	// Ratio is the frequency ratio [numerator, denominator].
+	Ratio [2]int
+
+	// Archetype is the archetype reference ID.
+	Archetype string
+
+	// Labels are the semantic labels.
+	Labels knowledge.IntFrequencyLabels
+
+	// Strength is the combined strength from all contributing concepts.
+	Strength float64
+
+	// Confidence is the weighted confidence from source profiles.
+	Confidence string
+}
+
+// HarmonicEvidence traces from activated concept to harmonic tone.
+type HarmonicEvidence struct {
+	// SourceConcept is the activated concept.
+	SourceConcept string
+
+	// SourceConceptWeight is the passage field weight of the source concept.
+	SourceConceptWeight float64
+
+	// MeaningFrequencyID is the matched profile's ID.
+	MeaningFrequencyID string
+
+	// ProfileWeight is the frequency profile's weight (0-100).
+	ProfileWeight int
+
+	// Confidence is the profile's confidence.
+	Confidence string
 }
 
 // CandidateBounds defines limits for candidate generation.

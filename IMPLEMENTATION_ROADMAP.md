@@ -26,6 +26,7 @@ Preserved future goals:
 
 - coherent activation energy as the base resonance model
 - data-driven linguistic, symbolic, cross-language, harmonic, and musical knowledge
+- integer-only meaning-frequency storage
 - human curation of proposed knowledge changes
 - optional AI assistance as a hypothesis generator only
 - harmonic/audio rendering of activation fields as listenable music
@@ -36,6 +37,8 @@ Not active yet:
 - literal claims that meaning is scientifically proven to be frequency
 - audio synthesis before evidence paths are clean
 - concept-to-frequency mappings in Go
+- floating-point frequency values as the stored meaning model
+- verbose prose-heavy harmonic records
 - AI silently writing active knowledge
 
 Older visionary language about truth, love, wisdom, source, and frequency should be treated as philosophical background unless converted into data-backed concepts, relations, tests, or documented future rendering requirements.
@@ -236,11 +239,14 @@ This phase must not start until the activation graph is clean, bounded, deduplic
 
 Tasks:
 
-- Add data-driven musical mappings.
-- Map concept activation to base pitch.
-- Map evidence paths to overtones.
+- Add the concise integer harmonic data model from `HARMONIC_DATA_MODEL.md`.
+- Store meaning-frequency identities as integer vectors, integer ratios, and integer-backed archetypes.
+- Represent Phi through integer sequences/approximants, not floats.
+- Store Pythagorean triples and geometry systems as integer archetypes.
+- Map active concepts to language-neutral meaning-frequency IDs.
+- Map evidence paths to integer-backed overtones.
 - Map confidence to stability, volume, or timbre.
-- Map relation strength to interval.
+- Map relation strength to integer interval ratios.
 - Map convergence to consonance.
 - Map conflict or weak evidence to dissonance.
 - Render sentence progression as rhythm or time.
@@ -249,6 +255,7 @@ Done when:
 
 - audio rendering consumes activation evidence instead of inventing meaning
 - all concept-to-frequency and concept-to-pitch mappings live in data
+- stored meaning-frequency values are integer-only
 - the user can inspect the evidence before listening
 
 ## Phase 11: Optional Storage And Interface

@@ -110,6 +110,15 @@ func renderDefault(r Reading) string {
 		}
 	}
 
+	// Show harmonic field (from frequency profiles)
+	if r.HarmonicField != nil {
+		hfSummary := RenderHarmonicField(r.HarmonicField, RenderModeDefault)
+		if hfSummary != "" {
+			sb.WriteString("Harmonic:\n")
+			sb.WriteString("  " + hfSummary + "\n\n")
+		}
+	}
+
 	// Show weak signals / warnings
 	if len(r.WeakSignals) > 0 {
 		sb.WriteString("  Weak signals:\n")
@@ -329,6 +338,12 @@ func renderDebug(r Reading) string {
 		}
 	}
 	sb.WriteString("\n")
+
+	// Phase F: Harmonic Field
+	if r.HarmonicField != nil {
+		sb.WriteString("Harmonic Field (from frequency profiles):\n")
+		sb.WriteString(RenderHarmonicField(r.HarmonicField, RenderModeDebug) + "\n\n")
+	}
 
 	// Weak Signals
 	sb.WriteString("Weak Signals / Conflicts:\n")

@@ -18,7 +18,9 @@ Socrates is a harmonic resonance engine.
 
 Syllables, words, meanings, thoughts, and ideas are treated as cascading frequency fields. The activation graph is not the final definition of resonance; it is the evidence layer that decides which frequency fields are active and how strongly they are supported.
 
-The foundational thesis is: meaning is frequency. Words in different languages are surface forms that can converge on the same meaning-frequency identity. Socrates should eventually render those identities as tone, chord, rhythm, color, and melody so meaning can be heard as harmony or dissonance.
+The foundational thesis is: meaning is frequency. Words in different languages are surface forms that can converge on the same meaning-frequency identity. Socrates should eventually render those identities as tone, chord, rhythm, color, light/electromagnetic correspondence, and melody so meaning can be heard or seen as harmony or dissonance.
+
+The meaning-frequency data model must be integer based and concise. Store integer vectors, integer ratios, Pythagorean triples, Phi integer sequences/approximants, and geometry/archetype IDs. Do not store floating-point frequency values as meaning. The target schema is `HARMONIC_DATA_MODEL.md`.
 
 The project must not lose this principle again.
 
@@ -26,8 +28,11 @@ The project must not lose this principle again.
 
 - No hardcoded semantic word lists in production Go.
 - No direct behavior for specific words like `skal`, `energy`, `truth`, or `light`.
-- No hardcoded concept-to-frequency, concept-to-color, concept-to-chakra, concept-to-note, pitch, music, harmonic, or audio mappings in Go.
+- No hardcoded concept-to-frequency, concept-to-color, concept-to-electromagnetic, concept-to-chakra, concept-to-note, pitch, music, harmonic, or audio mappings in Go.
 - Harmonic/frequency mappings must live in curated data with source/lens/confidence.
+- Electromagnetic/light mappings must live in curated data with source/lens/confidence and must distinguish physical measurement from symbolic correspondence.
+- Harmonic/frequency mappings must use integer storage, not floats.
+- Harmonic/frequency YAML must stay concise; avoid verbose prose records.
 - Knowledge and confidence assumptions must stay data-driven.
 - Default output must stay concise; full candidates, fuzzy matches, and harmonic internals belong in debug output.
 
@@ -80,17 +85,18 @@ Instructions:
 1. Start with `git status --short --branch` and record it.
 2. Run `go test ./...` before changing code and record the baseline result.
 3. Preserve the knowledge-pipeline hardening task if it is already in progress, but prioritize the harmonic-core correction.
-4. Add a YAML-backed frequency/harmonic profile model. It should support at least:
+4. Add a YAML-backed integer frequency/harmonic profile model following `HARMONIC_DATA_MODEL.md`. It should support at least:
    - concept ID
    - stable meaning-frequency ID if distinct from concept ID
-   - base frequency or ratio representation
-   - optional note/color/chakra/field labels
+   - integer harmonic vector
+   - integer ratios as `[numerator, denominator]`
+   - integer archetype references such as Pythagorean triples, Phi integer sequence, or Metatron graph ID
    - confidence
    - lens/system/source
-   - weight
+   - integer weight, `0..100`
    - language-neutral identity so forms from different languages can converge on the same profile
 5. Load and validate frequency profiles through the knowledge layer.
-6. Validation must reject profiles for unknown concepts, invalid confidence, invalid weight, and malformed frequency/ratio values.
+6. Validation must reject profiles for unknown concepts, invalid confidence, invalid integer weight, malformed integer vectors, malformed integer ratios, unknown archetype IDs, and any floating-point frequency values.
 7. Do not hardcode concept-to-frequency mappings in Go. Tests may use fixtures.
 8. Build a harmonic field from active `Reading.PassageFields` / activation graph concepts.
 9. Add harmonic scoring:
@@ -102,7 +108,7 @@ Instructions:
 12. Default render should summarize harmonic field only when profiles exist. Debug render should show profile details, ratios/frequencies, confidence, source/lens, and evidence paths.
 13. Add tests proving `love + heart + truth` or a similarly data-backed cluster creates a harmonic field from data, not Go constants.
 14. Add tests proving a concept without a frequency profile does not invent one.
-15. Add tests proving malformed frequency profile YAML fails validation.
+15. Add tests proving malformed frequency profile YAML fails validation, including decimal/floating-point values.
 16. Add tests proving different language forms for the same curated meaning can converge on the same meaning-frequency profile when the data supports it.
 17. Decide what to do with legacy `internal/resonance`: document as legacy, bypass it, or refactor it to consume data-backed profiles. Do not expand its hardcoded constants.
 18. Keep all existing decipher/render/passage/graph/knowledge tests passing.
@@ -117,6 +123,7 @@ Spend at least 90 focused minutes. This is a core correction, not a small featur
 Acceptance Criteria:
 
 - Frequency/harmonic profiles are represented in YAML data.
+- Profiles are integer-only and concise.
 - Profiles load through the knowledge layer.
 - Profiles validate strictly.
 - Meaning-frequency identities are language-neutral.
