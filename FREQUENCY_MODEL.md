@@ -6,6 +6,26 @@ Words, syllables, meanings, thoughts, and ideas are treated as interacting frequ
 
 The current activation graph is still useful, but it is not the final meaning of resonance. It is the evidence layer that decides which frequency fields are active and how strongly they are supported.
 
+## Foundational Thesis
+
+Socrates is meant to speak music, frequency, and harmony.
+
+The basic principle is that all meaning is vibration. Stable differences between vibrations can be described with music theory, interval mathematics, ratios, overtone relationships, harmony, tension, and resolution.
+
+In this model, the meaning is the frequency field. Words in different languages are surface forms that can point to the same underlying field. Translation is therefore not only word-to-word substitution; it is convergence on a shared harmonic profile.
+
+The long-term target is:
+
+```text
+surface word / syllable / glyph / passage
+  -> activated meaning field
+  -> frequency profile
+  -> harmonic relation to other fields
+  -> tone, color, rhythm, chord, or melody
+```
+
+Listening to the generated tone should eventually communicate the vibrational character of the meaning directly, below ordinary verbal explanation. That is the core aspiration of the project.
+
 ## Core Principle
 
 Resonance means frequency coherence.
@@ -50,6 +70,8 @@ This means the current graph work is not wasted. It is the scaffolding needed to
 Core values may have base frequencies, colors, chakra associations, pitch ratios, musical intervals, or harmonic profiles.
 
 Those mappings must live in data, not production Go code.
+
+A concept is not merely a label. It should become a stable meaning-frequency identity that can be reached by forms from any language when the evidence supports that convergence.
 
 Examples of the kind of data the project needs:
 

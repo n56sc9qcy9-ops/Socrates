@@ -18,6 +18,8 @@ Socrates is a harmonic resonance engine.
 
 Syllables, words, meanings, thoughts, and ideas are treated as cascading frequency fields. The activation graph is not the final definition of resonance; it is the evidence layer that decides which frequency fields are active and how strongly they are supported.
 
+The foundational thesis is: meaning is frequency. Words in different languages are surface forms that can converge on the same meaning-frequency identity. Socrates should eventually render those identities as tone, chord, rhythm, color, and melody so meaning can be heard as harmony or dissonance.
+
 The project must not lose this principle again.
 
 ## Standing Rules
@@ -80,11 +82,13 @@ Instructions:
 3. Preserve the knowledge-pipeline hardening task if it is already in progress, but prioritize the harmonic-core correction.
 4. Add a YAML-backed frequency/harmonic profile model. It should support at least:
    - concept ID
+   - stable meaning-frequency ID if distinct from concept ID
    - base frequency or ratio representation
    - optional note/color/chakra/field labels
    - confidence
    - lens/system/source
    - weight
+   - language-neutral identity so forms from different languages can converge on the same profile
 5. Load and validate frequency profiles through the knowledge layer.
 6. Validation must reject profiles for unknown concepts, invalid confidence, invalid weight, and malformed frequency/ratio values.
 7. Do not hardcode concept-to-frequency mappings in Go. Tests may use fixtures.
@@ -99,12 +103,13 @@ Instructions:
 13. Add tests proving `love + heart + truth` or a similarly data-backed cluster creates a harmonic field from data, not Go constants.
 14. Add tests proving a concept without a frequency profile does not invent one.
 15. Add tests proving malformed frequency profile YAML fails validation.
-16. Decide what to do with legacy `internal/resonance`: document as legacy, bypass it, or refactor it to consume data-backed profiles. Do not expand its hardcoded constants.
-17. Keep all existing decipher/render/passage/graph/knowledge tests passing.
-18. Do not implement audio synthesis yet. The target is harmonic data and scoring, not sound output.
-19. Run targeted tests while working, then `go test ./...`.
-20. Commit the completed harmonic-core work locally with a clear message. Do not push.
-21. Report final `git status --short --branch`, tests run, files changed, and an example harmonic field output.
+16. Add tests proving different language forms for the same curated meaning can converge on the same meaning-frequency profile when the data supports it.
+17. Decide what to do with legacy `internal/resonance`: document as legacy, bypass it, or refactor it to consume data-backed profiles. Do not expand its hardcoded constants.
+18. Keep all existing decipher/render/passage/graph/knowledge tests passing.
+19. Do not implement audio synthesis yet. The target is harmonic data and scoring, not sound output.
+20. Run targeted tests while working, then `go test ./...`.
+21. Commit the completed harmonic-core work locally with a clear message. Do not push.
+22. Report final `git status --short --branch`, tests run, files changed, and an example harmonic field output.
 
 Pi work requirement:
 Spend at least 90 focused minutes. This is a core correction, not a small feature.
@@ -114,6 +119,8 @@ Acceptance Criteria:
 - Frequency/harmonic profiles are represented in YAML data.
 - Profiles load through the knowledge layer.
 - Profiles validate strictly.
+- Meaning-frequency identities are language-neutral.
+- Multiple language forms can converge on the same data-backed harmonic profile.
 - No production Go file contains concept-to-frequency/color/chakra/note mappings.
 - `Reading` can expose a harmonic field derived from active concepts.
 - Harmonic field scoring is data-backed and confidence-weighted.

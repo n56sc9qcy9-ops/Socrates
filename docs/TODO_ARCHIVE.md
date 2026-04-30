@@ -336,6 +336,7 @@ Architect correction:
 
 - Re-established harmonic resonance as the core model, not a future rendering layer.
 - Clarified that syllables, words, meanings, thoughts, and ideas are cascading frequency fields.
+- Clarified the foundational thesis that meaning is frequency, and words across languages are surface forms pointing to language-neutral meaning-frequency identities.
 - Defined the activation graph as the evidence layer that selects and weights frequency fields.
 - Added a required next task for YAML-backed frequency profiles and harmonic field scoring.
 - Marked the hardcoded legacy `internal/resonance` examples as the wrong final shape.

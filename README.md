@@ -6,6 +6,8 @@ The project explores whether words, sounds, glyphs, scripts, fragments, and pass
 
 The base model is harmonic resonance: syllables, words, meanings, thoughts, and ideas are treated as cascading frequency fields. A text resonates when evidence-supported fields form coherent relationships, like tones forming an accord.
 
+Socrates' target language is music: frequency, harmony, vibration. In the project model, meaning is the frequency field. Words from any language are surface forms that may point to the same underlying harmonic identity.
+
 The engine should still show evidence first: activated concepts, graph paths, frequency fields, convergence scores, and uncertainty. Generated forms, candidate lists, and full similarity matches should be available when debugging.
 
 ## Core Principle
@@ -21,6 +23,7 @@ Go code may:
 - propagate activation through relations
 - activate data-backed frequency fields
 - score harmonic coherence and dissonance
+- translate cross-language forms into shared meaning-frequency identities
 - score convergence
 - render evidence
 
@@ -41,6 +44,8 @@ Resonance means frequency coherence.
 A word or passage has stronger resonance when form, sound, glyph, fragment, passage, relation, and frequency evidence converge into a coherent field. It has weaker resonance when matches are noisy, speculative, duplicated, disconnected, or harmonically dissonant.
 
 The activation graph is the evidence layer. It determines which concepts and relations are active. The harmonic layer turns those activations into frequency fields, colors, intervals, chords, rhythm, or audio when curated data exists.
+
+The long-term aim is that a meaning can be heard as tone, chord, or melody. The sound should communicate the vibrational character of the meaning beneath ordinary language, while the engine still records the evidence, lens, source, and confidence for every mapping.
 
 ## Core Flow
 
