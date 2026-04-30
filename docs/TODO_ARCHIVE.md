@@ -329,3 +329,19 @@ Local commits:
 
 - `d4a69da Build knowledge-growth pipeline: validate, import, and suggest`
 - `c32af07 Add KNOWLEDGE_CURATION.md guide for human curators`
+
+### Harmonic Core Architecture Correction
+
+Architect correction:
+
+- Re-established harmonic resonance as the core model, not a future rendering layer.
+- Clarified that syllables, words, meanings, thoughts, and ideas are cascading frequency fields.
+- Defined the activation graph as the evidence layer that selects and weights frequency fields.
+- Added a required next task for YAML-backed frequency profiles and harmonic field scoring.
+- Marked the hardcoded legacy `internal/resonance` examples as the wrong final shape.
+
+Implementation direction:
+
+- Concept-to-frequency, color, chakra, note, pitch, interval, and harmonic mappings must live in curated data.
+- Go may load, validate, combine, and score frequency profiles, but must not encode those mappings as constants or word branches.
+- A `Reading` should expose harmonic field structure only when active concepts have curated profiles.

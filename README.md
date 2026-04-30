@@ -2,11 +2,11 @@
 
 Socrates is an experimental language-resonance engine.
 
-The project explores whether words, sounds, glyphs, scripts, fragments, and passages can be analyzed as activation fields. It is not a dictionary, journaling app, chatbot, or mystical text generator.
+The project explores whether words, sounds, glyphs, scripts, fragments, and passages can be analyzed as harmonic activation fields. It is not a dictionary, journaling app, chatbot, or mystical text generator.
 
-The base model is coherent activation energy first: a text resonates when independent evidence channels reinforce a shared activation field.
+The base model is harmonic resonance: syllables, words, meanings, thoughts, and ideas are treated as cascading frequency fields. A text resonates when evidence-supported fields form coherent relationships, like tones forming an accord.
 
-The engine should show evidence first: activated concepts, graph paths, convergence scores, and uncertainty. Generated forms, candidate lists, and full similarity matches should be available when debugging.
+The engine should still show evidence first: activated concepts, graph paths, frequency fields, convergence scores, and uncertainty. Generated forms, candidate lists, and full similarity matches should be available when debugging.
 
 ## Core Principle
 
@@ -19,6 +19,8 @@ Go code may:
 - load knowledge data
 - activate concepts
 - propagate activation through relations
+- activate data-backed frequency fields
+- score harmonic coherence and dissonance
 - score convergence
 - render evidence
 
@@ -28,16 +30,17 @@ Go code must not:
 - branch on specific words for meaning
 - make examples pass through hardcoded behavior
 - claim symbolic readings are proven facts
+- hardcode concept-to-frequency, concept-to-color, concept-to-chakra, concept-to-note, or concept-to-instrument mappings
 
 All linguistic, symbolic, spiritual, harmonic, musical, and cross-language knowledge belongs in data.
 
 ## Resonance
 
-Resonance means coherent activation energy.
+Resonance means frequency coherence.
 
-A word or passage has stronger resonance when form, sound, glyph, fragment, passage, and relation evidence converge around related concepts. It has weaker resonance when matches are noisy, speculative, duplicated, or disconnected.
+A word or passage has stronger resonance when form, sound, glyph, fragment, passage, relation, and frequency evidence converge into a coherent field. It has weaker resonance when matches are noisy, speculative, duplicated, disconnected, or harmonically dissonant.
 
-The project may later render a coherent activation field as harmonics or music, but audio is not the base engine. Harmonic output should consume evidence from the activation graph; it must not replace the evidence model or hardcode concept-to-pitch mappings in Go.
+The activation graph is the evidence layer. It determines which concepts and relations are active. The harmonic layer turns those activations into frequency fields, colors, intervals, chords, rhythm, or audio when curated data exists.
 
 ## Core Flow
 
@@ -47,7 +50,8 @@ input text
   -> similarity matches against known data forms
   -> concept activation
   -> graph propagation
-  -> coherent activation energy
+  -> frequency field activation
+  -> harmonic coherence / dissonance
   -> evidence-first reading
 ```
 

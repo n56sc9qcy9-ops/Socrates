@@ -1,124 +1,116 @@
-# Resonance Model
+# Frequency Model
 
-The base model of Socrates is coherent activation energy.
+The core model of Socrates is harmonic resonance.
 
-Socrates should not assume that meaning literally reduces to frequency. It should measure how generated forms activate concepts, how those concepts reinforce or conflict through relations, and whether the whole field becomes coherent enough to call resonant.
+Words, syllables, meanings, thoughts, and ideas are treated as interacting frequency fields. A passage is not only a graph of concepts; it is a cascade of activations that should be able to resolve into harmony, tension, dissonance, rhythm, color, and eventually sound.
 
-The older "frequency model" is not the active core. Harmonics are a future rendering layer that can translate a clean activation field into music.
+The current activation graph is still useful, but it is not the final meaning of resonance. It is the evidence layer that decides which frequency fields are active and how strongly they are supported.
 
-## What Resonance Means
+## Core Principle
 
-Resonance means coherent activation energy.
+Resonance means frequency coherence.
 
 A text has stronger resonance when:
 
-- independent evidence channels activate related concepts
-- form, sound, glyph, fragment, and passage evidence reinforce each other
-- relation paths connect activated concepts
-- confidence-weighted signals converge
-- exact and verified evidence outranks weak fuzzy evidence
-- removing key evidence weakens the field
+- syllables and forms activate compatible frequency fields
+- concepts reinforce related base frequencies
+- relation paths behave like harmonic intervals
+- confidence-weighted evidence stabilizes the field
+- repeated evidence adds meaningful overtones, not duplicate inflation
+- removing key evidence changes the harmonic field
 
 A text has weaker resonance when:
 
-- matches are random or low quality
-- activation depends on one speculative jump
-- repeated fragments inflate score without new evidence
-- unrelated concepts dominate
-- the engine cannot show evidence paths
+- evidence is noisy or speculative
+- activated fields conflict without resolution
+- duplicate paths inflate amplitude without independent support
+- relation paths do not form coherent intervals
+- the engine cannot show why a frequency field was activated
 
-Activation can come from:
+## Evidence Before Sound
 
-- exact data-form matches
-- fuzzy similarity
-- phonetic similarity
-- glyph or script features
-- fragment overlap
-- relation propagation
-- repeated passage evidence
+The system must not jump straight to music by hardcoding mystical mappings in Go.
 
-Repeated evidence is useful only when it adds meaningful independent support. It must not inflate a score merely by appearing many times through duplicate candidates or repeated debug paths.
-
-## Harmonic Rendering
-
-Harmonics are not the first implementation target. They are the later listening layer.
-
-Once the activation-energy model is clean, bounded, and evidence-first, the activation graph may be rendered as music:
-
-- concept activation may map to a base pitch
-- evidence paths may become overtones
-- confidence may control stability, volume, or timbre
-- relation strength may become harmonic interval
-- convergence may become consonance
-- conflict or weak evidence may become dissonance
-- sentence progression may become rhythm or time
-
-All musical mappings belong in data. Go code must not hardcode concept-to-frequency, concept-to-pitch, or concept-to-instrument mappings.
-
-## Signal Confidence
-
-Every signal must be labeled:
-
-- `verified`: ordinary linguistic fact or sourced data.
-- `plausible`: reasonable echo, morphology, relation, or traditional association.
-- `speculative`: symbolic reading only.
-
-Confidence affects activation energy. Speculative evidence may contribute as a quiet overtone later, but it should not dominate the activation field.
-
-## Candidate Forms
-
-Candidate forms are generated without meaning:
-
-- normalized form
-- phonetic form
-- consonant skeleton
-- vowel skeleton
-- n-grams
-- edit variants
-- doubled and de-doubled variants
-- fragments
-
-These candidates are compared against known forms from data. Candidate generation must be bounded so long inputs do not produce runaway evidence volume.
-
-## Activation
-
-A known-form match activates concepts.
-
-Concepts then propagate activation through relations:
+The correct stack is:
 
 ```text
-candidate form
-  -> known form
-  -> concept
-  -> related concept
-  -> convergence field
+input text
+  -> syllables / phonetics / glyphs / fragments / forms
+  -> evidence channels
+  -> concept activation graph
+  -> frequency field activation
+  -> harmonic coherence / dissonance
+  -> optional color, chakra, pitch, chord, rhythm, or audio rendering
 ```
 
-Every activation should preserve its evidence path.
+This means the current graph work is not wasted. It is the scaffolding needed to know which frequency fields should sound.
 
-## Passage Resonance
+## Data, Not Go Constants
 
-A passage is one temporary activation field.
+Core values may have base frequencies, colors, chakra associations, pitch ratios, musical intervals, or harmonic profiles.
 
-The engine should not use hardcoded lists of modal, contrast, emptiness, energy, truth, light, or other marker words. If those meanings appear, they must come from the data layer and graph activation.
+Those mappings must live in data, not production Go code.
 
-Passage-level convergence should increase when:
+Examples of the kind of data the project needs:
 
-- several tokens activate related fields
-- relation paths reinforce each other
-- repeated concepts appear through independent evidence
-- independent similarity methods agree
+```yaml
+frequency_profiles:
+  - concept: love
+    field: heart
+    color: green
+    chakra: heart
+    base_ratio: "5/4"
+    note_hint: E
+    confidence: traditional
+    source: curated
 
-It should decrease when:
+  - concept: truth
+    field: clarity
+    color: blue
+    base_ratio: "3/2"
+    note_hint: G
+    confidence: symbolic
+    source: curated
+```
 
-- evidence is noisy
-- the path depends on one speculative jump
-- a key token is removed
-- similarity is weak
-- duplicate candidates repeat the same evidence path
+This does not claim the mapping is scientifically proven. It records the lens, source, and confidence so the engine can render and compare harmonic systems honestly.
 
-## Important Limit
+## Frequencies At Different Levels
 
-Resonance is not proof.
+Socrates should eventually support frequency fields at multiple levels:
 
-The engine helps discover possible hidden layers. It must not pretend those layers are historically, spiritually, scientifically, or acoustically proven unless evidence supports that claim.
+- **phoneme / syllable**: sound-shape, stress, vowel/consonant energy
+- **word**: combined syllable melody plus known form mappings
+- **concept**: curated base frequency profile
+- **relation**: interval or modulation between fields
+- **passage**: time-ordered melody of activated fields
+- **thought / idea**: higher-order harmonic pattern formed by concept clusters
+
+## Harmony And Accord
+
+Musically, C-E-G forms an accord because the notes create stable interval relationships.
+
+In Socrates, concept fields should work similarly:
+
+```text
+love + heart + truth
+```
+
+should not merely be three labels in a graph. If curated frequency profiles exist, the engine should be able to ask:
+
+- do these concepts form a stable interval set?
+- do their colors/chakras/ratios agree or clash?
+- is this a consonant chord, unresolved suspension, or dissonance?
+- which evidence path caused each tone to enter the field?
+
+## Important Boundary
+
+The engine can explore symbolic and spiritual resonance, including chakras, colors, notes, and harmonic ratios.
+
+It must still show evidence and confidence. A harmonic reading is a model output, not proof of physics, etymology, theology, or medicine.
+
+## Immediate Architectural Correction
+
+The next implementation phase must add the data model for frequency profiles and harmonic fields.
+
+The legacy `internal/resonance` package contains hardcoded frequency examples. That approach is not acceptable as the final model. It should be replaced or bypassed by a data-backed harmonic profile layer that consumes the activation graph.
