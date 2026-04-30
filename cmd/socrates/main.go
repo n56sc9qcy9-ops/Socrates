@@ -57,6 +57,8 @@ func main() {
 		fmt.Println("  socrates train --examples ./my-examples.yaml --debug")
 		fmt.Println("  socrates train --heldout ./heldout.yaml")
 		fmt.Println("  socrates train --weights ./weights.yaml")
+		fmt.Println("  socrates train suggest-weights")
+		fmt.Println("  socrates train apply-weights")
 		fmt.Println()
 		fmt.Println("Training flags:")
 		fmt.Println("  --examples <path>  Path to training examples YAML (default: training/examples.yaml)")
@@ -149,6 +151,8 @@ func main() {
 		args := trainCmd.Args()
 		if len(args) > 0 && args[0] == "suggest-weights" {
 			runSuggestWeights()
+		} else if len(args) > 0 && args[0] == "apply-weights" {
+			runApplyWeights()
 		} else {
 			runTrainEvaluate(*trainExamplesPath, *trainHeldOutPath, *trainWeightsPath, *trainDebugCmd)
 		}
@@ -156,6 +160,10 @@ func main() {
 	case "suggest-weights":
 		// Direct suggest-weights command
 		runSuggestWeights()
+
+	case "apply-weights":
+		// Direct apply-weights command
+		runApplyWeights()
 
 	case "help", "-h", "--help":
 		flag.Usage()
@@ -368,6 +376,214 @@ func runSuggestWeights() {
 	fmt.Println("Do NOT auto-apply - review each suggestion first.")
 
 	os.Exit(0)
+}
+
+// runApplyWeights applies accepted weight suggestions from a review file.
+func runApplyWeights() {
+	// Default paths
+	reviewPath := "review/weight_suggestions.yaml"
+	targetPath := "training/ranking_weights.yaml"
+	auditPath := "review/weight_audit.yaml"
+
+	// Parse any --review and --target flags if provided
+	// For simplicity, use fixed paths (can be extended with flags later)
+
+	fmt.Println("=== Apply Weight Suggestions ===")
+	fmt.Printf("Review file: %s\n", reviewPath)
+	fmt.Printf("Target config: %s\n", targetPath)
+
+	// Check if review file exists
+	if _, err := os.Stat(reviewPath); os.IsNotExist(err) {
+		fmt.Fprintf(os.Stderr, "Error: review file not found at %s\n", reviewPath)
+		fmt.Println("Run 'socrates suggest-weights' first to generate suggestions.")
+		os.Exit(1)
+	}
+
+	// Parse review file
+	rf, parseErrors := training.ParseReviewFile(reviewPath)
+	if len(parseErrors) > 0 {
+		fmt.Fprintf(os.Stderr, "Error parsing review file:\n")
+		for _, e := range parseErrors {
+			fmt.Fprintf(os.Stderr, "  %s\n", e.Error())
+		}
+		os.Exit(1)
+	}
+
+	// Validate review file
+	validationErrors := training.ValidateReviewFile(rf)
+	if len(validationErrors) > 0 {
+		fmt.Fprintf(os.Stderr, "Error validating review file:\n")
+		for _, e := range validationErrors {
+			fmt.Fprintf(os.Stderr, "  %s\n", e.Error())
+		}
+		os.Exit(1)
+	}
+
+	// Get pending, accepted, and rejected counts
+	pending := training.GetPendingSuggestions(rf)
+	accepted := training.GetAcceptedSuggestions(rf)
+	rejected := training.GetRejectedSuggestions(rf)
+
+	fmt.Printf("\nReview file status:\n")
+	fmt.Printf("  Pending: %d\n", len(pending))
+	fmt.Printf("  Accepted: %d\n", len(accepted))
+	fmt.Printf("  Rejected: %d\n", len(rejected))
+
+	// Check for accepted suggestions
+	if len(accepted) == 0 {
+		fmt.Println("\nNo accepted suggestions to apply.")
+		fmt.Println("Edit the review file and set status to 'accepted' for suggestions you want to apply.")
+		os.Exit(0)
+	}
+
+	// Display accepted suggestions
+	fmt.Println("\nAccepted suggestions to apply:")
+	for i, s := range accepted {
+		fmt.Printf("  [%d] %s: %.2v -> %.2v\n", i+1, s.Path, s.Current, s.Suggested)
+		if s.Rationale != "" {
+			fmt.Printf("      (%s)\n", s.Rationale)
+		}
+	}
+
+	// Confirm before applying
+	fmt.Println("\nThis will update the target config file.")
+	fmt.Print("Proceed with apply? (y/N): ")
+
+	var response string
+	fmt.Scanln(&response)
+
+	if response != "y" && response != "Y" {
+		fmt.Println("Aborted. No changes made.")
+		os.Exit(0)
+	}
+
+	// Read current weights from target
+	var currentWeights map[string]interface{}
+	if data, err := os.ReadFile(targetPath); err == nil {
+		// Parse existing weights
+		if parsed, err := training.ParseWeightsYAML(string(data)); err == nil {
+			currentWeights = parsed
+		}
+	}
+
+	if currentWeights == nil {
+		// Start with default weights if target doesn't exist
+		currentWeights = make(map[string]interface{})
+		fmt.Printf("Note: No existing config at %s, using default weights as baseline.\n", targetPath)
+		// Initialize with default ranking weights
+		defaultWeights := decipher.DefaultRankingWeights()
+		currentWeights["exact_match_base"] = defaultWeights.ExactMatchBase
+		currentWeights["fuzzy_match_base"] = defaultWeights.FuzzyMatchBase
+		currentWeights["fuzzy_distance_penalty"] = defaultWeights.FuzzyDistancePenalty
+		currentWeights["confidence_verified"] = defaultWeights.ConfidenceVerified
+		currentWeights["confidence_plausible"] = defaultWeights.ConfidencePlausible
+		currentWeights["confidence_speculative"] = defaultWeights.ConfidenceSpeculative
+		currentWeights["graph_expansion_weight"] = defaultWeights.GraphExpansionWeight
+		currentWeights["graph_depth_penalty"] = defaultWeights.GraphDepthPenalty
+		currentWeights["graph_relation_base_weight"] = defaultWeights.GraphRelationBaseWeight
+		currentWeights["passage_co_activation_weight"] = defaultWeights.PassageCoActivationWeight
+		currentWeights["passage_field_boost"] = defaultWeights.PassageFieldBoost
+		currentWeights["harmonic_profile_weight"] = defaultWeights.HarmonicProfileWeight
+		currentWeights["harmonic_ratio_compatibility"] = defaultWeights.HarmonicRatioCompatibility
+		currentWeights["harmonic_archetype_match"] = defaultWeights.HarmonicArchetypeMatch
+		currentWeights["multi_method_bonus"] = defaultWeights.MultiMethodBonus
+		currentWeights["multi_method_threshold"] = defaultWeights.MultiMethodThreshold
+		currentWeights["channel_diversity_bonus"] = defaultWeights.ChannelDiversityBonus
+		currentWeights["channel_diversity_threshold"] = defaultWeights.ChannelDiversityThreshold
+		currentWeights["duplicate_noise_penalty"] = defaultWeights.DuplicateNoisePenalty
+		currentWeights["dissonance_penalty"] = defaultWeights.DissonancePenalty
+		currentWeights["max_speculative_ratio"] = defaultWeights.MaxSpeculativeRatio
+		currentWeights["source_curated"] = defaultWeights.SourceCurated
+		currentWeights["source_traditional"] = defaultWeights.SourceTraditional
+		currentWeights["source_human_review"] = defaultWeights.SourceHumanReview
+		currentWeights["lens_orthographic"] = defaultWeights.LensOrthographic
+		currentWeights["lens_phonetic"] = defaultWeights.LensPhonetic
+		currentWeights["lens_semantic"] = defaultWeights.LensSemantic
+	}
+
+	// Read existing audit trail
+	existingAudit, _ := training.ReadAuditTrail(auditPath)
+
+	// Apply accepted suggestions
+	newAudit, applyErrors := training.ApplyWeightSuggestions(reviewPath, targetPath, currentWeights, existingAudit)
+	if len(applyErrors) > 0 {
+		fmt.Fprintf(os.Stderr, "Error applying suggestions:\n")
+		for _, e := range applyErrors {
+			fmt.Fprintf(os.Stderr, "  %s\n", e.Error())
+		}
+		fmt.Println("\nRefusing to apply due to drift or errors.")
+		os.Exit(1)
+	}
+
+	// Write audit trail
+	if err := training.WriteAuditTrail(auditPath, newAudit); err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: failed to write audit trail: %v\n", err)
+	}
+
+	fmt.Printf("\n✓ Applied %d weight change(s)\n", len(accepted))
+	fmt.Printf("  Target: %s\n", targetPath)
+	fmt.Printf("  Audit: %s\n", auditPath)
+
+	// Run validation on the new config
+	fmt.Println("\nValidating updated weights...")
+	if err := validateWeightsFile(targetPath); err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: weight validation failed: %v\n", err)
+	} else {
+		fmt.Println("✓ Weight validation passed")
+	}
+
+	// Run training evaluation with new weights
+	fmt.Println("\nRunning training evaluation with new weights...")
+
+	// Load knowledge base
+	kb, err := knowledge.LoadFromEmbed()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error loading knowledge: %v\n", err)
+		os.Exit(1)
+	}
+
+	engine := decipher.NewEngineWithKnowledge(kb)
+
+	// Load new weights
+	newWeights, err := decipher.LoadRankingWeights(targetPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error loading new weights: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Run evaluation
+	eval := training.NewEvaluatorWithWeights(engine, *newWeights, targetPath)
+
+	loader := training.NewLoader()
+	trainExamples, err := loader.LoadFromFile("training/examples.yaml")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error loading training examples: %v\n", err)
+		os.Exit(1)
+	}
+
+	report := eval.EvaluateWithReport(trainExamples)
+
+	fmt.Println("\nTraining results with new weights:")
+	fmt.Printf("  Concept: prec=%.4f, rec=%.4f\n", report.Train.ConceptPrec, report.Train.ConceptRec)
+	fmt.Printf("  Field: prec=%.4f, rec=%.4f\n", report.Train.FieldPrec, report.Train.FieldRec)
+	fmt.Printf("  Passed: %d/%d\n", report.Train.Passed, report.Train.Examples)
+
+	os.Exit(0)
+}
+
+// validateWeightsFile checks that a weights YAML file is valid.
+func validateWeightsFile(path string) error {
+	// Parse the file
+	if data, err := os.ReadFile(path); err != nil {
+		// File doesn't exist yet
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	} else {
+		_, err := training.ParseWeightsYAML(string(data))
+		return err
+	}
 }
 
 // runTrainEvaluate runs the training evaluation command.
