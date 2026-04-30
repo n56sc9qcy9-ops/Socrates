@@ -5,7 +5,7 @@ import (
 )
 
 // =============================================================================
-// Phase G: Scoring (with deduplication)
+// Phase G: Scoring (with deduplication and configurable weights)
 // =============================================================================
 
 // CalculateScoreComponents computes detailed score components.
@@ -18,73 +18,93 @@ func CalculateScoreComponents(
 	convergence ConvergenceResult,
 	channels []ChannelResult,
 ) ScoreComponents {
+	return CalculateScoreComponentsWithWeights(candidates, matches, expansions, convergence, channels, DefaultRankingWeights())
+}
+
+// CalculateScoreComponentsWithWeights computes score components using explicit weights.
+// This allows ranking weights to be configured and evaluated.
+func CalculateScoreComponentsWithWeights(
+	candidates []CandidateForm,
+	matches []MatchEvidence,
+	expansions map[string][]knowledge.DecipherConceptRelation,
+	convergence ConvergenceResult,
+	channels []ChannelResult,
+	weights RankingWeights,
+) ScoreComponents {
 	components := ScoreComponents{}
 
 	// Deduplicate matches by evidence ID - keep first (best) occurrence
 	dedupedMatches := deduplicateMatchEvidence(matches)
 
-	// Exact match score: high weight for exact matches
+	// Exact match score
 	var exactWeight, fuzzyWeight float64
 
 	for _, m := range dedupedMatches {
 		if m.Distance == 0 {
-			exactWeight += m.Weight
+			exactWeight += m.Weight * weights.ExactMatchBase
 		} else {
-			fuzzyWeight += m.Weight
+			// Apply distance penalty for fuzzy matches
+			distanceFactor := 1.0 - float64(m.Distance)*weights.FuzzyDistancePenalty
+			if distanceFactor < 0 {
+				distanceFactor = 0
+			}
+			fuzzyWeight += m.Weight * weights.FuzzyMatchBase * distanceFactor
 		}
 	}
 
 	if len(dedupedMatches) > 0 {
 		components.ExactMatchScore = exactWeight / float64(len(dedupedMatches))
-		components.FuzzyMatchScore = fuzzyWeight / float64(len(dedupedMatches)) * 0.8 // Fuzzy is weaker
+		components.FuzzyMatchScore = fuzzyWeight / float64(len(dedupedMatches))
 	}
 
-	// Graph expansion score - normalize by count AND cap at 1.0
+	// Graph expansion score
 	var expansionWeight float64
 	var expansionCount int
 	for _, exps := range expansions {
-		for _, e := range exps {
-			expansionWeight += e.Weight
+		for i, e := range exps {
+			// Apply depth penalty
+			depthFactor := 1.0 - float64(i)*weights.GraphDepthPenalty
+			if depthFactor < 0 {
+				depthFactor = 0
+			}
+			expansionWeight += e.Weight * weights.GraphExpansionWeight * depthFactor
 			expansionCount++
 		}
 	}
 	if expansionCount > 0 {
-		components.GraphExpansionScore = expansionWeight / float64(expansionCount) * 0.7
+		components.GraphExpansionScore = expansionWeight / float64(expansionCount)
 		if components.GraphExpansionScore > 1.0 {
 			components.GraphExpansionScore = 1.0
 		}
 	}
 
-	// Passage convergence score - derived from generic activation, not semantic buckets
-	// Deduplicate activated concepts first
+	// Passage convergence score
 	dedupedConcepts := deduplicateActivatedConcepts(convergence.ActivatedConcepts)
 	if len(dedupedConcepts) > 0 {
-		// Combine co-activation score with number of activated concepts
 		conceptCount := float64(len(dedupedConcepts))
-		components.PassageConvergenceScore = convergence.CoActivationScore*0.6 + (conceptCount/10.0)*0.4
-		// Normalize
+		components.PassageConvergenceScore = convergence.CoActivationScore*weights.PassageCoActivationWeight + (conceptCount/10.0)*weights.PassageFieldBoost
 		if components.PassageConvergenceScore > 1.0 {
 			components.PassageConvergenceScore = 1.0
 		}
 	}
 
-	// Multi-method bonus: deduplicated methods agreeing
+	// Multi-method bonus
 	methodSet := make(map[string]bool)
 	for _, m := range dedupedMatches {
 		methodSet[m.Method] = true
 	}
-	if len(methodSet) >= 3 {
-		components.MultiMethodBonus = 0.15
-	} else if len(methodSet) >= 2 {
-		components.MultiMethodBonus = 0.1
+	if len(methodSet) >= weights.MultiMethodThreshold {
+		components.MultiMethodBonus = weights.MultiMethodBonus
+	} else if len(methodSet) >= weights.MultiMethodThreshold-1 {
+		components.MultiMethodBonus = weights.MultiMethodBonus * 0.67 // Partial bonus
 	}
 
-	// Channel diversity bonus - only count channels with ACTIVE meaningful signals
+	// Channel diversity bonus
 	activeChannelCount := countActiveChannels(channels)
-	if activeChannelCount >= 4 {
-		components.ChannelDiversityBonus = 0.2
-	} else if activeChannelCount >= 3 {
-		components.ChannelDiversityBonus = 0.1
+	if activeChannelCount >= weights.ChannelDiversityThreshold {
+		components.ChannelDiversityBonus = weights.ChannelDiversityBonus
+	} else if activeChannelCount >= weights.ChannelDiversityThreshold-1 {
+		components.ChannelDiversityBonus = weights.ChannelDiversityBonus * 0.5
 	}
 
 	return components
@@ -163,8 +183,15 @@ func deduplicateActivatedConcepts(concepts []ActivatedConcept) []ActivatedConcep
 	return result
 }
 
-// CalculateFinalScore computes the final combined score.
+// CalculateFinalScore computes the final combined score using default weights.
 func CalculateFinalScore(components ScoreComponents) float64 {
+	return CalculateFinalScoreWithWeights(components, DefaultRankingWeights())
+}
+
+// CalculateFinalScoreWithWeights computes the final combined score using explicit weights.
+func CalculateFinalScoreWithWeights(components ScoreComponents, weights RankingWeights) float64 {
+	// Use weighted sum normalized to [0, 1]
+	// Base weights from current behavior: exact=0.25, fuzzy=0.20, graph=0.15, passage=0.25, bonus=0.15
 	score := components.ExactMatchScore*0.25 +
 		components.FuzzyMatchScore*0.20 +
 		components.GraphExpansionScore*0.15 +

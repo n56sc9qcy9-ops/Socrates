@@ -1,0 +1,114 @@
+# Held-Out Examples
+# These examples are kept separate from training examples.
+# They are used to evaluate model changes without tuning to the examples being inspected.
+# Do NOT add these to training/examples.yaml.
+#
+# expected_concepts: must reference concept IDs from concepts.yaml
+# expected_fields: must reference meaning_frequency_id from frequencies.yaml
+# expected_quality: consonant, dissonant, or unresolved_tension
+
+held_out:
+  # Example 1: El (Hebrew word for God) - cross-script meaning convergence
+  - id: ho.el.1
+    input: "El"
+    expected_concepts:
+      - source
+      - light
+      - one
+    expected_fields:
+      - one-unity-whole
+    expected_quality: consonant
+    confidence: curated
+    source: human_review
+    notes: "El activates one/unity concepts, converges Hebrew semantics"
+
+  # Example 2: dao (Chinese word for way) - cross-script convergence
+  - id: ho.dao.1
+    input: "道"
+    expected_concepts:
+      - path
+    expected_fields:
+      - path-way-dao
+    expected_quality: consonant
+    confidence: curated
+    source: human_review
+    notes: "道 activates path/way concepts, forms coherent field"
+
+  # Example 3: breath concept - activation dynamics
+  - id: ho.breath.1
+    input: breath
+    expected_concepts:
+      - breath
+      - life
+    expected_fields:
+      - breath-life-spirit
+    expected_quality: consonant
+    confidence: curated
+    source: human_review
+    notes: "breath activates life concepts"
+
+  # Example 4: inspired concept - form generation
+  - id: ho.inspired.1
+    input: inspired
+    expected_concepts:
+      - spirit
+      - breath
+    expected_fields:
+      - breath-life-spirit
+    expected_quality: consonant
+    confidence: curated
+    source: human_review
+    notes: "inspired activates breath/spirit convergence"
+
+  # Example 5: Logos (Greek for word/reason) - cross-script form
+  - id: ho.logos.1
+    input: Logos
+    expected_concepts:
+      - word
+      - sound
+    expected_fields:
+      - word-speech-logos
+    expected_quality: consonant
+    confidence: curated
+    source: human_review
+    notes: "Greek Logos activates word/sound concepts"
+
+  # Example 6: ruach (Hebrew for spirit/breath)
+  - id: ho.ruach.1
+    input: "רוּחַ"
+    expected_concepts:
+      - spirit
+      - breath
+      - wind
+    expected_fields:
+      - breath-life-spirit
+    expected_quality: consonant
+    confidence: curated
+    source: human_review
+    notes: "Hebrew ruach activates breath/spirit concepts"
+
+  # Example 7: qi/chi (Chinese for vital energy) - using breath/life
+  - id: ho.qi.1
+    input: "氣"
+    expected_concepts:
+      - breath
+      - life
+    expected_fields:
+      - breath-life-spirit
+    expected_quality: consonant
+    confidence: curated
+    source: human_review
+    notes: "氣 activates breath/life concepts"
+
+  # Example 8: prana (Sanskrit for life breath) - using breath/life
+  - id: ho.prana.1
+    input: prana
+    expected_concepts:
+      - breath
+      - life
+    expected_fields:
+      - breath-life-spirit
+    expected_quality: consonant
+    confidence: curated
+    source: human_review
+    notes: "prana activates breath/life convergence"

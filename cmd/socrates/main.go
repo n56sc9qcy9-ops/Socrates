@@ -25,6 +25,8 @@ func main() {
 	// Training subcommand
 	trainCmd := flag.NewFlagSet("train", flag.ExitOnError)
 	trainExamplesPath := trainCmd.String("examples", "", "path to training examples YAML file")
+	trainHeldOutPath := trainCmd.String("heldout", "", "path to held-out examples YAML file (optional)")
+	trainWeightsPath := trainCmd.String("weights", "", "path to ranking weights YAML file (optional, uses defaults)")
 	trainDebugCmd := trainCmd.Bool("debug", false, "show detailed evaluation output")
 
 	flag.Usage = func() {
@@ -50,6 +52,17 @@ func main() {
 		fmt.Println("  socrates decipher skal --debug")
 		fmt.Println("  socrates knowledge validate")
 		fmt.Println("  socrates knowledge validate --dir ./my-knowledge")
+		fmt.Println("  socrates train")
+		fmt.Println("  socrates train --debug")
+		fmt.Println("  socrates train --examples ./my-examples.yaml --debug")
+		fmt.Println("  socrates train --heldout ./heldout.yaml")
+		fmt.Println("  socrates train --weights ./weights.yaml")
+		fmt.Println()
+		fmt.Println("Training flags:")
+		fmt.Println("  --examples <path>  Path to training examples YAML (default: training/examples.yaml)")
+		fmt.Println("  --heldout <path>   Path to held-out examples YAML (optional)")
+		fmt.Println("  --weights <path>   Path to ranking weights YAML (optional, uses default weights)")
+		fmt.Println("  --debug            Show detailed evaluation output")
 		fmt.Println()
 		fmt.Println("Flags:")
 		flag.PrintDefaults()
@@ -133,7 +146,7 @@ func main() {
 		trainCmd.Parse(os.Args[2:])
 
 		// Run evaluation (train always evaluates)
-		runTrainEvaluate(*trainExamplesPath, *trainDebugCmd)
+		runTrainEvaluate(*trainExamplesPath, *trainHeldOutPath, *trainWeightsPath, *trainDebugCmd)
 
 	case "help", "-h", "--help":
 		flag.Usage()
@@ -256,7 +269,7 @@ func runKnowledgeValidate(dir string) {
 }
 
 // runTrainEvaluate runs the training evaluation command.
-func runTrainEvaluate(examplesPath string, debugMode bool) {
+func runTrainEvaluate(examplesPath string, heldOutPath string, weightsPath string, debugMode bool) {
 	// Load knowledge base
 	kb, err := knowledge.LoadFromEmbed()
 	if err != nil {
@@ -264,9 +277,28 @@ func runTrainEvaluate(examplesPath string, debugMode bool) {
 		os.Exit(1)
 	}
 
+	// Load ranking weights if specified
+	var weights decipher.RankingWeights
+	weightsSource := "default"
+
+	if weightsPath != "" {
+		weightsSource = weightsPath
+		var loadErr error
+		loadedWeights, loadErr := decipher.LoadRankingWeights(weightsPath)
+		if loadErr != nil {
+			fmt.Fprintf(os.Stderr, "Error loading ranking weights from %s: %v\n", weightsPath, loadErr)
+			os.Exit(1)
+		}
+		weights = *loadedWeights
+		fmt.Printf("Loaded ranking weights from %s\n", weightsPath)
+	} else {
+		weights = decipher.DefaultRankingWeights()
+	}
+
 	// Load training examples
 	loader := training.NewLoader()
 	var examples training.Examples
+	var heldOutExamples training.Examples
 
 	if examplesPath != "" {
 		// Load from specified file
@@ -300,6 +332,22 @@ func runTrainEvaluate(examplesPath string, debugMode bool) {
 		fmt.Printf("Loaded %d examples from default file\n", len(examples))
 	}
 
+	// Load held-out examples if specified
+	if heldOutPath != "" {
+		absPath, err := filepath.Abs(heldOutPath)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: invalid held-out path: %v\n", err)
+			os.Exit(1)
+		}
+
+		heldOutExamples, err = loader.LoadHeldOutFromFile(absPath)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error loading held-out examples from %s: %v\n", absPath, err)
+			os.Exit(1)
+		}
+		fmt.Printf("Loaded %d held-out examples from %s\n", len(heldOutExamples), absPath)
+	}
+
 	// Validate examples against knowledge
 	fmt.Println("\nValidating examples against knowledge base...")
 	validationResult := training.ValidateExamples(examples, kb)
@@ -314,30 +362,88 @@ func runTrainEvaluate(examplesPath string, debugMode bool) {
 	}
 	fmt.Printf("✓ All %d examples validated\n", len(examples))
 
-	// Create engine and evaluator
+	// Validate held-out examples if loaded
+	if len(heldOutExamples) > 0 {
+		heldOutValidationResult := training.ValidateExamples(heldOutExamples, kb)
+		if !heldOutValidationResult.IsValid() {
+			fmt.Printf("✗ Found %d validation error(s) in held-out examples:\n", len(heldOutValidationResult.Errors))
+			for _, e := range heldOutValidationResult.Errors {
+				fmt.Printf("  [%s] %s: %s\n", e.ExampleID, e.Field, e.Message)
+			}
+			fmt.Println("\nFix validation errors before running evaluation")
+			os.Exit(1)
+		}
+		fmt.Printf("✓ All %d held-out examples validated\n", len(heldOutExamples))
+	}
+
+	// Create engine and evaluator with weights
 	engine, err := decipher.NewEngine()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error creating engine: %v\n", err)
 		os.Exit(1)
 	}
 
-	evaluator := training.NewEvaluator(engine)
+	evaluator := training.NewEvaluatorWithWeights(engine, weights, weightsSource)
 
-	// Run evaluation
+	// Run full evaluation with train and held-out splits
 	fmt.Println("\nRunning evaluation...")
-	result := evaluator.Evaluate(examples)
 
-	// Print concise summary by default
-	fmt.Print(training.FormatResult(result))
+	var report *training.EvaluationReport
+	if len(heldOutExamples) > 0 {
+		report = evaluator.RunFullEvaluation(examples, heldOutExamples)
+	} else {
+		report = evaluator.EvaluateWithReport(examples)
+	}
+
+	// Print the evaluation report
+	fmt.Print(report.FormatReport())
 
 	// Print detailed results in debug mode
 	if debugMode {
-		fmt.Print(result.FormatDetailedResults(examples))
+		fmt.Println("\n--- DETAILED TRAIN RESULTS ---")
+		for _, ex := range report.Train.Detailed {
+			fmt.Printf("[%s] %s\n", ex.ExampleID, ex.Input)
+			fmt.Printf("  Passed: %v\n", ex.Passed)
+			fmt.Printf("  Concepts: %d hits, %d misses, %d false pos (prec=%.2f, rec=%.2f)\n",
+				ex.ConceptHits, ex.ConceptMisses, ex.ConceptFalsePos,
+				ex.ConceptPrecision, ex.ConceptRecall)
+			fmt.Printf("  Fields: %d hits, %d misses, %d false pos (prec=%.2f, rec=%.2f)\n",
+				ex.FieldHits, ex.FieldMisses, ex.FieldFalsePos,
+				ex.FieldPrecision, ex.FieldRecall)
+			if len(ex.MissedExpectedFields) > 0 {
+				fmt.Printf("  Missed fields: %v\n", ex.MissedExpectedFields)
+			}
+			if len(ex.FalseActivatedFields) > 0 {
+				fmt.Printf("  False fields: %v\n", ex.FalseActivatedFields)
+			}
+			fmt.Println()
+		}
+
+		if len(heldOutExamples) > 0 {
+			fmt.Println("\n--- DETAILED HELD-OUT RESULTS ---")
+			for _, ex := range report.HeldOut.Detailed {
+				fmt.Printf("[%s] %s\n", ex.ExampleID, ex.Input)
+				fmt.Printf("  Passed: %v\n", ex.Passed)
+				fmt.Printf("  Concepts: %d hits, %d misses, %d false pos (prec=%.2f, rec=%.2f)\n",
+					ex.ConceptHits, ex.ConceptMisses, ex.ConceptFalsePos,
+					ex.ConceptPrecision, ex.ConceptRecall)
+				fmt.Printf("  Fields: %d hits, %d misses, %d false pos (prec=%.2f, rec=%.2f)\n",
+					ex.FieldHits, ex.FieldMisses, ex.FieldFalsePos,
+					ex.FieldPrecision, ex.FieldRecall)
+				if len(ex.MissedExpectedFields) > 0 {
+					fmt.Printf("  Missed fields: %v\n", ex.MissedExpectedFields)
+				}
+				if len(ex.FalseActivatedFields) > 0 {
+					fmt.Printf("  False fields: %v\n", ex.FalseActivatedFields)
+				}
+				fmt.Println()
+			}
+		}
 	}
 
 	// Exit with appropriate code
-	if result.FailedExamples > 0 {
-		fmt.Printf("\n%d example(s) failed evaluation\n", result.FailedExamples)
+	if report.TotalFailed > 0 {
+		fmt.Printf("\n%d example(s) failed evaluation\n", report.TotalFailed)
 		os.Exit(1)
 	} else {
 		fmt.Println("\n✓ All examples passed evaluation")

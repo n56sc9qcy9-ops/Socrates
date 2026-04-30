@@ -17,6 +17,10 @@ type examplesDoc struct {
 	Examples []ExampleEntry `yaml:"examples"`
 }
 
+type heldoutDoc struct {
+	HeldOut []ExampleEntry `yaml:"held_out"`
+}
+
 type ExampleEntry struct {
 	ID               string   `yaml:"id"`
 	Input            string   `yaml:"input"`
@@ -77,6 +81,31 @@ func (l *Loader) Parse(data []byte) (Examples, error) {
 	}
 
 	return examples, nil
+}
+
+// ParseHeldOut parses held-out examples from YAML data.
+func (l *Loader) ParseHeldOut(data []byte) (Examples, error) {
+	var doc heldoutDoc
+	if err := yaml.Unmarshal(data, &doc); err != nil {
+		return nil, fmt.Errorf("failed to parse YAML: %w", err)
+	}
+
+	examples := make(Examples, 0, len(doc.HeldOut))
+	for _, e := range doc.HeldOut {
+		examples = append(examples, e.ToExample())
+	}
+
+	return examples, nil
+}
+
+// LoadHeldOutFromFile loads held-out examples from a YAML file.
+func (l *Loader) LoadHeldOutFromFile(path string) (Examples, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read held-out file: %w", err)
+	}
+
+	return l.ParseHeldOut(data)
 }
 
 // ============================================================

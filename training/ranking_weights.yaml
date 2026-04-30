@@ -1,0 +1,102 @@
+# ranking_weights.yaml - Explicit ranking weights for evidence-path scoring
+# These weights control how strongly each evidence type contributes to rankings.
+# Default weights preserve current scoring behavior as closely as practical.
+# Load via: socrates train --weights training/ranking_weights.yaml
+
+version: "1.0"
+
+description: |
+  Ranking weights for Socrates evidence-path scoring.
+  These weights are explicit and inspectable.
+  Changes should be evaluated against training examples before deployment.
+
+# =============================================================================
+# Exact Match Weights
+# =============================================================================
+
+exact_match:
+  base: 1.0  # Base weight for exact form matches (0-10)
+
+# =============================================================================
+# Fuzzy Match Weights
+# =============================================================================
+
+fuzzy_match:
+  base: 0.8  # Base weight for fuzzy matches (0-10)
+  distance_penalty: 0.1  # Penalty per edit distance (0-1)
+
+# =============================================================================
+# Confidence Weights
+# =============================================================================
+
+confidence:
+  verified: 1.0  # Multiplier for verified confidence (0-10)
+  plausible: 0.8  # Multiplier for plausible confidence (0-10)
+  speculative: 0.5  # Multiplier for speculative confidence (0-10)
+
+# =============================================================================
+# Graph Relation Weights
+# =============================================================================
+
+graph:
+  expansion_weight: 0.7  # Weight for concept graph expansion (0-10)
+  depth_penalty: 0.1  # Penalty factor per propagation depth (0-1)
+  relation_base_weight: 0.5  # Base weight for relation support (0-10)
+
+# =============================================================================
+# Passage and Convergence Weights
+# =============================================================================
+
+passage:
+  co_activation_weight: 0.6  # Weight for co-activation in passage (0-10)
+  field_boost: 0.4  # Boost for passage field concepts (0-1)
+
+# =============================================================================
+# Harmonic Profile Weights
+# =============================================================================
+
+harmonic:
+  profile_weight: 1.0  # Weight for harmonic profile support (0-10)
+  ratio_compatibility: 0.5  # Weight for ratio compatibility (0-10)
+  archetype_match: 0.3  # Weight for archetype match (0-10)
+
+# =============================================================================
+# Multi-Method and Channel Weights
+# =============================================================================
+
+multi_method:
+  bonus: 0.15  # Bonus for multiple methods agreeing (0-1)
+  threshold: 3  # Number of methods needed for bonus
+
+channel_diversity:
+  bonus: 0.2  # Bonus for channel diversity (0-1)
+  threshold: 4  # Number of active channels for bonus
+
+# =============================================================================
+# Penalty Weights
+# =============================================================================
+
+penalties:
+  duplicate_noise: 0.1  # Penalty for duplicate evidence (0-1)
+  dissonance: 0.2  # Penalty for unresolved dissonance (0-1)
+
+# =============================================================================
+# Bounding Weights
+# =============================================================================
+
+bounding:
+  max_speculative_ratio: 0.6  # Maximum ratio of speculative to total candidates (0-1)
+
+# =============================================================================
+# Source/Lens Weights
+# =============================================================================
+
+source:
+  curated: 1.0  # Multiplier for curated source (0-10)
+  traditional: 0.9  # Multiplier for traditional source (0-10)
+  human_review: 0.85  # Multiplier for human_review source (0-10)
+
+lens:
+  orthographic: 0.7  # Weight for orthographic lens (0-10)
+  phonetic: 0.9  # Weight for phonetic lens (0-10)
+  semantic: 1.0  # Weight for semantic lens (0-10)

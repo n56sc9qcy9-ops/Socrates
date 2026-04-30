@@ -12,15 +12,33 @@ import (
 
 // Evaluator evaluates training examples against engine analysis results.
 type Evaluator struct {
-	engine *decipher.Engine
-	kb     *decipher.Engine
+	engine  *decipher.Engine
+	kb      *decipher.Engine
+	weights decipher.RankingWeights
+	weightsPath string // "default" or file path
 }
 
-// NewEvaluator creates a new training evaluator.
+// NewEvaluator creates a new training evaluator with default weights.
 func NewEvaluator(engine *decipher.Engine) *Evaluator {
 	return &Evaluator{
-		engine: engine,
+		engine:     engine,
+		weights:    decipher.DefaultRankingWeights(),
+		weightsPath: "default",
 	}
+}
+
+// NewEvaluatorWithWeights creates a new training evaluator with custom weights.
+func NewEvaluatorWithWeights(engine *decipher.Engine, weights decipher.RankingWeights, path string) *Evaluator {
+	return &Evaluator{
+		engine:     engine,
+		weights:    weights,
+		weightsPath: path,
+	}
+}
+
+// WeightSet returns the path to the current weight set.
+func (e *Evaluator) WeightSet() string {
+	return e.weightsPath
 }
 
 // Evaluate runs the engine on all examples and returns the evaluation report.
@@ -82,6 +100,62 @@ func (e *Evaluator) Evaluate(examples Examples) *EvaluationResult {
 	}
 
 	return result
+}
+
+// EvaluateWithReport runs the engine on all examples and returns an evaluation report with weight info.
+func (e *Evaluator) EvaluateWithReport(examples Examples) *EvaluationReport {
+	report := NewEvaluationReport(e.weightsPath, e.weights)
+
+	for _, example := range examples {
+		exampleResult := e.evaluateExample(example)
+
+		if exampleResult.Passed {
+			report.Train.Passed++
+		} else {
+			report.Train.Failed++
+		}
+
+		report.AddTrainResult(exampleResult)
+	}
+
+	report.Finalize()
+
+	return report
+}
+
+// EvaluateHeldOut runs the engine on held-out examples and adds to the report.
+func (e *Evaluator) EvaluateHeldOut(examples Examples, report *EvaluationReport) {
+	for _, example := range examples {
+		exampleResult := e.evaluateExample(example)
+
+		if exampleResult.Passed {
+			report.HeldOut.Passed++
+		} else {
+			report.HeldOut.Failed++
+		}
+
+		report.AddHeldOutResult(exampleResult)
+	}
+}
+
+// RunFullEvaluation runs evaluation on both train and held-out splits.
+func (e *Evaluator) RunFullEvaluation(trainExamples, heldOutExamples Examples) *EvaluationReport {
+	report := NewEvaluationReport(e.weightsPath, e.weights)
+
+	// Evaluate train examples
+	for _, example := range trainExamples {
+		exampleResult := e.evaluateExample(example)
+		report.AddTrainResult(exampleResult)
+	}
+
+	// Evaluate held-out examples
+	for _, example := range heldOutExamples {
+		exampleResult := e.evaluateExample(example)
+		report.AddHeldOutResult(exampleResult)
+	}
+
+	report.Finalize()
+	return report
 }
 
 // evaluateExample evaluates a single training example.
