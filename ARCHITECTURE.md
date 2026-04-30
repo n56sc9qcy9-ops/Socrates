@@ -31,14 +31,21 @@ knowledge data
 
 Start with YAML because it is easy to inspect and edit.
 
-Suggested structure:
+Active runtime knowledge is in `internal/knowledge/*.yaml` (embedded at build time).
+Reference/source material is in `knowledge/reference/` (not runtime).
 
 ```text
-knowledge/concepts.yaml
-knowledge/forms.yaml
-knowledge/relations.yaml
-knowledge/lenses.yaml
-knowledge/confidence.yaml
+internal/knowledge/         # Active runtime (embedded)
+  concepts.yaml
+  forms.yaml
+  relations.yaml
+  frequencies.yaml
+  glyphs.yaml
+
+knowledge/reference/        # Source/reference (not runtime)
+  concepts.yaml
+  forms.yaml
+  relations.yaml
 ```
 
 The data layer should contain known forms and relations. The code should not know whether a form means obligation, breath, shell, emptiness, or anything else.

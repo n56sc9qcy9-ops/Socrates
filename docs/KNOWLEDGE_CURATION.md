@@ -6,7 +6,7 @@ This document describes how to add new knowledge to Socrates's curated knowledge
 
 **Runtime knowledge** is embedded in `internal/knowledge/*.yaml` and loaded at build time.
 
-**Source material** in `knowledge/*.yaml` is non-runtime reference material for curation.
+**Source/reference material** in `knowledge/reference/*.yaml` is non-runtime reference material for curation.
 
 ## Knowledge Types
 

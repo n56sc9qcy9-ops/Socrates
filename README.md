@@ -110,16 +110,24 @@ Detailed generated forms, candidate lists, and full fuzzy-match dumps should be 
 
 Start with YAML.
 
+Active runtime knowledge is in `internal/knowledge/*.yaml` (embedded at build time).
+
+Reference/source material is in `knowledge/reference/` (not runtime).
+
 Suggested structure:
 
 ```text
-knowledge/concepts.yaml
-knowledge/forms.yaml
-knowledge/relations.yaml
-knowledge/frequencies.yaml
-knowledge/archetypes.yaml
-knowledge/lenses.yaml
-knowledge/confidence.yaml
+internal/knowledge/         # Active runtime (embedded at build)
+  concepts.yaml
+  forms.yaml
+  relations.yaml
+  frequencies.yaml
+  glyphs.yaml
+
+knowledge/reference/        # Source/reference (not runtime)
+  concepts.yaml
+  forms.yaml
+  relations.yaml
 ```
 
 SQLite can be considered later if YAML becomes too limited.
