@@ -85,14 +85,42 @@ the engine should analyze the whole passage as one activation field. If the data
 ## Target CLI
 
 ```sh
-go run ./cmd/socrates decipher inspired
-go run ./cmd/socrates decipher energy
-go run ./cmd/socrates decipher skal
-go run ./cmd/socrates decipher רוח
-go run ./cmd/socrates decipher प्राण
-go run ./cmd/socrates decipher 氣
-go run ./cmd/socrates decipher "jeg skal gjøre det, men det føles tomt"
+# Natural input (root defaults to decipher, joins all arguments)
+socrates what is the purpose of life
+socrates love energy spirit
+socrates skal
+
+# Explicit subcommand form
+socrates decipher inspired
+socrates decipher energy
+socrates decipher skal
+socrates decipher רוח
+socrates decipher प्राण
+socrates decipher 氣
+socrates decipher "jeg skal gjøre det, men det føles tomt"
+
+# Debug mode (shows candidates, fuzzy matches, internal details)
+socrates decipher skal --debug
+
+# Knowledge management
+socrates knowledge validate
+socrates knowledge validate --dir ./my-knowledge
+
+# Training and evaluation
+socrates train
+socrates train --debug
+socrates train suggest-weights
+socrates train apply-weights
+
+# Build (from repo root)
+make create           # builds ./bin/socrates
+go build -o socrates ./cmd/socrates
+
+# Help
+socrates --help
 ```
+
+**Note:** Running `./socrates` directly from the repo root requires a prior build (`make create` or `go build -o socrates ./cmd/socrates`). The `bin/socrates` binary is the canonical output location.
 
 The output should include:
 

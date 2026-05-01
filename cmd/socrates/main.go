@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"socrates/internal/decipher"
 	"socrates/internal/knowledge"
@@ -33,14 +34,19 @@ func main() {
 		fmt.Println("Socrates Language-Resonance Engine")
 		fmt.Println()
 		fmt.Println("Usage:")
-		fmt.Println("  socrates decipher <word|phrase> [flags]")
-		fmt.Println("  socrates descifer <word|phrase>  (alias)")
-		fmt.Println("  socrates knowledge validate [--dir <path>]")
+		fmt.Println("  socrates <word|phrase>   Analyze text for resonance (default)")
+		fmt.Println("  socrates decipher <text>  Explicit decipher subcommand")
+		fmt.Println("  socrates --help           Show full help with all commands and flags")
 		fmt.Println()
 		fmt.Println("Commands:")
-		fmt.Println("  decipher, descifer  Analyze a word or phrase for resonance")
-		fmt.Println("  knowledge          Knowledge management commands")
-		fmt.Println("  help               Show this help message")
+		fmt.Println("  decipher     Analyze a word or phrase for resonance")
+		fmt.Println("  knowledge    Knowledge management (validate)")
+		fmt.Println("  train        Training and evaluation")
+		fmt.Println("  help         Show this help message")
+		fmt.Println()
+		fmt.Println("Quick start (root natural input):")
+		fmt.Println("  socrates what is the purpose of my life")
+		fmt.Println("  socrates love energy spirit")
 		fmt.Println()
 		fmt.Println("Examples:")
 		fmt.Println("  socrates decipher inspired")
@@ -50,21 +56,19 @@ func main() {
 		fmt.Println("  socrates decipher प्राण")
 		fmt.Println("  socrates decipher 道")
 		fmt.Println("  socrates decipher skal --debug")
+		fmt.Println()
+		fmt.Println("Knowledge:")
 		fmt.Println("  socrates knowledge validate")
 		fmt.Println("  socrates knowledge validate --dir ./my-knowledge")
+		fmt.Println()
+		fmt.Println("Training:")
 		fmt.Println("  socrates train")
 		fmt.Println("  socrates train --debug")
-		fmt.Println("  socrates train --examples ./my-examples.yaml --debug")
+		fmt.Println("  socrates train --examples ./my-examples.yaml")
 		fmt.Println("  socrates train --heldout ./heldout.yaml")
 		fmt.Println("  socrates train --weights ./weights.yaml")
 		fmt.Println("  socrates train suggest-weights")
 		fmt.Println("  socrates train apply-weights")
-		fmt.Println()
-		fmt.Println("Training flags:")
-		fmt.Println("  --examples <path>  Path to training examples YAML (default: training/examples.yaml)")
-		fmt.Println("  --heldout <path>   Path to held-out examples YAML (optional)")
-		fmt.Println("  --weights <path>   Path to ranking weights YAML (optional, uses default weights)")
-		fmt.Println("  --debug            Show detailed evaluation output")
 		fmt.Println()
 		fmt.Println("Flags:")
 		flag.PrintDefaults()
@@ -173,10 +177,51 @@ func main() {
 		fmt.Println("A pattern engine for exploring word resonance across languages.")
 
 	default:
-		fmt.Printf("Unknown command: %s\n", command)
-		fmt.Println()
-		flag.Usage()
-		os.Exit(1)
+		// Root default: treat as decipher input
+		// Join all remaining args into one passage
+		input := command // first arg is part of input
+		if len(os.Args) > 2 {
+			// Join remaining arguments into one passage
+			for i := 2; i < len(os.Args); i++ {
+				if os.Args[i] != "" {
+					if input != "" {
+						input += " " + os.Args[i]
+					} else {
+						input = os.Args[i]
+					}
+				}
+			}
+		}
+
+		// If input looks like a subcommand name (starts with "-" or matches known patterns),
+		// show help instead
+		if strings.HasPrefix(command, "-") {
+			flag.Usage()
+			os.Exit(1)
+		}
+
+		// Run decipher on the natural-language input
+		if input == "" {
+			fmt.Println("Error: please provide an input word or phrase")
+			fmt.Println()
+			fmt.Println("Usage: socrates <word|phrase>  - analyze text for resonance")
+			fmt.Println("       socrates decipher <text>  - explicit decipher subcommand")
+			fmt.Println()
+			fmt.Println("For help: socrates --help")
+			os.Exit(1)
+		}
+
+		// Run the engine
+		engine, err := decipher.NewEngine()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to initialize engine: %v\n", err)
+			os.Exit(1)
+		}
+		reading := engine.Analyze(input)
+
+		// Render the output based on mode (default to concise)
+		output := decipher.RenderReadingWithOptions(reading, decipher.DefaultRenderOptions())
+		fmt.Print(output)
 	}
 }
 
