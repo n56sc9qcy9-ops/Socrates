@@ -10,8 +10,26 @@ import (
 	"socrates/internal/knowledge"
 )
 
+// repoRoot finds the repository root by locating go.mod.
+func repoRoot() string {
+	cwd, _ := os.Getwd()
+	for {
+		if _, err := os.Stat(filepath.Join(cwd, "go.mod")); err == nil {
+			return cwd
+		}
+		parent := filepath.Dir(cwd)
+		if parent == cwd {
+			break
+		}
+		cwd = parent
+	}
+	return "/Users/bot/Socrates" // fallback
+}
+
 // TestWeightSuggester generates and writes suggestions.
 func TestWeightSuggester(t *testing.T) {
+	os.Chdir(repoRoot())
+
 	kb, err := knowledge.LoadFromEmbed()
 	if err != nil {
 		t.Fatalf("Failed to load knowledge: %v", err)
@@ -21,16 +39,17 @@ func TestWeightSuggester(t *testing.T) {
 	weights := decipher.DefaultRankingWeights()
 
 	suggester := NewWeightSuggester(engine, weights)
-	suggester.SetReviewPath("review/test_weight_suggestions.yaml")
+	reviewDir := t.TempDir()
+	suggester.SetReviewPath(filepath.Join(reviewDir, "weight_suggestions.yaml"))
 
 	// Load examples
 	loader := NewLoader()
-	trainExamples, err := loader.LoadFromFile("/Users/bot/Socrates/training/examples.yaml")
+	trainExamples, err := loader.LoadFromFile("training/examples.yaml")
 	if err != nil {
 		t.Fatalf("Failed to load train examples: %v", err)
 	}
 
-	heldOutExamples, err := loader.LoadHeldOutFromFile("/Users/bot/Socrates/training/heldout.yaml")
+	heldOutExamples, err := loader.LoadHeldOutFromFile("training/heldout.yaml")
 	if err != nil {
 		t.Fatalf("Failed to load held-out examples: %v", err)
 	}
@@ -98,6 +117,8 @@ func TestWeightSuggester(t *testing.T) {
 
 // TestSuggestionsNotApplied verifies suggestions go to review, not active config.
 func TestSuggestionsNotApplied(t *testing.T) {
+	os.Chdir(repoRoot())
+
 	kb, err := knowledge.LoadFromEmbed()
 	if err != nil {
 		t.Fatalf("Failed to load knowledge: %v", err)
@@ -107,14 +128,15 @@ func TestSuggestionsNotApplied(t *testing.T) {
 	weights := decipher.DefaultRankingWeights()
 
 	suggester := NewWeightSuggester(engine, weights)
-	suggester.SetReviewPath("/tmp/test_review_not_applied.yaml")
+	tmpDir := t.TempDir()
+	suggester.SetReviewPath(filepath.Join(tmpDir, "test_review_not_applied.yaml"))
 
 	loader := NewLoader()
-	trainExamples, err := loader.LoadFromFile("/Users/bot/Socrates/training/examples.yaml")
+	trainExamples, err := loader.LoadFromFile("training/examples.yaml")
 	if err != nil {
 		t.Fatalf("Failed to load examples: %v", err)
 	}
-	heldOutExamples, err := loader.LoadHeldOutFromFile("/Users/bot/Socrates/training/heldout.yaml")
+	heldOutExamples, err := loader.LoadHeldOutFromFile("training/heldout.yaml")
 	if err != nil {
 		t.Fatalf("Failed to load held-out examples: %v", err)
 	}
@@ -140,6 +162,8 @@ func TestSuggestionsNotApplied(t *testing.T) {
 
 // TestHeldOutImprovementPreferred verifies held-out improvements are prioritized.
 func TestHeldOutImprovementPreferred(t *testing.T) {
+	os.Chdir(repoRoot())
+
 	kb, err := knowledge.LoadFromEmbed()
 	if err != nil {
 		t.Fatalf("Failed to load knowledge: %v", err)
@@ -187,6 +211,8 @@ func TestHeldOutImprovementPreferred(t *testing.T) {
 
 // TestTrainOnlyImprovementFlagged verifies train-only improvements are flagged.
 func TestTrainOnlyImprovementFlagged(t *testing.T) {
+	os.Chdir(repoRoot())
+
 	kb, err := knowledge.LoadFromEmbed()
 	if err != nil {
 		t.Fatalf("Failed to load knowledge: %v", err)
@@ -218,6 +244,8 @@ func TestTrainOnlyImprovementFlagged(t *testing.T) {
 
 // TestReviewFileContent verifies the review file format.
 func TestReviewFileContent(t *testing.T) {
+	os.Chdir(repoRoot())
+
 	kb, err := knowledge.LoadFromEmbed()
 	if err != nil {
 		t.Fatalf("Failed to load knowledge: %v", err)
@@ -227,16 +255,16 @@ func TestReviewFileContent(t *testing.T) {
 	weights := decipher.DefaultRankingWeights()
 
 	suggester := NewWeightSuggester(engine, weights)
-	reviewDir := filepath.Join(os.TempDir(), "socrates_test_review")
-	reviewFile := filepath.Join(reviewDir, "weight_suggestions.yaml")
+	tmpDir := t.TempDir()
+	reviewFile := filepath.Join(tmpDir, "weight_suggestions.yaml")
 	suggester.SetReviewPath(reviewFile)
 
 	loader := NewLoader()
-	trainExamples, err := loader.LoadFromFile("/Users/bot/Socrates/training/examples.yaml")
+	trainExamples, err := loader.LoadFromFile("training/examples.yaml")
 	if err != nil {
 		t.Fatalf("Failed to load examples: %v", err)
 	}
-	heldOutExamples, err := loader.LoadHeldOutFromFile("/Users/bot/Socrates/training/heldout.yaml")
+	heldOutExamples, err := loader.LoadHeldOutFromFile("training/heldout.yaml")
 	if err != nil {
 		t.Fatalf("Failed to load held-out examples: %v", err)
 	}
