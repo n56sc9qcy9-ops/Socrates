@@ -53,11 +53,12 @@ Completed and committed locally:
 - Human review/apply workflow for proposed ranking weight changes.
 - Knowledge layout consolidation; active runtime in `internal/knowledge/`, reference in `knowledge/reference/`.
 - Oversized decipher tests split by behavior.
+- Production responsibility audit completed; no safe extraction needed.
 
 Current git status before this handoff:
 
 ```text
-## main...origin/main [ahead 40]
+## main...origin/main [ahead 41]
 ```
 
 Architect correction:
@@ -75,6 +76,7 @@ Architect correction:
 - Pi completed human review/apply workflow for proposed weight changes in commit `c420013`.
 - Pi completed knowledge layout consolidation in commit `916c504`.
 - Pi completed behavior-based test split in commit `66a731a`.
+- Pi completed production responsibility audit. `engine.go`, `activation_graph.go`, and `candidate_generation.go` have clear responsibilities and no low-risk extraction seam was found.
 - Active runtime knowledge is documented as `internal/knowledge/`.
 - Root `knowledge/` now holds non-runtime reference material under `knowledge/reference/`.
 - Field precision improved without recall collapse:
@@ -82,60 +84,61 @@ Architect correction:
   - held-out field precision `0.16 -> 0.27`, recall `0.62 -> 0.62`
   - train pass rate `0/8 -> 8/8`
   - held-out pass rate `0/8 -> 5/8`
-- The next step is not counsellor prose and not new symbolic feature work. It is production-file responsibility audit.
+- The next step is not counsellor prose and not new symbolic feature work. It is CLI ergonomics cleanup.
 
 ## Current Next Task
 
 Task:
-Audit production-file responsibilities and extract only stable low-risk seams.
+Improve CLI ergonomics without changing engine behavior.
 
 Context:
-The evidence pipeline, harmonic core, training evaluation, validation, channel semantics, identity/provenance model, concept schema guardrails, ranking weights, held-out evaluation, false-activation gating, review-file generation, review/apply workflow, knowledge layout, and test maintainability are now in place.
+The evidence pipeline, harmonic core, training evaluation, validation, channel semantics, identity/provenance model, concept schema guardrails, ranking weights, held-out evaluation, false-activation gating, review-file generation, review/apply workflow, knowledge layout, test maintainability, and production responsibility audit are now in place.
 
-The next maintainability risk is production files with too many responsibilities. Do not start with a broad refactor. First audit responsibilities, then extract only stable, low-risk boundaries that preserve behavior.
+The next user-facing risk is CLI friction. Socrates should remain a command-line tool for now, but it should be natural enough that a human can speak a phrase without remembering mechanical subcommands.
 
-```text
-internal/decipher/engine.go
-internal/decipher/activation_graph.go
-internal/decipher/candidate_generation.go
-```
+Current pain points:
 
-The goal is to make future work safer without changing resonance behavior.
+- Root help does not clearly show subcommand flags.
+- `socrates knowledge validate` must remain documented and working.
+- `descifer` typo alias exists and should not be emphasized.
+- `socrates <natural phrase>` should default to decipher by joining root arguments into one passage.
+- Build/run paths should be clear: `make create` builds `bin/socrates`, while some manual testing has used repo-root `./socrates`.
 
 Reference:
 
-- `ARCHITECTURE.md`
+- `README.md`
 - `CONTRIBUTING.md`
+- `cmd/socrates/main.go`
 - `IMPLEMENTATION_ROADMAP.md`
 
 Likely files:
 
-- `internal/decipher/engine.go`
-- `internal/decipher/activation_graph.go`
-- `internal/decipher/candidate_generation.go`
-- existing focused files under `internal/decipher/`
-- tests already split under `internal/decipher/`
-- new production files only if extraction is clearly low-risk
+- `cmd/socrates/main.go`
+- `README.md`
+- `Makefile`
+- CLI-related tests if present or useful
 
 Instructions:
 
 1. Start with `git status --short --branch` and record it.
 2. Run `go test ./...` before changing code and record the baseline result.
-3. Produce a concise responsibility audit before changing code.
-   - Identify responsibilities inside `engine.go`, `activation_graph.go`, and `candidate_generation.go`.
-   - Mark each responsibility as stable or still evolving.
-   - Only stable responsibilities are eligible for extraction.
-4. Prefer no-op/move-only extractions.
-   - Move cohesive functions into focused files.
-   - Avoid changing algorithms, scoring, thresholds, data semantics, or output text.
-   - Avoid new abstractions unless they remove real coupling.
-5. Suggested extraction targets if safe:
-   - `engine.go`: keep high-level orchestration; move stable setup/options/report plumbing if clearly separable.
-   - `activation_graph.go`: separate graph construction, propagation, deduplication, and path formatting only if tests make the boundaries clear.
-   - `candidate_generation.go`: separate normalization, skeletons, n-grams, edit variants, and phonetic generation if they are already independent.
-6. Do not refactor harmonic gating, ranking, training, knowledge validation, or curation logic in this task.
-7. Do not add new features, new active knowledge, AI, embeddings, counsellor/transmutation fields, UI, or audio.
-8. Preserve completed guardrails:
+3. Add root default decipher behavior:
+   - `socrates what is the purpose of my life?` should analyze the joined phrase.
+   - Explicit subcommands still take precedence.
+   - Flags should remain available for explicit `decipher`.
+4. Keep `socrates decipher <text>` as the explicit form.
+5. Keep `socrates knowledge validate` working exactly as documented.
+6. Keep `socrates train`, `socrates suggest-weights`, and `socrates apply-weights` working.
+7. Improve help output:
+   - show available commands accurately
+   - show relevant flags or point to subcommand help clearly
+   - do not emphasize the typo alias `descifer`; keep it only if needed for compatibility
+8. Clarify build/run paths in docs:
+   - `make create` builds `bin/socrates`
+   - manual root `./socrates` may be stale unless rebuilt separately
+9. Do not change decipher engine behavior, scoring, ranking, validation, knowledge, training metrics, or output format except where CLI routing/help requires it.
+10. Do not add new active knowledge, AI, embeddings, counsellor/transmutation fields, UI, or audio.
+11. Preserve completed guardrails:
    - active YAML validates
    - `knowledge validate` works
    - channel diversity counts active evidence only
@@ -143,16 +146,22 @@ Instructions:
    - multi-concept fuzzy evidence remains complete
    - cross-script love and Hebrew `El` boundary behavior still works
    - concept schema hygiene warnings remain visible and bounded
-9. Run targeted tests while working, then `go test ./...` or `make test`.
-10. Commit the completed production responsibility audit/extraction locally with a clear message. Do not push.
-11. Report final `git status --short --branch`, tests run, files changed/moved, before/after line counts for touched production files, and a short responsibility map.
+12. Add or update tests proving:
+   - root natural-language input defaults to decipher
+   - explicit subcommands still work
+   - `knowledge validate` positional command still works
+   - train/suggest/apply commands still route correctly
+13. Run targeted tests while working, then `go test ./...` or `make test`.
+14. Commit the completed CLI ergonomics work locally with a clear message. Do not push.
+15. Report final `git status --short --branch`, tests run, files changed, and examples for root natural input plus key subcommands.
 
 Acceptance Criteria:
 
-- Production responsibility audit is reported.
-- Any extraction is behavior-preserving and low-risk.
-- No algorithms, thresholds, knowledge semantics, or output behavior are intentionally changed.
-- Runtime behavior is unchanged.
+- Root natural-language input defaults to decipher.
+- Explicit subcommands still work.
+- Help output is accurate and less confusing.
+- Build/run path is documented clearly.
+- Engine behavior is unchanged apart from CLI routing.
 - Existing harmonic core, training evaluation, quality gate behavior, identity/provenance hardening, and cross-script convergence still pass.
 - Training does not mutate active knowledge.
 - No black-box truth model is introduced.
@@ -161,7 +170,7 @@ Acceptance Criteria:
 
 ## Next After This
 
-After production-file responsibility cleanup, review CLI ergonomics before counsellor/transmutation fields.
+After CLI ergonomics are clean, do one final architecture readiness review. Only after that should Socrates add counsellor/transmutation fields.
 
 ## Nice To Have Later
 
