@@ -52,11 +52,12 @@ Completed and committed locally:
 - Review-file generation for proposed ranking weight changes.
 - Human review/apply workflow for proposed ranking weight changes.
 - Knowledge layout consolidation; active runtime in `internal/knowledge/`, reference in `knowledge/reference/`.
+- Oversized decipher tests split by behavior.
 
 Current git status before this handoff:
 
 ```text
-## main...origin/main [ahead 38]
+## main...origin/main [ahead 40]
 ```
 
 Architect correction:
@@ -73,6 +74,7 @@ Architect correction:
 - Pi completed review-gated weight suggestion generation in commit `4b50136`.
 - Pi completed human review/apply workflow for proposed weight changes in commit `c420013`.
 - Pi completed knowledge layout consolidation in commit `916c504`.
+- Pi completed behavior-based test split in commit `66a731a`.
 - Active runtime knowledge is documented as `internal/knowledge/`.
 - Root `knowledge/` now holds non-runtime reference material under `knowledge/reference/`.
 - Field precision improved without recall collapse:
@@ -80,63 +82,60 @@ Architect correction:
   - held-out field precision `0.16 -> 0.27`, recall `0.62 -> 0.62`
   - train pass rate `0/8 -> 8/8`
   - held-out pass rate `0/8 -> 5/8`
-- The next step is not counsellor prose and not new symbolic feature work. It is test maintainability cleanup.
+- The next step is not counsellor prose and not new symbolic feature work. It is production-file responsibility audit.
 
 ## Current Next Task
 
 Task:
-Split oversized tests by behavior without changing runtime behavior.
+Audit production-file responsibilities and extract only stable low-risk seams.
 
 Context:
-The evidence pipeline, harmonic core, training evaluation, validation, channel semantics, identity/provenance model, concept schema guardrails, ranking weights, held-out evaluation, false-activation gating, review-file generation, review/apply workflow, and knowledge layout are now in place.
+The evidence pipeline, harmonic core, training evaluation, validation, channel semantics, identity/provenance model, concept schema guardrails, ranking weights, held-out evaluation, false-activation gating, review-file generation, review/apply workflow, knowledge layout, and test maintainability are now in place.
 
-The next maintainability risk is oversized test files. They make future agents slower and less reliable because unrelated behaviors are mixed together.
+The next maintainability risk is production files with too many responsibilities. Do not start with a broad refactor. First audit responsibilities, then extract only stable, low-risk boundaries that preserve behavior.
 
 ```text
-internal/decipher/engine_test.go           ~1694 lines
-internal/decipher/activation_graph_test.go ~958 lines
-internal/decipher/passage_field_test.go    ~886 lines
+internal/decipher/engine.go
+internal/decipher/activation_graph.go
+internal/decipher/candidate_generation.go
 ```
 
-The goal is a behavior-preserving test split. Do not refactor production code in this task.
+The goal is to make future work safer without changing resonance behavior.
 
 Reference:
 
 - `ARCHITECTURE.md`
 - `CONTRIBUTING.md`
+- `IMPLEMENTATION_ROADMAP.md`
 
 Likely files:
 
-- `internal/decipher/engine_test.go`
-- `internal/decipher/activation_graph_test.go`
-- `internal/decipher/passage_field_test.go`
-- new test files under `internal/decipher/`
+- `internal/decipher/engine.go`
+- `internal/decipher/activation_graph.go`
+- `internal/decipher/candidate_generation.go`
+- existing focused files under `internal/decipher/`
+- tests already split under `internal/decipher/`
+- new production files only if extraction is clearly low-risk
 
 Instructions:
 
 1. Start with `git status --short --branch` and record it.
 2. Run `go test ./...` before changing code and record the baseline result.
-3. Do not change production code.
-4. Split tests by behavior, not by arbitrary line count.
-5. Preserve test names where practical, or use names that keep failure output easy to map to the original behavior.
-6. Suggested split:
-   - `engine_render_test.go`
-   - `engine_scoring_test.go`
-   - `engine_bounds_test.go`
-   - `engine_regression_test.go`
-   - `activation_graph_build_test.go`
-   - `activation_graph_propagation_test.go`
-   - `activation_graph_dedup_test.go`
-   - `activation_graph_paths_test.go`
-   - `passage_field_merge_test.go`
-   - `passage_field_convergence_test.go`
-   - `passage_field_regression_test.go`
-7. Keep shared test helpers local and minimal.
-   - Do not create a large abstract test framework.
-   - If helpers are needed, put them in a small clearly named `_test.go` helper file.
-8. Avoid rewriting assertions except where necessary for moves/imports.
-9. Do not add new features, new active knowledge, AI, embeddings, counsellor/transmutation fields, UI, or audio.
-10. Preserve completed guardrails:
+3. Produce a concise responsibility audit before changing code.
+   - Identify responsibilities inside `engine.go`, `activation_graph.go`, and `candidate_generation.go`.
+   - Mark each responsibility as stable or still evolving.
+   - Only stable responsibilities are eligible for extraction.
+4. Prefer no-op/move-only extractions.
+   - Move cohesive functions into focused files.
+   - Avoid changing algorithms, scoring, thresholds, data semantics, or output text.
+   - Avoid new abstractions unless they remove real coupling.
+5. Suggested extraction targets if safe:
+   - `engine.go`: keep high-level orchestration; move stable setup/options/report plumbing if clearly separable.
+   - `activation_graph.go`: separate graph construction, propagation, deduplication, and path formatting only if tests make the boundaries clear.
+   - `candidate_generation.go`: separate normalization, skeletons, n-grams, edit variants, and phonetic generation if they are already independent.
+6. Do not refactor harmonic gating, ranking, training, knowledge validation, or curation logic in this task.
+7. Do not add new features, new active knowledge, AI, embeddings, counsellor/transmutation fields, UI, or audio.
+8. Preserve completed guardrails:
    - active YAML validates
    - `knowledge validate` works
    - channel diversity counts active evidence only
@@ -144,16 +143,16 @@ Instructions:
    - multi-concept fuzzy evidence remains complete
    - cross-script love and Hebrew `El` boundary behavior still works
    - concept schema hygiene warnings remain visible and bounded
-11. Run targeted tests while working, then `go test ./...` or `make test`.
-12. Commit the completed test split locally with a clear message. Do not push.
-13. Report final `git status --short --branch`, tests run, files changed/moved, and approximate before/after line counts for split files.
+9. Run targeted tests while working, then `go test ./...` or `make test`.
+10. Commit the completed production responsibility audit/extraction locally with a clear message. Do not push.
+11. Report final `git status --short --branch`, tests run, files changed/moved, before/after line counts for touched production files, and a short responsibility map.
 
 Acceptance Criteria:
 
-- Oversized test files are split by behavior.
+- Production responsibility audit is reported.
+- Any extraction is behavior-preserving and low-risk.
+- No algorithms, thresholds, knowledge semantics, or output behavior are intentionally changed.
 - Runtime behavior is unchanged.
-- Production code is untouched except for unavoidable formatting/import consequences, if any.
-- Test failure output remains easy to understand.
 - Existing harmonic core, training evaluation, quality gate behavior, identity/provenance hardening, and cross-script convergence still pass.
 - Training does not mutate active knowledge.
 - No black-box truth model is introduced.
@@ -162,7 +161,7 @@ Acceptance Criteria:
 
 ## Next After This
 
-After oversized tests are split, perform a production-file responsibility audit. Only after maintainability cleanup should Socrates add counsellor/transmutation fields.
+After production-file responsibility cleanup, review CLI ergonomics before counsellor/transmutation fields.
 
 ## Nice To Have Later
 
