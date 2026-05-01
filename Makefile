@@ -4,13 +4,14 @@ APP := socrates
 CMD := ./cmd/socrates
 BIN_DIR := bin
 BIN := $(BIN_DIR)/$(APP)
+GO := /usr/local/go/bin/go
 GO_PACKAGES := ./...
 
 all: fmt lint test build usage
 
 build:
 	mkdir -p $(BIN_DIR)
-	go build -o $(BIN) $(CMD)
+	$(GO) build -o $(BIN) $(CMD)
 
 create: build
 
