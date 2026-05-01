@@ -54,11 +54,13 @@ Completed and committed locally:
 - Knowledge layout consolidation; active runtime in `internal/knowledge/`, reference in `knowledge/reference/`.
 - Oversized decipher tests split by behavior.
 - Production responsibility audit completed; no safe extraction needed.
+- CLI ergonomics cleanup; root natural input now defaults to decipher and help/build docs are clearer.
 
 Current git status before this handoff:
 
 ```text
-## main...origin/main [ahead 41]
+## main...origin/main [ahead 43]
+?? internal/training/review/
 ```
 
 Architect correction:
@@ -77,6 +79,7 @@ Architect correction:
 - Pi completed knowledge layout consolidation in commit `916c504`.
 - Pi completed behavior-based test split in commit `66a731a`.
 - Pi completed production responsibility audit. `engine.go`, `activation_graph.go`, and `candidate_generation.go` have clear responsibilities and no low-risk extraction seam was found.
+- Pi completed CLI ergonomics in commit `007922a`.
 - Active runtime knowledge is documented as `internal/knowledge/`.
 - Root `knowledge/` now holds non-runtime reference material under `knowledge/reference/`.
 - Field precision improved without recall collapse:
@@ -84,60 +87,88 @@ Architect correction:
   - held-out field precision `0.16 -> 0.27`, recall `0.62 -> 0.62`
   - train pass rate `0/8 -> 8/8`
   - held-out pass rate `0/8 -> 5/8`
-- The next step is not counsellor prose and not new symbolic feature work. It is CLI ergonomics cleanup.
+- The next step is not counsellor prose and not new symbolic feature work. It is a final architecture readiness and documentation consolidation pass.
 
 ## Current Next Task
 
 Task:
-Improve CLI ergonomics without changing engine behavior.
+Perform architecture readiness review and documentation consolidation.
 
 Context:
-The evidence pipeline, harmonic core, training evaluation, validation, channel semantics, identity/provenance model, concept schema guardrails, ranking weights, held-out evaluation, false-activation gating, review-file generation, review/apply workflow, knowledge layout, test maintainability, and production responsibility audit are now in place.
+The core evidence pipeline, harmonic field layer, training/evaluation loop, review-gated weight workflow, knowledge layout, maintainability split, production responsibility audit, and CLI ergonomics are now in place.
 
-The next user-facing risk is CLI friction. Socrates should remain a command-line tool for now, but it should be natural enough that a human can speak a phrase without remembering mechanical subcommands.
+Before Socrates moves into counsellor/transmutation fields, the project needs a long-horizon readiness pass:
 
-Current pain points:
-
-- Root help does not clearly show subcommand flags.
-- `socrates knowledge validate` must remain documented and working.
-- `descifer` typo alias exists and should not be emphasized.
-- `socrates <natural phrase>` should default to decipher by joining root arguments into one passage.
-- Build/run paths should be clear: `make create` builds `bin/socrates`, while some manual testing has used repo-root `./socrates`.
+- make sure docs match the code
+- make sure TODO does not carry stale completed addenda as active guidance
+- make sure all guardrails are documented in the right permanent files
+- make sure generated artifacts are not sitting in source directories
+- make sure the current CLI, validation, training, held-out evaluation, suggestion generation, and apply workflow all work as documented
+- produce a concise readiness report with blockers and recommended next task
 
 Reference:
 
 - `README.md`
-- `CONTRIBUTING.md`
-- `cmd/socrates/main.go`
+- `ARCHITECTURE.md`
+- `FREQUENCY_MODEL.md`
+- `HARMONIC_DATA_MODEL.md`
+- `TRAINING_MODEL.md`
 - `IMPLEMENTATION_ROADMAP.md`
+- `docs/KNOWLEDGE_CURATION.md`
+- `CONTRIBUTING.md`
+- `TODO.md`
 
 Likely files:
 
-- `cmd/socrates/main.go`
 - `README.md`
-- `Makefile`
-- CLI-related tests if present or useful
+- `ARCHITECTURE.md`
+- `FREQUENCY_MODEL.md`
+- `HARMONIC_DATA_MODEL.md`
+- `TRAINING_MODEL.md`
+- `IMPLEMENTATION_ROADMAP.md`
+- `docs/KNOWLEDGE_CURATION.md`
+- `CONTRIBUTING.md`
+- `TODO.md`
+- new file if useful: `docs/ARCHITECTURE_READINESS.md`
+- generated/test artifact path: `internal/training/review/`
 
 Instructions:
 
 1. Start with `git status --short --branch` and record it.
 2. Run `go test ./...` before changing code and record the baseline result.
-3. Add root default decipher behavior:
-   - `socrates what is the purpose of my life?` should analyze the joined phrase.
-   - Explicit subcommands still take precedence.
-   - Flags should remain available for explicit `decipher`.
-4. Keep `socrates decipher <text>` as the explicit form.
-5. Keep `socrates knowledge validate` working exactly as documented.
-6. Keep `socrates train`, `socrates suggest-weights`, and `socrates apply-weights` working.
-7. Improve help output:
-   - show available commands accurately
-   - show relevant flags or point to subcommand help clearly
-   - do not emphasize the typo alias `descifer`; keep it only if needed for compatibility
-8. Clarify build/run paths in docs:
-   - `make create` builds `bin/socrates`
-   - manual root `./socrates` may be stale unless rebuilt separately
-9. Do not change decipher engine behavior, scoring, ranking, validation, knowledge, training metrics, or output format except where CLI routing/help requires it.
-10. Do not add new active knowledge, AI, embeddings, counsellor/transmutation fields, UI, or audio.
+3. Run and record the documented operational commands:
+   - `make test` or `go test ./...`
+   - `make create`
+   - `./bin/socrates help`
+   - `./bin/socrates love`
+   - `./bin/socrates knowledge validate`
+   - `./bin/socrates train --heldout training/heldout.yaml`
+   - `./bin/socrates suggest-weights`
+   - `./bin/socrates apply-weights` only in a safe test flow or with a dry-run/no-op path if available; do not accidentally apply pending real suggestions
+4. Resolve the untracked `internal/training/review/` artifact.
+   - If it is generated test output, remove it or move tests to use `t.TempDir()`.
+   - If it is an intended fixture, move it to a proper testdata path and document why.
+   - Do not leave review/generated YAML under `internal/training/review/`.
+5. Audit all major docs for drift against current behavior.
+   - The active runtime knowledge location must be `internal/knowledge/`.
+   - Reference knowledge must be described as `knowledge/reference/`.
+   - Review files must be described as review data, not active runtime knowledge.
+   - Training examples/weights/held-out data must be separate from active knowledge.
+   - `curated` must be provenance/source, not confidence.
+   - Confidence must remain `verified`, `plausible`, `speculative`.
+   - Root natural-language CLI input must be documented.
+   - Build path `bin/socrates` must be documented.
+6. Move durable architectural guidance out of transient TODO addenda if appropriate.
+   - Concept schema guardrails belong in curation/architecture docs.
+   - Repository shape/maintainability guidance belongs in architecture/contributing docs.
+   - TODO should remain the current task source, not a permanent archive of completed addenda.
+7. Create or update a readiness report.
+   - Suggested file: `docs/ARCHITECTURE_READINESS.md`.
+   - Include current architecture status, verified commands, known metrics, accepted warning debt, remaining risks, and blockers before counsellor/transmutation fields.
+   - Include the recommended next task.
+8. Do not start counsellor/transmutation implementation in this task.
+9. Do not add new active knowledge, concepts, forms, relations, AI, embeddings, UI, or audio.
+10. Do not change engine behavior, scoring, ranking, validation, training thresholds, or YAML semantics except to fix a documented mismatch discovered during readiness review.
 11. Preserve completed guardrails:
    - active YAML validates
    - `knowledge validate` works
@@ -146,22 +177,19 @@ Instructions:
    - multi-concept fuzzy evidence remains complete
    - cross-script love and Hebrew `El` boundary behavior still works
    - concept schema hygiene warnings remain visible and bounded
-12. Add or update tests proving:
-   - root natural-language input defaults to decipher
-   - explicit subcommands still work
-   - `knowledge validate` positional command still works
-   - train/suggest/apply commands still route correctly
+12. Add or update tests only if they protect a documented readiness/cleanup issue.
 13. Run targeted tests while working, then `go test ./...` or `make test`.
-14. Commit the completed CLI ergonomics work locally with a clear message. Do not push.
-15. Report final `git status --short --branch`, tests run, files changed, and examples for root natural input plus key subcommands.
+14. Commit the completed readiness/documentation consolidation locally with a clear message. Do not push.
+15. Report final `git status --short --branch`, commands run, tests run, files changed, readiness conclusion, and recommended next task.
 
 Acceptance Criteria:
 
-- Root natural-language input defaults to decipher.
-- Explicit subcommands still work.
-- Help output is accurate and less confusing.
-- Build/run path is documented clearly.
-- Engine behavior is unchanged apart from CLI routing.
+- Documentation matches current code and data layout.
+- `TODO.md` is focused on active/future task flow, not stale completed addenda.
+- Generated/test artifacts are not left in source directories.
+- Readiness report exists and identifies blockers or confirms readiness for the next architecture phase.
+- Operational commands listed above are verified or exceptions are documented.
+- Engine behavior is unchanged.
 - Existing harmonic core, training evaluation, quality gate behavior, identity/provenance hardening, and cross-script convergence still pass.
 - Training does not mutate active knowledge.
 - No black-box truth model is introduced.
@@ -170,7 +198,7 @@ Acceptance Criteria:
 
 ## Next After This
 
-After CLI ergonomics are clean, do one final architecture readiness review. Only after that should Socrates add counsellor/transmutation fields.
+After architecture readiness is documented, decide whether to add counsellor/transmutation fields or handle any blockers identified in the readiness report.
 
 ## Nice To Have Later
 
