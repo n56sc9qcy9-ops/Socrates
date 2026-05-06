@@ -1,7 +1,9 @@
 package knowledge
 
 import (
+	"embed"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -827,6 +829,166 @@ func TestHarmonicFieldUsesIntegerData(t *testing.T) {
 	t.Logf("HarmonicField does NOT import: socrates/internal/resonance")
 	t.Logf("HarmonicField uses: FrequencyProfile (integer vector, ratio, labels, weight)")
 	t.Logf("Runtime scores are float64 (evidence ranking), not meaning identity")
+}
+
+// TestFloatHarmonicFieldsRejected verifies that float harmonic meaning fields
+// are rejected at load time, before they can silently corrupt the data model.
+// This is a real regression guardrail: fields like frequency_hz: 528.0,
+// pitch: 432.0, color_rgb: [1.0, 0.2, 0.3], or em_band_id: ... must not pass.
+func TestFloatHarmonicFieldsRejected(t *testing.T) {
+	testCases := []struct {
+		name      string
+		yaml      string
+		shouldErr bool
+		errContains string
+	}{
+		{
+			name: "frequency_hz_float_rejected",
+			yaml: `frequency_profiles:
+  - meaning_frequency_id: test-float
+    concepts: [truth]
+    vector: [1, 2, 1]
+    ratio: [1, 1]
+    frequency_hz: 528.0
+`,
+			shouldErr:   true,
+			errContains: "frequency_hz",
+		},
+		{
+			name: "frequency_hz_integer_rejected",
+			yaml: `frequency_profiles:
+  - meaning_frequency_id: test-float-int
+    concepts: [truth]
+    vector: [1, 2, 1]
+    ratio: [1, 1]
+    frequency_hz: 432
+`,
+			shouldErr:   true,
+			errContains: "frequency_hz",
+		},
+		{
+			name: "pitch_float_rejected",
+			yaml: `frequency_profiles:
+  - meaning_frequency_id: test-pitch
+    concepts: [truth]
+    vector: [1, 2, 1]
+    ratio: [1, 1]
+    pitch: 432.0
+`,
+			shouldErr:   true,
+			errContains: "pitch",
+		},
+		{
+			name: "color_rgb_float_rejected",
+			yaml: `frequency_profiles:
+  - meaning_frequency_id: test-rgb
+    concepts: [truth]
+    vector: [1, 2, 1]
+    ratio: [1, 1]
+    color_rgb: [1.0, 0.2, 0.3]
+`,
+			shouldErr:   true,
+			errContains: "color_rgb",
+		},
+		{
+			name: "em_band_id_rejected",
+			yaml: `frequency_profiles:
+  - meaning_frequency_id: test-em
+    concepts: [truth]
+    vector: [1, 2, 1]
+    ratio: [1, 1]
+    em_band_id: em.visible.green
+`,
+			shouldErr:   true,
+			errContains: "em_band_id",
+		},
+		{
+			name: "wavelength_nm_rejected",
+			yaml: `frequency_profiles:
+  - meaning_frequency_id: test-wl
+    concepts: [truth]
+    vector: [1, 2, 1]
+    ratio: [1, 1]
+    wavelength_nm: 540
+`,
+			shouldErr:   true,
+			errContains: "wavelength",
+		},
+		{
+			name: "rgb_shorthand_rejected",
+			yaml: `frequency_profiles:
+  - meaning_frequency_id: test-rgb2
+    concepts: [truth]
+    vector: [1, 2, 1]
+    ratio: [1, 1]
+    rgb: [255, 128, 0]
+`,
+			shouldErr:   true,
+			errContains: "rgb",
+		},
+		{
+			name: "valid_frequencies_yaml_passes",
+			yaml: `frequency_profiles:
+  - meaning_frequency_id: test-valid
+    concepts: [truth]
+    vector: [1, 2, 1]
+    ratio: [1, 1]
+    labels:
+      note: 12
+      color: 167
+      field: 1
+    confidence: verified
+    weight: 80
+`,
+			shouldErr: false,
+		},
+		{
+			name: "harmonic_systems_structural_key_allowed",
+			yaml: `harmonic_systems:
+  - id: equal_temperament
+    description: 12-tone equal division
+    base_ratio: [12, 1]
+frequency_profiles:
+  - meaning_frequency_id: test-structural
+    concepts: [truth]
+    vector: [1, 2, 1]
+    ratio: [1, 1]
+    confidence: verified
+    weight: 80
+`,
+			shouldErr: false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// Write temp YAML
+			tmpDir := t.TempDir()
+			yamlPath := filepath.Join(tmpDir, "frequencies.yaml")
+			if err := os.WriteFile(yamlPath, []byte(tc.yaml), 0644); err != nil {
+				t.Fatalf("Failed to write temp YAML: %v", err)
+			}
+
+			// Try to load
+			loader := NewLoader(embed.FS{}, tmpDir, false)
+			kb := &KnowledgeBuilder{}
+			err := loader.loadFrequencies(kb)
+
+			if tc.shouldErr {
+				if err == nil {
+					t.Errorf("Expected error for YAML with %s, got nil", tc.name)
+					return
+				}
+				if tc.errContains != "" && !strings.Contains(err.Error(), tc.errContains) {
+					t.Errorf("Error should mention %q, got: %v", tc.errContains, err)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("Valid YAML should not error: %v", err)
+				}
+			}
+		})
+	}
 }
 
 // TestNoHardcodedConceptMappings verifies no production Go contains hardcoded

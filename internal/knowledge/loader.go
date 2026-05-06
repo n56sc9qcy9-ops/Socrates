@@ -249,11 +249,22 @@ func (l *Loader) loadGlyphs(kb *KnowledgeBuilder) error {
 }
 
 // loadFrequencies loads frequencies.yaml and populates the knowledge builder.
+// CRITICAL: This function enforces strict parsing of frequency profiles.
+// Float harmonic meaning fields (frequency_hz, pitch, color_rgb, em_band_id, etc.)
+// are NOT modeled and must be rejected to prevent silent data model corruption.
+// Use scanForUnknownFreqFields to detect these fields before unmarshaling.
 func (l *Loader) loadFrequencies(kb *KnowledgeBuilder) error {
 	data, err := l.readFile("frequencies.yaml")
 	if err != nil {
 		// frequencies.yaml is optional - if it doesn't exist, just return
 		return nil
+	}
+
+	// Strict check: reject float harmonic meaning fields that aren't modeled.
+	// Fields like frequency_hz: 528.0, pitch: 432.0, color_rgb: [...], or
+	// em_band_id: ... must not silently pass through YAML unmarshaling.
+	if unknown, err := hasUnknownFreqFields(data); err == nil && len(unknown) > 0 {
+		return fmt.Errorf("frequencies.yaml contains unknown harmonic identity fields: %v; model these explicitly or remove", unknown)
 	}
 
 	var doc frequenciesDoc
@@ -607,4 +618,120 @@ func (e FrequencyProfileEntry) ToFrequencyProfile() FrequencyProfile {
 		Lens:               e.Lens,
 		Weight:             e.Weight,
 	}
+}
+
+// ============================================================
+// Strict Frequency Field Detection
+// ============================================================
+//
+// The harmonic meaning-frequency model is strictly integer-based.
+// Float values (frequency_hz, pitch, color_rgb, em_band_id) are NOT modeled
+// and must NOT silently pass through the YAML loader.
+//
+// This section implements a pre-unmarshaling scan that detects these fields
+// and returns an error before any silent data corruption can occur.
+//
+// CRITICAL: YAML silently ignores unknown fields when unmarshaling into a
+// typed struct. A field like `frequency_hz: 528.0` in the YAML would simply
+// be dropped by yaml.Unmarshal, making it impossible to detect after the fact.
+// Therefore we scan the raw YAML before unmarshaling.
+
+// floatHarmonicKeys are unmodeled float-meaning fields that must be rejected.
+// These represent physical float measurements that do NOT belong in the
+// integer harmonic meaning-frequency substrate.
+var floatHarmonicKeys = map[string]bool{
+	"frequency_hz":    true,
+	"frequency_hertz": true,
+	"pitch":           true,
+	"color_rgb":       true,
+	"rgb":             true,
+	"rgba":            true,
+	"hex_color":       true,
+	"colour":          true,
+	"em_band_id":      true,
+	"em_frequency":    true,
+	"em_wavelength":   true,
+	"wave_length":     true,
+	"wavelength_nm":   true,
+	"wavelength_hz":   true,
+	"wavelength":      true,
+}
+
+// structuralDocKeys are document-level structural keys (not profile fields).
+var structuralDocKeys = map[string]bool{
+	"frequency_profiles": true,
+	"harmonic_systems":   true,
+}
+
+// knownFreqProfileKeys are modeled fields within a frequency profile entry.
+var knownFreqProfileKeys = map[string]bool{
+	"meaning_frequency_id": true,
+	"concepts":             true,
+	"vector":               true,
+	"ratio":                true,
+	"archetype":            true,
+	"labels":               true,
+	"confidence":           true,
+	"source":               true,
+	"lens":                 true,
+	"weight":               true,
+	// labels sub-fields
+	"note":  true,
+	"color": true,
+	"field": true,
+}
+
+// hasUnknownFreqFields scans YAML data for unmodeled float-harmonic fields.
+// Returns field paths (e.g., "frequency_profiles[0].frequency_hz") for any
+// float-harmonic fields found inside frequency profile entries.
+// Returns nil if no unmodeled fields are found (valid data).
+func hasUnknownFreqFields(data []byte) ([]string, error) {
+	var raw interface{}
+	if err := yaml.Unmarshal(data, &raw); err != nil {
+		return nil, err
+	}
+	return scanForUnknownFreqFields(raw, ""), nil
+}
+
+// scanForUnknownFreqFields recursively scans a parsed YAML node.
+// path is the dot-separated path to the current node.
+// Returns paths to any unmodeled float-harmonic fields found.
+func scanForUnknownFreqFields(node interface{}, path string) []string {
+	var unknown []string
+
+	switch v := node.(type) {
+	case map[string]interface{}:
+		for key, val := range v {
+			isStructural := structuralDocKeys[key]
+			isKnownField := knownFreqProfileKeys[key]
+			isFloatHarmonic := floatHarmonicKeys[key]
+
+			var fullPath string
+			if path == "" {
+				fullPath = key
+			} else {
+				fullPath = path + "." + key
+			}
+
+			if isStructural && path == "" {
+				// Top-level structural key (e.g., "frequency_profiles")
+				unknown = append(unknown, scanForUnknownFreqFields(val, fullPath)...)
+			} else if isKnownField {
+				// Known field - recurse but don't flag
+				unknown = append(unknown, scanForUnknownFreqFields(val, fullPath)...)
+			} else if isFloatHarmonic {
+				// Unmodeled float-harmonic field - this is an error
+				unknown = append(unknown, fullPath)
+			} else {
+				// Unknown key - recurse to find nested float-harmonic fields
+				unknown = append(unknown, scanForUnknownFreqFields(val, fullPath)...)
+			}
+		}
+	case []interface{}:
+		for i, item := range v {
+			unknown = append(unknown, scanForUnknownFreqFields(item, path+"["+itoa(i)+"]")...)
+		}
+	}
+
+	return unknown
 }
