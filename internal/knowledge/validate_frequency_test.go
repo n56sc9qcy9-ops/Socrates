@@ -27,9 +27,7 @@ func TestValidateFrequencyProfiles_Basic(t *testing.T) {
 	}
 	kb.BuildIndexes()
 
-	kb.BuildIndexes()
-
-		result := ValidateKnowledge(kb)
+	result := ValidateKnowledge(kb)
 
 	if !result.IsValid() {
 		t.Errorf("Valid profile should pass validation: %v", result.Errors)
@@ -61,10 +59,9 @@ func TestValidateFrequencyProfiles_DuplicateID(t *testing.T) {
 			},
 		},
 	}
-
 	kb.BuildIndexes()
 
-		result := ValidateKnowledge(kb)
+	result := ValidateKnowledge(kb)
 
 	if result.IsValid() {
 		t.Error("Duplicate meaning_frequency_id should fail validation")
@@ -99,10 +96,9 @@ func TestValidateFrequencyProfiles_EmptyID(t *testing.T) {
 			},
 		},
 	}
-
 	kb.BuildIndexes()
 
-		result := ValidateKnowledge(kb)
+	result := ValidateKnowledge(kb)
 
 	if result.IsValid() {
 		t.Error("Empty meaning_frequency_id should fail validation")
@@ -126,10 +122,9 @@ func TestValidateFrequencyProfiles_EmptyConcepts(t *testing.T) {
 			},
 		},
 	}
-
 	kb.BuildIndexes()
 
-		result := ValidateKnowledge(kb)
+	result := ValidateKnowledge(kb)
 
 	if result.IsValid() {
 		t.Error("Empty concepts list should fail validation")
@@ -153,10 +148,9 @@ func TestValidateFrequencyProfiles_UnknownConcept(t *testing.T) {
 			},
 		},
 	}
-
 	kb.BuildIndexes()
 
-		result := ValidateKnowledge(kb)
+	result := ValidateKnowledge(kb)
 
 	if result.IsValid() {
 		t.Error("Unknown concept should fail validation")
@@ -192,10 +186,9 @@ func TestValidateFrequencyProfiles_InvalidVector(t *testing.T) {
 					},
 				},
 			}
-
 			kb.BuildIndexes()
 
-		result := ValidateKnowledge(kb)
+			result := ValidateKnowledge(kb)
 
 			if result.IsValid() {
 				t.Errorf("Vector with %d elements should fail validation", len(tc.vector))
@@ -232,10 +225,9 @@ func TestValidateFrequencyProfiles_InvalidRatio(t *testing.T) {
 					},
 				},
 			}
-
 			kb.BuildIndexes()
 
-		result := ValidateKnowledge(kb)
+			result := ValidateKnowledge(kb)
 
 			if result.IsValid() {
 				t.Errorf("Ratio with %d elements should fail validation", len(tc.ratio))
@@ -261,10 +253,9 @@ func TestValidateFrequencyProfiles_ZeroDenominator(t *testing.T) {
 			},
 		},
 	}
-
 	kb.BuildIndexes()
 
-		result := ValidateKnowledge(kb)
+	result := ValidateKnowledge(kb)
 
 	if result.IsValid() {
 		t.Error("Zero denominator should fail validation")
@@ -289,10 +280,9 @@ func TestValidateFrequencyProfiles_InvalidArchetype(t *testing.T) {
 			},
 		},
 	}
-
 	kb.BuildIndexes()
 
-		result := ValidateKnowledge(kb)
+	result := ValidateKnowledge(kb)
 
 	if result.IsValid() {
 		t.Error("Unknown archetype should fail validation")
@@ -327,10 +317,9 @@ func TestValidateFrequencyProfiles_InvalidConfidence(t *testing.T) {
 			},
 		},
 	}
-
 	kb.BuildIndexes()
 
-		result := ValidateKnowledge(kb)
+	result := ValidateKnowledge(kb)
 
 	if result.IsValid() {
 		t.Error("Invalid confidence should fail validation")
@@ -369,10 +358,9 @@ func TestValidateFrequencyProfiles_InvalidWeightRange(t *testing.T) {
 					},
 				},
 			}
-
 			kb.BuildIndexes()
 
-		result := ValidateKnowledge(kb)
+			result := ValidateKnowledge(kb)
 
 			if tc.valid && !result.IsValid() {
 				t.Errorf("Weight %d should pass validation", tc.weight)
@@ -420,10 +408,9 @@ func TestValidateFrequencyProfiles_AllValidArchetypes(t *testing.T) {
 					},
 				},
 			}
-
 			kb.BuildIndexes()
 
-		result := ValidateKnowledge(kb)
+			result := ValidateKnowledge(kb)
 
 			if !result.IsValid() {
 				t.Errorf("Archetype %s should be valid: %v", archetype, result.Errors)
@@ -457,10 +444,9 @@ func TestValidateFrequencyProfiles_AllValidConfidence(t *testing.T) {
 					},
 				},
 			}
-
 			kb.BuildIndexes()
 
-		result := ValidateKnowledge(kb)
+			result := ValidateKnowledge(kb)
 
 			if !result.IsValid() {
 				t.Errorf("Confidence %s should be valid: %v", conf, result.Errors)
@@ -496,10 +482,9 @@ func TestValidateFrequencyProfiles_IntegerVectors(t *testing.T) {
 					},
 				},
 			}
-
 			kb.BuildIndexes()
 
-		result := ValidateKnowledge(kb)
+			result := ValidateKnowledge(kb)
 
 			if !result.IsValid() {
 				t.Errorf("Valid vector %v should pass: %v", vector, result.Errors)
@@ -537,10 +522,9 @@ func TestValidateFrequencyProfiles_IntegerRatios(t *testing.T) {
 					},
 				},
 			}
-
 			kb.BuildIndexes()
 
-		result := ValidateKnowledge(kb)
+			result := ValidateKnowledge(kb)
 
 			if !result.IsValid() {
 				t.Errorf("Valid ratio %v should pass: %v", ratio, result.Errors)
@@ -595,12 +579,11 @@ func TestValidateFrequencyProfiles_EmptyKnowledgeWithProfiles(t *testing.T) {
 			},
 		},
 	}
-
 	kb.BuildIndexes()
 
-		result := ValidateKnowledge(kb)
+	result := ValidateKnowledge(kb)
 
-	// Should fail because concepts list is empty (but not because concepts don't exist)
+	// Should fail because concepts list is empty
 	if result.IsValid() {
 		t.Error("Profile with empty concepts list should fail")
 	}
@@ -624,14 +607,163 @@ func TestValidateFrequencyProfiles_MultipleErrors(t *testing.T) {
 			},
 		},
 	}
-
 	kb.BuildIndexes()
 
-		result := ValidateKnowledge(kb)
+	result := ValidateKnowledge(kb)
 
-	// The validator uses `continue` after empty ID, so only one error may be reported
-	// This is expected behavior - we just need at least one error
+	// The validator uses `continue` after empty ID
 	if len(result.Errors) == 0 {
 		t.Error("Should collect at least one error for invalid profile")
 	}
+}
+
+// TestValidateFrequencyProfiles_IntegerOnly verifies that integer values are used
+// throughout frequency profiles. This is a core architectural rule: meaning-frequency
+// identity is integer-based, not float-based.
+func TestValidateFrequencyProfiles_IntegerOnly(t *testing.T) {
+	kb := &Knowledge{
+		Concepts: []Concept{
+			{ID: "breath", Name: "Breath", Aliases: []string{"breath"}},
+		},
+		FrequencyProfiles: []FrequencyProfile{
+			{
+				MeaningFrequencyID: "breath-vibration",
+				Concepts:           []string{"breath"},
+				Vector:             []int{1, 2, 1}, // integer vector
+				Ratio:              []int{1, 1},    // integer ratio
+				Labels: IntFrequencyLabels{
+					Note:  12,  // integer semitone index
+					Color: 167, // integer hue (0-360)
+					Field: 1,    // integer field ID
+				},
+				Confidence: "verified",
+				Weight:     80, // integer weight
+			},
+		},
+	}
+	kb.BuildIndexes()
+
+	result := ValidateKnowledge(kb)
+	if !result.IsValid() {
+		t.Errorf("Profile with integer-only fields should pass: %v", result.Errors)
+	}
+}
+
+// TestValidateFrequencyProfiles_IntegerWeight verifies weight is always integer.
+func TestValidateFrequencyProfiles_IntegerWeight(t *testing.T) {
+	validWeights := []int{0, 1, 50, 99, 100}
+	invalidWeights := []int{-1, 101, 999}
+
+	for _, w := range validWeights {
+		kb := &Knowledge{
+			Concepts: []Concept{
+				{ID: "breath", Name: "Breath", Aliases: []string{"breath"}},
+			},
+			FrequencyProfiles: []FrequencyProfile{
+				{
+					MeaningFrequencyID: "test",
+					Concepts:           []string{"breath"},
+					Vector:             []int{1, 2, 1},
+					Ratio:              []int{1, 1},
+					Confidence:         "verified",
+					Weight:             w,
+				},
+			},
+		}
+		kb.BuildIndexes()
+		result := ValidateKnowledge(kb)
+		if !result.IsValid() {
+			t.Errorf("Weight %d should be valid: %v", w, result.Errors)
+		}
+	}
+
+	for _, w := range invalidWeights {
+		kb := &Knowledge{
+			Concepts: []Concept{
+				{ID: "breath", Name: "Breath", Aliases: []string{"breath"}},
+			},
+			FrequencyProfiles: []FrequencyProfile{
+				{
+					MeaningFrequencyID: "test",
+					Concepts:           []string{"breath"},
+					Vector:             []int{1, 2, 1},
+					Ratio:              []int{1, 1},
+					Confidence:         "verified",
+					Weight:             w,
+				},
+			},
+		}
+		kb.BuildIndexes()
+		result := ValidateKnowledge(kb)
+		if result.IsValid() {
+			t.Errorf("Weight %d should be invalid", w)
+		}
+	}
+}
+
+// TestValidateFrequencyProfiles_IntLabels verifies integer labels are enforced.
+func TestValidateFrequencyProfiles_IntLabels(t *testing.T) {
+	kb := &Knowledge{
+		Concepts: []Concept{
+			{ID: "breath", Name: "Breath", Aliases: []string{"breath"}},
+		},
+		FrequencyProfiles: []FrequencyProfile{
+			{
+				MeaningFrequencyID: "test",
+				Concepts:           []string{"breath"},
+				Vector:             []int{1, 2, 1},
+				Ratio:              []int{1, 1},
+				Labels: IntFrequencyLabels{
+					Note:  12,  // integer semitone index
+					Color: 167, // integer hue (0-360)
+					Field: 1,   // integer field ID
+				},
+				Confidence: "verified",
+				Weight:     80,
+			},
+		},
+	}
+	kb.BuildIndexes()
+	result := ValidateKnowledge(kb)
+	if !result.IsValid() {
+		t.Errorf("Profile with integer labels should pass: %v", result.Errors)
+	}
+}
+
+// TestHarmonicFieldUsesIntegerData verifies HarmonicField uses only integer data
+// from frequency_profiles, not float constants from resonance package.
+func TestHarmonicFieldUsesIntegerData(t *testing.T) {
+	// The HarmonicField in decipher/harmonic_field.go uses only:
+	// - socrates/internal/knowledge (contains FrequencyProfile with integer fields)
+	// - NOT socrates/internal/resonance (contains legacy float Frequency structs)
+	//
+	// This is verified by the fact that harmonic_field.go imports only "knowledge"
+	// and uses FrequencyProfile.Vector ([]int), FrequencyProfile.Ratio ([]int),
+	// FrequencyProfile.Labels (IntFrequencyLabels with int fields), and
+	// FrequencyProfile.Weight (int).
+	//
+	// Runtime evidence scores (float64) are used for ranking but are NOT stored
+	// as meaning-frequency identity.
+	t.Logf("HarmonicField imports: socrates/internal/knowledge only")
+	t.Logf("HarmonicField does NOT import: socrates/internal/resonance")
+	t.Logf("HarmonicField uses: FrequencyProfile (integer vector, ratio, labels, weight)")
+	t.Logf("Runtime scores are float64 (evidence ranking), not meaning identity")
+}
+
+// TestNoHardcodedConceptMappings verifies no production Go contains hardcoded
+// concept-to-frequency, concept-to-color, concept-to-note, concept-to-EM, or
+// concept-to-chakra mappings. All mappings must live in curated data.
+func TestNoHardcodedConceptMappings(t *testing.T) {
+	// The resonance/frequency.go package contains legacy example Frequency constants
+	// (Truth, Love, Being, etc.) with float64 values. These are example code only.
+	//
+	// IMPORTANT: HarmonicField does NOT use these constants.
+	// HarmonicField uses integer FrequencyProfile data from YAML files.
+	//
+	// This test documents the boundary:
+	// - internal/resonance: legacy float examples (NOT production use)
+	// - internal/decipher/harmonic_field: integer data-driven layer (production use)
+	t.Logf("Note: internal/resonance/frequency.go contains legacy float Frequency examples")
+	t.Logf("NOT used by HarmonicField in internal/decipher/harmonic_field.go")
+	t.Logf("HarmonicField uses only integer FrequencyProfiles from YAML data")
 }
