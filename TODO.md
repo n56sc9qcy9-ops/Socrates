@@ -67,6 +67,16 @@ Key completed metrics (full detail in `docs/ARCHITECTURE_READINESS.md`):
 Task:
 Calibrate counsellor/transmutation fields so they remain humble, evidence-first, and not overdiagnostic.
 
+Architect review status:
+Not accepted yet. Pi reported this task complete, but the working tree still contains uncommitted implementation changes. Before any new task begins, Pi must consolidate the current work and resolve the blockers below.
+
+Current blockers:
+- `git status --short --branch` must be clean after Pi commits the calibration work locally.
+- Transmutation weights are now stored as integer percentages such as `40`, `50`, and `60`, but counsellor scoring must normalize them before multiplying by source strength. A source strength of `0.70` and relation weight `60` should produce `0.42`, not `42`.
+- Validation, comments, tests, debug output, and score rendering must agree on the same weight scale.
+- Propagated/neighbor-only counsellor suggestions must be visibly weaker than direct evidence and must not flood default output.
+- Final report must include example default and debug output after the weight-scale correction.
+
 Context:
 The first counsellor/transmutation layer is implemented and committed. It loads `internal/knowledge/transmute.yaml`, validates transmutation relations, builds a `CounsellorField`, and renders default/debug output with evidence paths. The implementation is directionally correct, but the first output sample shows an architectural risk:
 
@@ -175,5 +185,4 @@ After counsellor/transmutation fields:
 - integer-only harmonic data model coverage
 - extended script support (Arabic, Thai, etc.)
 - harmonic/audio rendering layer
-
 
