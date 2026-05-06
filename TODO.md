@@ -49,7 +49,7 @@ Completed (see `docs/TODO_ARCHIVE.md` and git history for detail):
 Current git status:
 
 ```text
-## main...origin/main [ahead 50]
+## main...origin/main [ahead 51]
 ```
 
 Key completed metrics (full detail in `docs/ARCHITECTURE_READINESS.md`):
@@ -65,50 +65,29 @@ Key completed metrics (full detail in `docs/ARCHITECTURE_READINESS.md`):
 ## Current Next Task
 
 Task:
-Add data-backed counsellor/transmutation fields.
+Calibrate counsellor/transmutation fields so they remain humble, evidence-first, and not overdiagnostic.
 
 Context:
-Architecture readiness is complete. The engine is stable, documented, and ready for the next layer.
+The first counsellor/transmutation layer is implemented and committed. It loads `internal/knowledge/transmute.yaml`, validates transmutation relations, builds a `CounsellorField`, and renders default/debug output with evidence paths. The implementation is directionally correct, but the first output sample shows an architectural risk:
 
-Counsellor/transmutation fields extend evidence-first reading with symbolic guidance capabilities. This is not fortune telling and not an oracle layer. Socrates should read the currently activated field, identify likely inertia if the field remains unchanged, and show data-backed correction/transmutation fields that may alter the path.
+- A single explicit source field can activate neighbor fields, and those neighbor fields can produce multiple correction suggestions.
+- The phrase "if field remains X, tends toward Y" can sound like deterministic moral diagnosis.
+- The default output can become a list of corrections before the user has enough evidence context.
 
-Target flow:
-
-```text
-input passage
-  -> evidence-backed concept activation
-  -> harmonic field
-  -> detected tension / contraction / unresolved pattern
-  -> data-backed transmutation relation
-  -> possible correction field
-  -> evidence-first counsel summary
-```
-
-Examples of future data-backed relations:
-
-```text
-resentment -> forgiveness
-pride -> humility
-fear -> trust
-guilt -> mercy / atonement
-past fixation -> presence / holy instant
-separation -> loving consciousness
-control -> surrender
-judgment -> mercy
-```
-
-These are examples, not hardcoded Go behavior. If the active data does not support a path, Socrates must not invent it.
+The goal of this pass is not to add more counsellor content. The goal is to make the counsellor layer restrained, transparent, and aligned with human sovereignty.
 
 Rules:
-- No hardcoded word-specific behaviour in Go
-- All mappings must be data-driven with source/lens/confidence
-- Training must not mutate active knowledge
-- No black-box truth model
-- No fixed-future prediction. Use language such as "if unchanged, this field tends toward..." rather than "this will happen."
+- No hardcoded word-specific or concept-specific behaviour in production Go.
+- All mappings must remain data-driven with source/lens/confidence.
+- Training must not mutate active knowledge.
+- No black-box truth model.
+- No fixed-future prediction.
 - Preserve human sovereignty. Counsel should suggest possible correction fields, not command the user.
 - No medical, legal, or clinical claims.
 - No claim that symbolic readings are proven divine facts.
 - Default output must remain concise and evidence-first; detailed counsellor internals belong in debug/report output.
+- Do not add new broad spiritual seed packs during this pass.
+- Do not lower validation discipline to make warnings disappear.
 
 Reference:
 
@@ -120,56 +99,37 @@ Reference:
 
 Likely files:
 
-- `internal/knowledge/*.yaml`
-- `internal/knowledge/knowledge.go`
-- `internal/knowledge/loader.go`
+- `internal/knowledge/transmute.yaml`
 - `internal/knowledge/validate.go`
 - `internal/decipher/types.go`
-- `internal/decipher/engine.go`
 - `internal/decipher/render.go`
-- new file if useful: `internal/decipher/counsellor_field.go`
-- new tests under `internal/decipher/`
-- training examples if needed: `training/examples.yaml`, `training/heldout.yaml`
+- `internal/decipher/counsellor.go`
+- counsellor tests under `internal/decipher/`
 
 Instructions:
 
 1. Start with `git status --short --branch` and record it.
 2. Run `go test ./...` before changing code and record the baseline result.
 3. Run `./bin/socrates knowledge validate` or the documented equivalent and record the result.
-4. Design the smallest data model for transmutation/counsellor relations.
-   - Prefer extending existing relation/profile data if clean.
-   - Add a new YAML file only if existing schemas become unclear.
-   - Required fields: source field/concept, target correction field/concept, relation kind, confidence, source/provenance, lens, weight.
-   - Suggested relation kinds: `transmutes_to`, `softens_through`, `corrects_through`, `releases_into`, `grounds_in`.
-5. Validation must reject:
-   - unknown source/target concept or field IDs
-   - invalid confidence
-   - invalid provenance/source
-   - invalid weights
-   - unsupported relation kinds
-   - floating-point harmonic meaning data if any harmonic profile is added
-6. Add a structured result to `Reading`, such as `CounsellorField` or `TransmutationField`.
-   - It should include active tension/source concepts, suggested correction fields, relation paths, confidence, weights, and evidence paths.
-   - It must be absent/empty when no data-backed transmutation path exists.
-7. Build counsellor/transmutation suggestions from active passage fields and harmonic fields.
-   - Do not inspect raw words directly for meaning.
-   - Use activated concepts/fields and curated transmutation relations.
-   - Require sufficient evidence strength before suggesting a correction field.
-   - Prefer verified/plausible evidence over speculative evidence.
-8. Rendering:
-   - Default render: concise, evidence-first, only when counsellor fields exist.
-   - Debug render: show relation kind, source/lens/confidence, weights, and evidence paths.
-   - Avoid moralizing language.
-   - Avoid "you must" phrasing.
-9. Add minimal curated seed data for the first counsellor paths.
-   - Keep it small and high-signal.
-   - Use source/provenance such as `curated` or `traditional`.
-   - Confidence should be `plausible` or `speculative` unless ordinary evidence supports `verified`.
-   - Do not add a broad spiritual concept pack.
-10. Add training/held-out examples only if needed to verify the feature.
-   - Keep training separate from active knowledge.
-   - Do not mutate active knowledge from training.
-11. Preserve completed guardrails:
+4. Review the current counsellor source selection.
+   - Distinguish direct evidence from propagated/neighbor evidence in the source field.
+   - Neighbor-propagated fields must not produce equal-strength counsel by default.
+   - If a suggestion is driven only by propagated evidence, mark it weaker or keep it debug-only unless there is independent supporting evidence.
+5. Review default rendering.
+   - Replace deterministic-sounding phrasing with a softer evidence phrase.
+   - Preferred shape: "possible correction field: source -> target" or "field X may be softened through Y".
+   - Avoid "if field remains" in default output unless the evidence clearly supports an inertia statement.
+   - Keep relation kind and confidence out of default unless needed for clarity.
+6. Add a small cap or ranking rule for default counsellor suggestions.
+   - Default output should show the highest-signal few suggestions, not every graph-adjacent correction.
+   - Debug output may show all candidates and why they were included or suppressed.
+7. Add suppression reasons to debug/report output if useful.
+   - Example reasons: weak source, propagated-only source, speculative relation, below display threshold.
+   - Keep the implementation light; do not build a large policy framework.
+8. Review seed data count and quality.
+   - Do not add new entries unless a test genuinely needs one.
+   - If any current transmutation relation is too generic or unsupported, lower confidence/weight or leave it debug-only through gating.
+9. Preserve completed guardrails:
    - active YAML validates
    - `knowledge validate` works
    - channel diversity counts active evidence only
@@ -178,25 +138,24 @@ Instructions:
    - cross-script love and Hebrew `El` boundary behavior still works
    - concept schema hygiene warnings remain visible and bounded
    - review/apply workflow does not mutate active knowledge without explicit accepted suggestions
-12. Add tests proving:
-   - counsellor field appears only from data-backed transmutation relations
-   - removing the transmutation data removes the counsel
-   - weak/speculative evidence alone does not produce strong counsel
-   - relation evidence paths are preserved
-   - default render stays concise
-   - debug render exposes source/lens/confidence/evidence paths
-   - no production Go hardcodes examples like forgiveness, humility, ego, or love as special cases
-13. Run targeted tests while working, then `go test ./...` or `make test`.
-14. Commit the completed counsellor/transmutation field work locally with a clear message. Do not push.
-15. Report final `git status --short --branch`, validation result, tests run, files changed, example default/debug outputs, and any added seed paths.
+10. Add tests proving:
+   - direct evidence can produce a concise counsellor suggestion
+   - propagated-only neighbor evidence does not flood default output
+   - default output is not deterministic or commanding
+   - debug output shows why suggestions were included/suppressed
+   - no production Go hardcodes particular concepts such as forgiveness, humility, resentment, fear, or love as special cases
+11. Run targeted tests while working, then `go test ./...` or `make test`.
+12. Commit the completed calibration work locally with a clear message. Do not push.
+13. Report final `git status --short --branch`, validation result, tests run, files changed, example default/debug outputs, and any unresolved warnings.
 
 Acceptance Criteria:
 
 - Counsellor/transmutation suggestions are data-backed.
 - No hardcoded word-specific or concept-specific counsel exists in Go.
-- Suggestions preserve evidence paths and confidence/provenance.
-- Default output remains concise and evidence-first.
-- Debug output exposes transmutation internals.
+- Suggestions preserve evidence paths, source strength, confidence, and provenance.
+- Default output is concise, humble, and does not sound like a fixed diagnosis.
+- Default output does not flood the user with correction fields from neighbor expansion.
+- Debug output exposes transmutation internals, including included/suppressed reasoning where implemented.
 - No fixed-future, medical, legal, or divine-certainty claims are introduced.
 - Existing harmonic core, training evaluation, review/apply workflow, validation, and cross-script convergence still pass.
 - `go test ./...` passes.
@@ -213,10 +172,8 @@ After counsellor/transmutation fields:
 
 ## Nice To Have Later
 
-- counsellor/transmutation fields (current task)
 - integer-only harmonic data model coverage
 - extended script support (Arabic, Thai, etc.)
 - harmonic/audio rendering layer
-
 
 
