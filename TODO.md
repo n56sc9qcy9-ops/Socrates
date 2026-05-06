@@ -65,40 +65,32 @@ Key completed metrics (full detail in `docs/ARCHITECTURE_READINESS.md`):
 ## Current Next Task
 
 Task:
-Calibrate counsellor/transmutation fields so they remain humble, evidence-first, and not overdiagnostic.
+Audit and harden integer-only harmonic data model coverage.
 
-Architect review status:
-Not accepted yet. Pi fixed the main evidence classification path and the working tree is clean, but default counsellor ranking and evidence-path classification still need correction.
-
-Current blockers:
-- Default counsellor output must prioritize direct, stronger, higher-confidence suggestions before propagated/speculative suggestions. In the current sample, propagated `guilt` and `fear` appear before direct `resentment -> forgiveness`; that is not acceptable for default guidance.
-- Add deterministic ranking for counsellor suggestions before default rendering. Recommended ordering: direct evidence first, then confidence, then strength, then stable lexical tie-breakers.
-- `TransmutationEvidence.IsDirectSource` must use the same evidence classification as `TransmutationSource.IsDirectEvidence`, not only `Depth == 0`. A symbolic neighbor expansion can have depth 0 but still be indirect.
-- Debug output should make it obvious when a default-hidden suggestion was hidden by ranking/cap, not because it lacked data.
-- Add or update regression tests proving that real engine analysis ranks the direct `resentment -> forgiveness` path ahead of neighbor-derived correction paths in default output.
-- Final report must include example default and debug output after ranking and evidence-path classification are corrected.
+Completed and accepted:
+- Counsellor/transmutation calibration is complete.
+- Direct evidence is ranked before propagated/speculative suggestions.
+- Neighbor-derived evidence remains visibly propagated in debug output.
+- Transmutation weights are normalized from integer percentages before scoring.
+- Default counsel is concise and humble.
+- Work committed locally through `ed68780`.
 
 Context:
-The first counsellor/transmutation layer is implemented and committed. It loads `internal/knowledge/transmute.yaml`, validates transmutation relations, builds a `CounsellorField`, and renders default/debug output with evidence paths. The implementation is directionally correct, but the first output sample shows an architectural risk:
+The counsellor layer is now restrained enough to move back to the harmonic core. Before Socrates grows toward audio, light, electromagnetic correspondence, or richer guidance, the meaning-frequency substrate must be audited and hardened.
 
-- A single explicit source field can activate neighbor fields, and those neighbor fields can produce multiple correction suggestions.
-- The phrase "if field remains X, tends toward Y" can sound like deterministic moral diagnosis.
-- The default output can become a list of corrections before the user has enough evidence context.
+The core rule remains: meaning-frequency identity must be integer based and concise. Decimal runtime scores are acceptable for evidence strength and ranking, but the stored harmonic meaning model must not become floating-point frequency numerology.
 
-The goal of this pass is not to add more counsellor content. The goal is to make the counsellor layer restrained, transparent, and aligned with human sovereignty.
+This task is an architecture hardening pass, not a feature expansion. Do not add audio synthesis, color rendering, chakras, UI, or a broad concept pack.
 
 Rules:
-- No hardcoded word-specific or concept-specific behaviour in production Go.
-- All mappings must remain data-driven with source/lens/confidence.
-- Training must not mutate active knowledge.
-- No black-box truth model.
-- No fixed-future prediction.
-- Preserve human sovereignty. Counsel should suggest possible correction fields, not command the user.
-- No medical, legal, or clinical claims.
-- No claim that symbolic readings are proven divine facts.
-- Default output must remain concise and evidence-first; detailed counsellor internals belong in debug/report output.
-- Do not add new broad spiritual seed packs during this pass.
-- Do not lower validation discipline to make warnings disappear.
+- Do not store floating-point frequency values as meaning.
+- Integer harmonic fields may include integer vectors, integer ratios, Pythagorean triples, Phi integer sequences/approximants, geometry IDs, and integer-backed electromagnetic references.
+- Physical electromagnetic references must be clearly separated from symbolic correspondences.
+- No hardcoded concept-to-frequency, concept-to-color, concept-to-note, pitch, chakra, electromagnetic, or music mappings in production Go.
+- All harmonic mappings must live in curated data with source/lens/confidence.
+- Runtime evidence scores may remain decimal because they are ranking signals, not meaning identity.
+- Keep the model compact. Prefer a small schema with clear validation over many optional fields.
+- Do not mutate active knowledge from training or review artifacts.
 
 Reference:
 
@@ -110,36 +102,46 @@ Reference:
 
 Likely files:
 
-- `internal/knowledge/transmute.yaml`
+- `internal/knowledge/frequencies.yaml`
+- `internal/knowledge/knowledge.go`
+- `internal/knowledge/loader.go`
 - `internal/knowledge/validate.go`
-- `internal/decipher/types.go`
-- `internal/decipher/render.go`
-- `internal/decipher/counsellor.go`
-- counsellor tests under `internal/decipher/`
+- `internal/decipher/harmonic_field.go`
+- `internal/decipher/harmonic_field_test.go`
+- `HARMONIC_DATA_MODEL.md`
+- `FREQUENCY_MODEL.md`
+- `docs/KNOWLEDGE_CURATION.md`
 
 Instructions:
 
 1. Start with `git status --short --branch` and record it.
 2. Run `go test ./...` before changing code and record the baseline result.
 3. Run `./bin/socrates knowledge validate` or the documented equivalent and record the result.
-4. Review the current counsellor source selection.
-   - Distinguish direct evidence from propagated/neighbor evidence in the source field.
-   - Neighbor-propagated fields must not produce equal-strength counsel by default.
-   - If a suggestion is driven only by propagated evidence, mark it weaker or keep it debug-only unless there is independent supporting evidence.
-5. Review default rendering.
-   - Replace deterministic-sounding phrasing with a softer evidence phrase.
-   - Preferred shape: "possible correction field: source -> target" or "field X may be softened through Y".
-   - Avoid "if field remains" in default output unless the evidence clearly supports an inertia statement.
-   - Keep relation kind and confidence out of default unless needed for clarity.
-6. Add a small cap or ranking rule for default counsellor suggestions.
-   - Default output should show the highest-signal few suggestions, not every graph-adjacent correction.
-   - Debug output may show all candidates and why they were included or suppressed.
-7. Add suppression reasons to debug/report output if useful.
-   - Example reasons: weak source, propagated-only source, speculative relation, below display threshold.
-   - Keep the implementation light; do not build a large policy framework.
-8. Review seed data count and quality.
-   - Do not add new entries unless a test genuinely needs one.
-   - If any current transmutation relation is too generic or unsupported, lower confidence/weight or leave it debug-only through gating.
+4. Audit the active harmonic/frequency schema and data.
+   - Identify every stored harmonic identity field.
+   - Confirm which fields are integer identity data and which fields are runtime scores.
+   - Confirm no meaning-frequency identity depends on a float.
+5. Harden validation.
+   - Reject floating-point harmonic meaning fields where integer identity is required.
+   - Reject malformed integer ratios, vectors, triples, geometry IDs, or electromagnetic references.
+   - Reject ambiguous physical/symbolic electromagnetic entries.
+   - Keep accepted warning debt visible; do not silence unrelated warnings.
+6. Harden loader/types only where necessary.
+   - If fields are currently loose strings, make validation stricter before adding abstractions.
+   - Do not create a large generalized physics model.
+   - Keep backward compatibility with current valid YAML where possible.
+7. Add focused tests proving:
+   - active `frequencies.yaml` validates
+   - float harmonic identity data is rejected
+   - integer ratios/vectors/triples are accepted
+   - invalid ratios/vectors/triples are rejected
+   - physical electromagnetic references require a clear physical/source lens
+   - symbolic electromagnetic correspondences remain distinguishable from physical claims
+   - no production Go contains hardcoded concept-to-frequency/color/note/EM/chakra mappings
+8. Review documentation.
+   - Update `HARMONIC_DATA_MODEL.md` and/or `FREQUENCY_MODEL.md` if the current schema rules are unclear.
+   - Document the boundary between integer meaning identity and decimal runtime evidence scoring.
+   - Document the boundary between physical electromagnetic measurement and symbolic correspondence.
 9. Preserve completed guardrails:
    - active YAML validates
    - `knowledge validate` works
@@ -149,25 +151,19 @@ Instructions:
    - cross-script love and Hebrew `El` boundary behavior still works
    - concept schema hygiene warnings remain visible and bounded
    - review/apply workflow does not mutate active knowledge without explicit accepted suggestions
-10. Add tests proving:
-   - direct evidence can produce a concise counsellor suggestion
-   - propagated-only neighbor evidence does not flood default output
-   - default output is not deterministic or commanding
-   - debug output shows why suggestions were included/suppressed
-   - no production Go hardcodes particular concepts such as forgiveness, humility, resentment, fear, or love as special cases
-11. Run targeted tests while working, then `go test ./...` or `make test`.
-12. Commit the completed calibration work locally with a clear message. Do not push.
-13. Report final `git status --short --branch`, validation result, tests run, files changed, example default/debug outputs, and any unresolved warnings.
+   - counsellor/transmutation direct-vs-propagated ranking remains correct
+10. Run targeted tests while working, then `go test ./...` or `make test`.
+11. Commit the completed harmonic data model hardening work locally with a clear message. Do not push.
+12. Report final `git status --short --branch`, validation result, tests run, files changed, schema decisions, and any unresolved warnings.
 
 Acceptance Criteria:
 
-- Counsellor/transmutation suggestions are data-backed.
-- No hardcoded word-specific or concept-specific counsel exists in Go.
-- Suggestions preserve evidence paths, source strength, confidence, and provenance.
-- Default output is concise, humble, and does not sound like a fixed diagnosis.
-- Default output does not flood the user with correction fields from neighbor expansion.
-- Debug output exposes transmutation internals, including included/suppressed reasoning where implemented.
-- No fixed-future, medical, legal, or divine-certainty claims are introduced.
+- Harmonic meaning identity remains integer-only.
+- Decimal values are allowed only for runtime evidence/scoring, not stored meaning identity.
+- Physical electromagnetic references are clearly separated from symbolic correspondence.
+- Validation rejects malformed harmonic identity data.
+- No concept-to-frequency/color/note/EM/chakra mapping is hardcoded in production Go.
+- Documentation clearly explains the schema boundary.
 - Existing harmonic core, training evaluation, review/apply workflow, validation, and cross-script convergence still pass.
 - `go test ./...` passes.
 - Work is committed locally and not pushed.
@@ -175,14 +171,12 @@ Acceptance Criteria:
 
 ## Next After This
 
-After counsellor/transmutation fields:
-- Integer-only harmonic data model coverage
+After harmonic data model hardening:
 - Extended script support (Arabic, Thai, etc.)
 - Harmonic/audio rendering layer
 - Consult `docs/ARCHITECTURE_READINESS.md` before major new feature layers
 
 ## Nice To Have Later
 
-- integer-only harmonic data model coverage
 - extended script support (Arabic, Thai, etc.)
 - harmonic/audio rendering layer
