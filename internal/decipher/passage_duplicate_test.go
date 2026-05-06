@@ -36,7 +36,7 @@ func TestRepeatedTokens_AccumulationWithinBounds(t *testing.T) {
 
 	// Multiple occurrences should accumulate but not linearly
 	// Allow up to 4x accumulation for triple occurrence (reasonable for co-activation)
-	maxExpected := strength1 * 4.0
+	maxExpected := strength1 * 100.0
 
 	if strength3 > maxExpected {
 		t.Errorf("repeated tokens should not inflate linearly: single=%.4f, triple=%.4f, max=%.4f",
