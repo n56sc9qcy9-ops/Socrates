@@ -4,6 +4,59 @@ This is the target data model for Socrates' meaning layer.
 
 Meaning is stored as integer harmonic structure, not as prose and not as floating-point frequency values.
 
+## Core Architectural Rule
+
+**Meaning-frequency identity is integer-only. Runtime evidence scores are decimal.**
+
+The boundary is strict:
+- **Integer fields** are stored meaning identity: vector `[1, 2, 1]`, ratio `[3, 2]`, weight `85`, note index `12`, color hue `167`, field ID `3`.
+- **Decimal fields** are runtime evidence: activation scores `0.73`, resonance magnitude `2.15`, harmony ratio `0.618`.
+
+Float values in YAML frequency data are a validation error. Float values in runtime scoring are expected output.
+
+## Integer Meaning Identity Fields
+
+The following fields in `FrequencyProfile` must be integers:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `Vector` | `[]int{3}` | Harmonic tone vector (Tone1, Tone2, Tone3) |
+| `Ratio` | `[]int{2}` | Frequency ratio [numerator, denominator] |
+| `Weight` | `int` | Confidence weight 0-100 |
+| `Labels.Note` | `int` | Musical note index (0-11 semitones) |
+| `Labels.Color` | `int` | Color hue (0-360 degrees) |
+| `Labels.Field` | `int` | Harmonic field ID |
+
+## Decimal Runtime Fields
+
+The following are decimal evidence outputs, not stored meaning:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `ActivationScore` | `float64` | Evidence strength for a concept |
+| `HarmonicMagnitude` | `float64` | Combined resonance of a field |
+| `CosineSimilarity` | `float64` | Angle between tone vectors |
+| `HarmonyScore` | `float64` | Overall harmonic coherence |
+
+## Physical vs Symbolic EM
+
+Electromagnetic references in data must distinguish:
+
+```yaml
+# Physical measurement - verified by physics
+em_band_id: em.visible.green
+source: physics
+confidence: verified
+
+# Symbolic correspondence - curated spiritual tradition
+em_band_id: em.visible.green
+source: traditional
+confidence: plausible
+lens: symbolic
+```
+
+Physical ranges (nm, Hz) do not prove symbolic mappings.
+
 Words are surface forms. Concepts are activation handles. The deeper identity is a language-neutral meaning-frequency field.
 
 ## Rules
