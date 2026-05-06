@@ -139,6 +139,67 @@ type ScoreComponents struct {
 	ChannelDiversityBonus   float64
 }
 
+// CounsellorField contains data-backed transmutation suggestions.
+// Built from curated transmute relations — not from hardcoded Go.
+type CounsellorField struct {
+	// SourceFields are the activated tension/contracted fields.
+	SourceFields []TransmutationSource
+
+	// Suggestions are the data-backed correction paths.
+	Suggestions []TransmutationSuggestion
+
+	// EvidencePaths trace from activated concepts to suggestions.
+	EvidencePaths []TransmutationEvidence
+}
+
+// TransmutationSource is a tension/contracted field detected in the reading.
+type TransmutationSource struct {
+	// Concept is the concept ID of the source field.
+	Concept string
+
+	// Strength is the activation strength (0-1).
+	Strength float64
+
+	// EvidenceSources are where this field was activated from.
+	EvidenceSources []string
+}
+
+// TransmutationSuggestion is a data-backed correction path.
+type TransmutationSuggestion struct {
+	// SourceConcept is the source field concept ID.
+	SourceConcept string
+
+	// TargetConcept is the correction target concept ID.
+	TargetConcept string
+
+	// Kind is the transmutation kind (transmutes_to, softens_through, etc.).
+	Kind string
+
+	// Confidence is the confidence level.
+	Confidence string
+
+	// Source is the provenance (curated, traditional, human_review).
+	Source string
+
+	// Lens is the interpretive lens.
+	Lens string
+
+	// Weight is the relation weight (0-1).
+	Weight float64
+
+	// Strength is the combined strength (source field × relation weight).
+	Strength float64
+}
+
+// TransmutationEvidence traces a suggestion back to its data source.
+type TransmutationEvidence struct {
+	SourceConcept   string
+	TargetConcept  string
+	Kind           string
+	DataSourceFile string
+	Notes          string
+}
+
 // Reading is the complete output of the decipher engine.
 type Reading struct {
 	Input              string
@@ -150,6 +211,7 @@ type Reading struct {
 	Convergence        ConvergenceResult                              // Phase E: Convergence via generic activation
 	PassageFields      PassageFields                                  // Phase E: Passage fields via activation graph
 	HarmonicField      *HarmonicField                                 // Phase F: Harmonic field from frequency profiles
+	CounsellorField    *CounsellorField                               // Phase G: Data-backed transmutation/counsellor fields
 	Channels           []ChannelResult
 	ConvergingPatterns []Pattern
 	WeakSignals        []Pattern

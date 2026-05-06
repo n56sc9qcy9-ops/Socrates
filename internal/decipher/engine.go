@@ -73,6 +73,9 @@ func (e *Engine) Analyze(input string) Reading {
 	// Build harmonic field from passage fields using frequency profiles
 	harmonicField := BuildHarmonicField(passageFields, e.Knowledge)
 
+	// Build counsellor field from passage fields using transmutation data
+	counsellorField := BuildCounsellorField(passageFields, e.Knowledge)
+
 	// Collect all signals and deduplicate before scoring
 	allSignals := collectAllSignals(channels)
 	allSignals = DeduplicateSignals(allSignals)
@@ -105,6 +108,7 @@ func (e *Engine) Analyze(input string) Reading {
 		Convergence:        convergence,
 		PassageFields:      passageFields,
 		HarmonicField:      harmonicField,
+		CounsellorField:    counsellorField,
 		Channels:           channels,
 		ConvergingPatterns: converging,
 		WeakSignals:        weakSignals,

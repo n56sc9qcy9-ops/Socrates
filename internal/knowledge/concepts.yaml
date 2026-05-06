@@ -514,3 +514,181 @@ concepts:
     name: essence
     aliases: [nature, fundamental]
     neighbors: [being, spirit, truth]
+    
+  - id: resentment
+    name: resentment
+    aliases: [bitterness, grudging]
+    neighbors: [fear, guilt, judgment]
+    
+  - id: forgiveness
+    name: forgiveness
+    aliases: [pardon, release]
+    neighbors: [love, mercy, truth]
+    
+  - id: pride
+    name: pride
+    aliases: [arrogance, self_importance]
+    neighbors: [ego, judgment, control]
+    
+  - id: humility
+    name: humility
+    aliases: [meekness, modesty]
+    neighbors: [truth, love, source]
+    
+  - id: fear
+    name: fear
+    aliases: [fright, dread, terror]
+    neighbors: [guilt, control, isolation]
+    
+  - id: trust
+    name: trust
+    aliases: [faith, confidence]
+    neighbors: [love, source, truth]
+    
+  - id: guilt
+    name: guilt
+    aliases: [shame, remorse]
+    neighbors: [fear, judgment, past]
+    
+  - id: mercy
+    name: mercy
+    aliases: [compassion, grace]
+    neighbors: [love, forgiveness, truth]
+    
+  - id: shame
+    name: shame
+    aliases: [humiliation, disgrace]
+    neighbors: [guilt, fear, judgment]
+    
+  - id: self_acceptance
+    name: self_acceptance
+    aliases: [self_compassion, self_forgiveness]
+    neighbors: [love, being, truth]
+    
+  - id: attachment
+    name: attachment
+    aliases: [clinging, grasping]
+    neighbors: [desire, control, fear]
+    
+  - id: letting_go
+    name: letting_go
+    aliases: [release, surrender]
+    neighbors: [trust, presence, love]
+    
+  - id: control
+    name: control
+    aliases: [domination, dominance]
+    neighbors: [fear, pride, power]
+    
+  - id: surrender
+    name: surrender
+    aliases: [yielding, acceptance]
+    neighbors: [trust, love, presence]
+    
+  - id: avoidance
+    name: avoidance
+    aliases: [escape, fleeing]
+    neighbors: [fear, guilt, past]
+    
+  - id: presence
+    name: presence
+    aliases: [awareness, now, mindfulness]
+    neighbors: [being, breath, truth]
+    
+  - id: judgment
+    name: judgment
+    aliases: [condemnation, criticism]
+    neighbors: [pride, fear, separation]
+    
+  - id: isolation
+    name: isolation
+    aliases: [separation, aloneness]
+    neighbors: [fear, guilt, separation]
+        
+  - id: grasping
+    name: grasping
+    aliases: [clinging, holding]
+    neighbors: [attachment, desire, control]
+    
+  - id: openness
+    name: openness
+    aliases: [receptivity, openness_to]
+    neighbors: [trust, presence, breath]
+    
+  - id: confusion
+    name: confusion
+    aliases: [bewilderment, uncertainty]
+    neighbors: [separation, past, future]
+    
+  - id: clarity
+    name: clarity
+    aliases: [understanding, lucidity]
+    neighbors: [truth, light, presence]
+    
+  - id: rigidity
+    name: rigidity
+    aliases: [inflexibility, stubbornness]
+    neighbors: [control, pride, fear]
+    
+  - id: flexibility
+    name: flexibility
+    aliases: [adaptability, suppleness]
+    neighbors: [flow, breath, trust]
+    
+  - id: conflict
+    name: conflict
+    aliases: [struggle, tension]
+    neighbors: [separation, fear, power]
+    
+  - id: harmony
+    name: harmony
+    aliases: [agreement, concord]
+    neighbors: [love, one, truth]
+    
+  - id: stagnation
+    name: stagnation
+    aliases: [stillness, inactivity]
+    neighbors: [fear, past, attachment]
+
+
+  - id: ego
+    name: ego
+    aliases: [self, self_image, self-reference]
+    neighbors: [pride, being, separation]
+    
+  - id: past
+    name: past
+    aliases: [memory, before, prior]
+    neighbors: [time, guilt, future]
+    
+  - id: future
+    name: future
+    aliases: [time, ahead, after]
+    neighbors: [time, presence, hope]
+    
+  - id: desire
+    name: desire
+    aliases: [wanting, longing, craving]
+    neighbors: [attachment, grasping, life]
+    
+  - id: separation
+    name: separation
+    aliases: [division, apartness, disconnect]
+    neighbors: [isolation, conflict, being]
+    
+  - id: flow
+    name: flow
+    aliases: [movement, stream, ease]
+    neighbors: [flexibility, breath, life]
+
+
+  - id: time
+    name: time
+    aliases: [temporal, duration, chronos]
+    neighbors: [past, future, presence]
+    
+  - id: hope
+    name: hope
+    aliases: [anticipation, expectation, faith]
+    neighbors: [future, trust, source]
+

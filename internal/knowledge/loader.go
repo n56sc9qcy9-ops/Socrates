@@ -2,6 +2,7 @@ package knowledge
 
 import (
 	"embed"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -42,6 +43,11 @@ func (l *Loader) LoadAll() (*Knowledge, error) {
 
 	// Load relations
 	if err := l.loadRelations(kb); err != nil {
+		return nil, err
+	}
+
+	// Load transmute (counsellor/transmutation field relations)
+	if err := l.loadTransmutations(kb); err != nil {
 		return nil, err
 	}
 
@@ -114,6 +120,26 @@ func (l *Loader) loadRelations(kb *KnowledgeBuilder) error {
 
 	for _, r := range doc.Relations {
 		kb.AddRelation(r.ToRelation())
+	}
+
+	return nil
+}
+
+// loadTransmutations loads transmute.yaml for counsellor/transmutation fields.
+func (l *Loader) loadTransmutations(kb *KnowledgeBuilder) error {
+	data, err := l.readFile("transmute.yaml")
+	if err != nil {
+		// File may not exist in all builds — not an error
+		return nil
+	}
+
+	var doc transmuteDoc
+	if err := yaml.Unmarshal(data, &doc); err != nil {
+		return fmt.Errorf("failed to parse transmute.yaml: %w", err)
+	}
+
+	for _, e := range doc.TransmuteEntries {
+		kb.AddTransmutation(e.ToTransmutation())
 	}
 
 	return nil
@@ -356,6 +382,37 @@ func (s ScriptWordEntry) ToScriptWord() ScriptWord {
 // relationsDoc represents the YAML structure for relations.
 type relationsDoc struct {
 	Relations []RelationEntry `yaml:"relations"`
+}
+
+// transmuteDoc represents the YAML structure for counsellor/transmutation fields.
+type transmuteDoc struct {
+	TransmuteEntries []TransmuteEntry `yaml:"transmute_entries"`
+}
+
+// TransmuteEntry represents a transmutation entry in YAML.
+type TransmuteEntry struct {
+	From       string  `yaml:"from"`
+	To         string  `yaml:"to"`
+	Kind       string  `yaml:"kind"`
+	Confidence string  `yaml:"confidence"`
+	Source     string  `yaml:"source"`
+	Lens       string  `yaml:"lens"`
+	Weight     float64 `yaml:"weight"`
+	Notes      string  `yaml:"notes"`
+}
+
+// ToTransmutation converts to decipher.TransmutationRelation type.
+func (e TransmuteEntry) ToTransmutation() TransmutationRelation {
+	return TransmutationRelation{
+		From:       e.From,
+		To:         e.To,
+		Kind:       e.Kind,
+		Confidence: e.Confidence,
+		Source:     e.Source,
+		Lens:       e.Lens,
+		Weight:     e.Weight,
+		Notes:      e.Notes,
+	}
 }
 
 // RelationEntry represents a relation entry in YAML.

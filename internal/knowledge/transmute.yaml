@@ -1,0 +1,180 @@
+# transmute.yaml - Data-backed counsellor/transmutation fields
+# Extends evidence-first reading with symbolic guidance capabilities.
+#
+# These are curated relational mappings from tension/contracted field to correction/counsel field.
+# NOT fortune telling. NOT oracle. Data-driven counsel from curated relations.
+#
+# Rules:
+# - No hardcoded transmutation logic in Go
+# - All entries must be data-driven with source/lens/confidence
+# - Language must be "if unchanged, this field tends toward..." not "this will happen"
+# - No medical, legal, or clinical claims
+# - No divine certainty claims
+# - Preserve human sovereignty; suggest correction, don't command
+
+transmute_entries:
+  # Each entry maps a source field (tension/contracted) to a correction field.
+  # Required: from, to, kind, confidence, source, lens, weight
+  # Supported kinds: transmutes_to, softens_through, corrects_through, releases_into, grounds_in
+
+  - from: resentment
+    to: forgiveness
+    kind: transmutes_to
+    confidence: plausible
+    source: curated
+    lens: relational_healing
+    weight: 0.7
+    notes: >
+      Resentment is a holding onto past harm. Forgiveness releases without condoning.
+
+  - from: pride
+    to: humility
+    kind: corrects_through
+    confidence: plausible
+    source: curated
+    lens: virtue_practice
+    weight: 0.7
+    notes: >
+      Pride inflates self-reference. Humility sees clearly within the whole.
+
+  - from: fear
+    to: trust
+    kind: releases_into
+    confidence: plausible
+    source: curated
+    lens: relational_healing
+    weight: 0.7
+    notes: >
+      Fear contracts around self-protection. Trust expands toward presence.
+
+  - from: guilt
+    to: mercy
+    kind: softens_through
+    confidence: plausible
+    source: curated
+    lens: virtue_practice
+    weight: 0.6
+    notes: >
+      Guilt contracts around past action. Mercy holds the self with compassion.
+
+  - from: shame
+    to: self_acceptance
+    kind: grounds_in
+    confidence: speculative
+    source: curated
+    lens: relational_healing
+    weight: 0.6
+    notes: >
+      Shame conflates being with doing. Self-acceptance separates identity from action.
+
+  - from: attachment
+    to: letting_go
+    kind: releases_into
+    confidence: speculative
+    source: curated
+    lens: virtue_practice
+    weight: 0.6
+    notes: >
+      Attachment clings to permanence. Letting go accepts change without resistance.
+
+  - from: control
+    to: surrender
+    kind: transmutes_to
+    confidence: plausible
+    source: curated
+    lens: virtue_practice
+    weight: 0.6
+    notes: >
+      Control attempts to fix the unfixed. Surrender aligns with what is.
+
+  - from: avoidance
+    to: presence
+    kind: corrects_through
+    confidence: speculative
+    source: curated
+    lens: relational_healing
+    weight: 0.5
+    notes: >
+      Avoidance flees from what is. Presence meets what is with open attention.
+
+  - from: judgment
+    to: mercy
+    kind: transmutes_to
+    confidence: plausible
+    source: traditional
+    lens: virtue_practice
+    weight: 0.6
+    notes: >
+      Judgment contracts around comparison. Mercy holds the other with compassion.
+
+  - from: isolation
+    to: connection
+    kind: releases_into
+    confidence: plausible
+    source: curated
+    lens: relational_healing
+    weight: 0.7
+    notes: >
+      Isolation separates self from whole. Connection recognizes shared being.
+
+  - from: grasping
+    to: openness
+    kind: softens_through
+    confidence: speculative
+    source: curated
+    lens: virtue_practice
+    weight: 0.5
+    notes: >
+      Grasping holds tightly. Openness releases and receives what arises.
+
+  - from: confusion
+    to: clarity
+    kind: grounds_in
+    confidence: speculative
+    source: curated
+    lens: virtue_practice
+    weight: 0.5
+    notes: >
+      Confusion arises from unresolved pattern. Clarity emerges through attention and time.
+
+  - from: rigidity
+    to: flexibility
+    kind: corrects_through
+    confidence: speculative
+    source: curated
+    lens: virtue_practice
+    weight: 0.5
+    notes: >
+      Rigidity resists change. Flexibility adapts without losing structure.
+
+  - from: conflict
+    to: harmony
+    kind: transmutes_to
+    confidence: speculative
+    source: curated
+    lens: relational_healing
+    weight: 0.5
+    notes: >
+      Conflict arises from opposing fields. Harmony finds common resonance.
+
+  - from: stagnation
+    to: growth
+    kind: grounds_in
+    confidence: speculative
+    source: curated
+    lens: virtue_practice
+    weight: 0.5
+    notes: >
+      Stagnation holds pattern without movement. Growth changes pattern toward potential.
+
+# Supported transmutation kinds:
+#   transmutes_to   - primary transformation (resentment -> forgiveness)
+#   softens_through - gentle release (guilt -> mercy)
+#   corrects_through - alignment shift (pride -> humility)
+#   releases_into  - expansion from contraction (fear -> trust)
+#   grounds_in      - foundation shift (shame -> self_acceptance)
+
+# Supported confidence: verified, plausible, speculative
+# Supported source: curated, traditional, human_review
+# Supported lens: relational_healing, virtue_practice, harmonic_lens
+# Weight: float 0.0-1.0 (integer-convertible)

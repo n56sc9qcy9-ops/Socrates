@@ -162,6 +162,9 @@ func ValidateKnowledge(kb *Knowledge) *ValidationResult {
 	// Validate frequency profiles - check all constraints
 	validateFrequencyProfiles(kb.FrequencyProfiles, kb, result)
 
+	// Validate transmutations - check endpoints and kinds
+	validateTransmutations(kb.Transmutations, kb, result)
+
 	return result
 }
 
@@ -511,7 +514,66 @@ func isValidSource(source string) bool {
 	}
 }
 
+// Supported transmutation kinds.
+var validTransmutationKinds = map[string]bool{
+	"transmutes_to":    true,
+	"softens_through":   true,
+	"corrects_through": true,
+	"releases_into":    true,
+	"grounds_in":       true,
+}
+
+// validateTransmutations validates transmutation relation definitions.
+func validateTransmutations(transmutations []TransmutationRelation, kb *Knowledge, result *ValidationResult) {
+	for i, t := range transmutations {
+		field := transmutationField(i)
+
+		// Check from concept - alias resolution is expected and OK
+		if t.From == "" {
+			result.AddError(field+".from", "transmutation 'from' concept cannot be empty")
+		} else {
+			resolved := ResolveConceptRef(t.From, kb)
+			if resolved.Status == RefUnknown {
+				result.AddError(field+".from", "transmutation 'from' concept '"+t.From+"' does not exist")
+			}
+		}
+
+		// Check to concept - alias resolution is expected and OK
+		if t.To == "" {
+			result.AddError(field+".to", "transmutation 'to' concept cannot be empty")
+		} else {
+			resolved := ResolveConceptRef(t.To, kb)
+			if resolved.Status == RefUnknown {
+				result.AddError(field+".to", "transmutation 'to' concept '"+t.To+"' does not exist")
+			}
+		}
+
+		// Check kind is valid
+		if t.Kind == "" {
+			result.AddError(field+".kind", "transmutation kind cannot be empty")
+		} else if !validTransmutationKinds[t.Kind] {
+			result.AddError(field+".kind", "invalid transmutation kind '"+t.Kind+"'; must be one of: transmutes_to, softens_through, corrects_through, releases_into, grounds_in")
+		}
+
+		// Check confidence if present
+		if t.Confidence != "" && !isValidConfidence(t.Confidence) {
+			result.AddError(field+".confidence", "invalid confidence '"+t.Confidence+"'; must be verified, plausible, or speculative")
+		}
+
+		// Check source/provenance if present
+		if t.Source != "" && !isValidSource(t.Source) {
+			result.AddError(field+".source", "invalid source '"+t.Source+"'; must be curated, traditional, human_review, or physics")
+		}
+
+		// Validate weight
+		if t.Weight < 0 || t.Weight > 1 {
+			result.AddError(field+".weight", "weight must be in [0, 1]; got "+ftos(t.Weight))
+		}
+	}
+}
+
 // Field helper functions for error messages.
+func transmutationField(i int) string { return "transmutations[" + itoa(i) + "]" }
 func conceptField(i int) string      { return "concepts[" + itoa(i) + "]" }
 func formField(i int) string         { return "forms[" + itoa(i) + "]" }
 func scriptWordField(i int) string   { return "script_words[" + itoa(i) + "]" }

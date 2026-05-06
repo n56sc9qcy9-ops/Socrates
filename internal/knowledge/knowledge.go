@@ -59,6 +59,7 @@ type Knowledge struct {
 	Forms             []Form
 	ScriptWords       []ScriptWord
 	Relations         []Relation
+	Transmutations    []TransmutationRelation
 	GlyphPatterns     []GlyphPattern
 	FrequencyProfiles []FrequencyProfile
 
@@ -71,10 +72,12 @@ type Knowledge struct {
 	aliasesToConcept           map[string]Concept
 	relationsFrom              map[string][]Relation
 	relationsTo                map[string][]Relation
+	transmutationsFrom         map[string][]TransmutationRelation
+	transmutationsTo           map[string][]TransmutationRelation
 	glyphPatternsByScript      map[string][]GlyphPattern
 	glyphPatternsByRune        map[uint32][]GlyphPattern
 	frequencyProfilesByConcept map[string][]FrequencyProfile
-	frequencyProfilesByID      map[string]FrequencyProfile
+	frequencyProfilesByID     map[string]FrequencyProfile
 }
 
 // NewKnowledgeBuilder builds a Knowledge struct incrementally.
@@ -83,6 +86,7 @@ type KnowledgeBuilder struct {
 	forms             []Form
 	scriptWords       []ScriptWord
 	relations         []Relation
+	transmutations    []TransmutationRelation
 	glyphPatterns     []GlyphPattern
 	frequencyProfiles []FrequencyProfile
 }
@@ -107,6 +111,11 @@ func (b *KnowledgeBuilder) AddRelation(r Relation) {
 	b.relations = append(b.relations, r)
 }
 
+// AddTransmutation adds a transmutation relation to the builder.
+func (b *KnowledgeBuilder) AddTransmutation(t TransmutationRelation) {
+	b.transmutations = append(b.transmutations, t)
+}
+
 // AddGlyphPattern adds a glyph pattern to the builder.
 func (b *KnowledgeBuilder) AddGlyphPattern(g GlyphPattern) {
 	b.glyphPatterns = append(b.glyphPatterns, g)
@@ -124,6 +133,7 @@ func NewKnowledgeBuilder() *KnowledgeBuilder {
 		forms:             make([]Form, 0),
 		scriptWords:       make([]ScriptWord, 0),
 		relations:         make([]Relation, 0),
+		transmutations:    make([]TransmutationRelation, 0),
 		glyphPatterns:     make([]GlyphPattern, 0),
 		frequencyProfiles: make([]FrequencyProfile, 0),
 	}
@@ -136,6 +146,7 @@ func (b *KnowledgeBuilder) Build() *Knowledge {
 		Forms:             b.forms,
 		ScriptWords:       b.scriptWords,
 		Relations:         b.relations,
+		Transmutations:    b.transmutations,
 		GlyphPatterns:     b.glyphPatterns,
 		FrequencyProfiles: b.frequencyProfiles,
 
@@ -148,6 +159,8 @@ func (b *KnowledgeBuilder) Build() *Knowledge {
 		aliasesToConcept:           make(map[string]Concept),
 		relationsFrom:              make(map[string][]Relation),
 		relationsTo:                make(map[string][]Relation),
+		transmutationsFrom:         make(map[string][]TransmutationRelation),
+		transmutationsTo:           make(map[string][]TransmutationRelation),
 		glyphPatternsByScript:      make(map[string][]GlyphPattern),
 		glyphPatternsByRune:        make(map[uint32][]GlyphPattern),
 		frequencyProfilesByConcept: make(map[string][]FrequencyProfile),
@@ -196,6 +209,14 @@ func (b *KnowledgeBuilder) Build() *Knowledge {
 		}
 	}
 
+	// Index transmutations
+	kb.transmutationsFrom = make(map[string][]TransmutationRelation)
+	kb.transmutationsTo = make(map[string][]TransmutationRelation)
+	for _, t := range kb.Transmutations {
+		kb.transmutationsFrom[t.From] = append(kb.transmutationsFrom[t.From], t)
+		kb.transmutationsTo[t.To] = append(kb.transmutationsTo[t.To], t)
+	}
+
 	return kb
 }
 
@@ -211,6 +232,8 @@ func (kb *Knowledge) BuildIndexes() {
 	kb.aliasesToConcept = make(map[string]Concept)
 	kb.relationsFrom = make(map[string][]Relation)
 	kb.relationsTo = make(map[string][]Relation)
+	kb.transmutationsFrom = make(map[string][]TransmutationRelation)
+	kb.transmutationsTo = make(map[string][]TransmutationRelation)
 	kb.glyphPatternsByScript = make(map[string][]GlyphPattern)
 	kb.glyphPatternsByRune = make(map[uint32][]GlyphPattern)
 	kb.frequencyProfilesByConcept = make(map[string][]FrequencyProfile)
@@ -321,6 +344,20 @@ type GlyphPattern struct {
 	Weight     float64
 }
 
+// TransmutationRelation represents a data-backed counsellor/transmutation relation.
+// Maps a tension/contracted field (From) to a correction field (To).
+// Not fortune telling — curated relational guidance from knowledge.
+type TransmutationRelation struct {
+	From       string
+	To         string
+	Kind       string
+	Confidence string
+	Source     string
+	Lens       string
+	Weight     float64
+	Notes      string
+}
+
 // ============================================================
 // Lookup Methods (Index-based, fast)
 // ============================================================
@@ -415,6 +452,21 @@ func (k *Knowledge) AllForms() []Form {
 // AllRelations returns all loaded relations.
 func (k *Knowledge) AllRelations() []Relation {
 	return k.Relations
+}
+
+// GetTransmutationsFrom returns all transmutation relations outgoing from a concept.
+func (k *Knowledge) GetTransmutationsFrom(concept string) []TransmutationRelation {
+	return k.transmutationsFrom[concept]
+}
+
+// GetTransmutationsTo returns all transmutation relations incoming to a concept.
+func (k *Knowledge) GetTransmutationsTo(concept string) []TransmutationRelation {
+	return k.transmutationsTo[concept]
+}
+
+// AllTransmutations returns all loaded transmutation relations.
+func (k *Knowledge) AllTransmutations() []TransmutationRelation {
+	return k.Transmutations
 }
 
 // GetAllFormsAsAnchors returns all forms as anchor concepts for fuzzy matching.
