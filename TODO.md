@@ -68,13 +68,13 @@ Task:
 Calibrate counsellor/transmutation fields so they remain humble, evidence-first, and not overdiagnostic.
 
 Architect review status:
-Not accepted yet. Pi reported this task complete, but the working tree still contains uncommitted implementation changes. Before any new task begins, Pi must consolidate the current work and resolve the blockers below.
+Not accepted yet. Pi consolidated the working tree and fixed raw percentage weight normalization, but the example debug output still labels neighbor-derived sources as `direct`.
 
 Current blockers:
-- `git status --short --branch` must be clean after Pi commits the calibration work locally.
-- Transmutation weights are now stored as integer percentages such as `40`, `50`, and `60`, but counsellor scoring must normalize them before multiplying by source strength. A source strength of `0.70` and relation weight `60` should produce `0.42`, not `42`.
-- Validation, comments, tests, debug output, and score rendering must agree on the same weight scale.
+- The sample debug output shows sources such as `resentment -> neighbor: fear` rendered as `direct`. That is incorrect. Neighbor-derived evidence must remain distinguishable from direct form/glyph/script evidence all the way into `CounsellorField`.
+- Do not rely only on `PassageField.Depth` if a channel has already emitted neighbor concepts as direct signals. Source/evidence type must preserve whether the concept came from exact/direct evidence, fuzzy evidence, graph expansion, or symbolic neighbor expansion.
 - Propagated/neighbor-only counsellor suggestions must be visibly weaker than direct evidence and must not flood default output.
+- Add a regression test using a real engine analysis where a direct source such as `resentment` activates neighbors such as `fear`, `guilt`, or `judgment`; those neighbor-derived counsellor sources must not render as `direct`.
 - Final report must include example default and debug output after the weight-scale correction.
 
 Context:
@@ -185,4 +185,3 @@ After counsellor/transmutation fields:
 - integer-only harmonic data model coverage
 - extended script support (Arabic, Thai, etc.)
 - harmonic/audio rendering layer
-
