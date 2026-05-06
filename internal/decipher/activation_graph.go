@@ -14,6 +14,9 @@ type EvidencePath struct {
 	SourceToken string
 	SourceForm  string
 	SourceType  string // "direct_channel", "fuzzy_match", "passage_signal", "graph_expansion"
+	// IsDirect is true if this evidence comes from direct form/glyph/script evidence,
+	// false if it comes from symbolic neighbor expansion or other indirect sources.
+	IsDirect    bool
 
 	// Match information
 	MatchForm  string
@@ -253,6 +256,7 @@ func BuildGraphFromEvidence(
 							SourceType:  "direct_channel",
 							Confidence:  sig.Confidence,
 							Weight:      sig.Weight,
+							IsDirect:    sig.IsDirect,
 						}
 					}
 					if sig.Confidence == ConfidenceVerified {
@@ -285,6 +289,7 @@ func BuildGraphFromEvidence(
 			MatchScore:  sig.MatchScore,
 			Confidence:  sig.Confidence,
 			Weight:      sig.Weight,
+			IsDirect:    true, // Passage signals are direct evidence
 		}
 		node.AddEvidence(evidence)
 	}
@@ -311,6 +316,7 @@ func BuildGraphFromEvidence(
 				MatchScore:  match.Weight,
 				Confidence:  anchorConfidence(match.Weight),
 				Weight:      match.Weight,
+				IsDirect:    false, // Fuzzy matches are indirect
 			}
 			node.AddEvidence(evidence)
 		}

@@ -98,6 +98,9 @@ type Signal struct {
 	Lens       string
 	Confidence string
 	Weight     float64
+	// IsDirect indicates this signal comes from direct form/glyph/script evidence
+	// (not from symbolic neighbor expansion). Used to distinguish evidence provenance.
+	IsDirect   bool
 }
 
 // EvidenceID returns a deterministic identity for this signal.
@@ -162,6 +165,10 @@ type TransmutationSource struct {
 
 	// Depth is the propagation depth (0 = direct, 1+ = graph-expanded/neighbor).
 	Depth int
+
+	// IsDirectEvidence is true if this source has direct form/glyph/script evidence.
+	// False means evidence comes only from symbolic neighbor expansion.
+	IsDirectEvidence bool
 
 	// EvidenceSources are where this field was activated from.
 	EvidenceSources []string

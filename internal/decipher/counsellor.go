@@ -80,10 +80,11 @@ func findTransmutationSources(passageFields PassageFields, kb *knowledge.Knowled
 		seen[field.Concept] = true
 
 		sources = append(sources, TransmutationSource{
-			Concept:         field.Concept,
-			Strength:        field.Strength,
-			Depth:           field.Depth,
-			EvidenceSources: field.TokenSources,
+			Concept:           field.Concept,
+			Strength:          field.Strength,
+			Depth:             field.Depth,
+			EvidenceSources:   field.TokenSources,
+			IsDirectEvidence:  field.IsDirectEvidence,
 		})
 	}
 
@@ -104,11 +105,13 @@ func buildSuggestions(sources []TransmutationSource, kb *knowledge.Knowledge) []
 				continue
 			}
 
-			// Downgrade confidence for propagated/neighbor sources
-			// Direct concepts (depth 0) use normal confidence
-			// Graph-expanded neighbors get downgraded to prevent overconfident counsel
+			// Downgrade confidence for indirect evidence sources.
+			// Direct form/glyph/script evidence uses normal confidence.
+			// Symbolic neighbor expansion or graph-propagated sources get downgraded.
 			suggestionConf := t.Confidence
-			if src.Depth > 0 {
+			// Check both Depth (graph propagation) and IsDirectEvidence (form evidence)
+			isIndirect := src.Depth > 0 || !src.IsDirectEvidence
+			if isIndirect {
 				if t.Confidence == ConfidenceVerified {
 					suggestionConf = ConfidencePlausible
 				} else if t.Confidence == ConfidencePlausible {

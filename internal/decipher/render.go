@@ -371,12 +371,13 @@ func renderDebug(r Reading) string {
 		sb.WriteString("Counsellor Field (from transmutation data):\n")
 		sb.WriteString(fmt.Sprintf("  Source fields: %d\n", len(r.CounsellorField.SourceFields)))
 		for _, src := range r.CounsellorField.SourceFields {
-			depthStr := "direct"
-			if src.Depth > 0 {
-				depthStr = "propagated"
+			// Show evidence type: direct form/glyph/script or symbolic/neighbor/propagated
+			evidenceType := "direct"
+			if src.Depth > 0 || !src.IsDirectEvidence {
+				evidenceType = "propagated"
 			}
-			sb.WriteString(fmt.Sprintf("    - %s [strength: %.2f, %s, sources: %v]\n",
-				src.Concept, src.Strength, depthStr, src.EvidenceSources))
+			sb.WriteString(fmt.Sprintf("    - %s [strength: %.2f, evidence: %s, sources: %v]\n",
+				src.Concept, src.Strength, evidenceType, src.EvidenceSources))
 		}
 		sb.WriteString(fmt.Sprintf("  Suggestions: %d\n", len(r.CounsellorField.Suggestions)))
 		for _, s := range r.CounsellorField.Suggestions {

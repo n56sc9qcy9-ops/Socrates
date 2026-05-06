@@ -13,7 +13,7 @@ func TestBuildCounsellorField(t *testing.T) {
 
 	// Create passage fields with a concept that has transmutation relations
 	passageFields := PassageFields{
-		{Concept: "resentment", Strength: 0.8, TokenSources: []string{"resentment"}},
+		{Concept: "resentment", Strength: 0.8, IsDirectEvidence: true, TokenSources: []string{"resentment"}},
 		{Concept: "love", Strength: 0.7, TokenSources: []string{"love"}},
 	}
 
@@ -86,7 +86,7 @@ func TestCounsellorFieldKinds(t *testing.T) {
 
 	// resentment: transmutes_to
 	passageFields := PassageFields{
-		{Concept: "resentment", Strength: 0.8, TokenSources: []string{"resentment"}},
+		{Concept: "resentment", Strength: 0.8, IsDirectEvidence: true, TokenSources: []string{"resentment"}},
 	}
 	field := BuildCounsellorField(passageFields, kb)
 	if field == nil || len(field.Suggestions) == 0 {
@@ -201,7 +201,7 @@ func TestTransmutationConfidence(t *testing.T) {
 	kb := knowledge.LoadOrPanic()
 
 	passageFields := PassageFields{
-		{Concept: "resentment", Strength: 0.8, TokenSources: []string{"resentment"}},
+		{Concept: "resentment", Strength: 0.8, IsDirectEvidence: true, TokenSources: []string{"resentment"}},
 	}
 	field := BuildCounsellorField(passageFields, kb)
 	if field == nil || len(field.Suggestions) == 0 {
@@ -219,7 +219,7 @@ func TestCounsellorDirectEvidenceProducesSuggestion(t *testing.T) {
 
 	// Create passage field with direct concept (depth 0)
 	passageFields := PassageFields{
-		{Concept: "resentment", Strength: 0.8, Depth: 0, TokenSources: []string{"resentment"}},
+		{Concept: "resentment", Strength: 0.8, Depth: 0, IsDirectEvidence: true, TokenSources: []string{"resentment"}},
 	}
 
 	field := BuildCounsellorField(passageFields, kb)
@@ -244,7 +244,7 @@ func TestCounsellorPropagatedNeighborEvidenceDowngraded(t *testing.T) {
 	// Create passage field with propagated concept (depth 1) - simulating graph expansion
 	// In real usage, depth 1 means it came from a neighbor relation, not direct evidence
 	passageFields := PassageFields{
-		{Concept: "fear", Strength: 0.4, Depth: 1, TokenSources: []string{"resentment -> neighbor: fear"}},
+		{Concept: "fear", Strength: 0.4, Depth: 1, IsDirectEvidence: false, TokenSources: []string{"resentment -> neighbor: fear"}},
 	}
 
 	field := BuildCounsellorField(passageFields, kb)
@@ -270,7 +270,7 @@ func TestCounsellorDefaultOutputNotCommanding(t *testing.T) {
 
 	// Create reading with counsellor field
 	passageFields := PassageFields{
-		{Concept: "resentment", Strength: 0.8, Depth: 0, TokenSources: []string{"resentment"}},
+		{Concept: "resentment", Strength: 0.8, Depth: 0, IsDirectEvidence: true, TokenSources: []string{"resentment"}},
 	}
 	field := BuildCounsellorField(passageFields, kb)
 
@@ -306,7 +306,7 @@ func TestCounsellorDefaultOutputCapped(t *testing.T) {
 
 	// Create many passage fields that would produce many suggestions
 	passageFields := PassageFields{
-		{Concept: "resentment", Strength: 0.8, Depth: 0, TokenSources: []string{"resentment"}},
+		{Concept: "resentment", Strength: 0.8, Depth: 0, IsDirectEvidence: true, TokenSources: []string{"resentment"}},
 		{Concept: "guilt", Strength: 0.8, Depth: 0, TokenSources: []string{"guilt"}},
 		{Concept: "judgment", Strength: 0.8, Depth: 0, TokenSources: []string{"judgment"}},
 		{Concept: "fear", Strength: 0.8, Depth: 0, TokenSources: []string{"fear"}},
@@ -413,6 +413,78 @@ func TestNoHardcodedConceptBehavior(t *testing.T) {
 		pattern := "\"" + concept + "\""
 		if strings.Contains(string(counsellorCode), pattern) {
 			t.Errorf("counsellor.go contains hardcoded concept reference: %s", concept)
+		}
+	}
+}
+
+// TestEngineCounsellorNeighborVsDirectEvidence proves that:
+// 1. Form/glyph/script evidence (IsDirect=true) renders with normal confidence
+// 2. Symbolic neighbor expansion (IsDirect=false) is downgraded
+// This is an end-to-end regression test that runs through the real engine.
+func TestEngineCounsellorNeighborVsDirectEvidence(t *testing.T) {
+	kb := knowledge.LoadOrPanic()
+	engine := NewEngineWithKnowledge(kb)
+
+	// Analyze "resentment" - this triggers:
+	// - Direct: primitive match for resentment (IsDirect=true, weight 0.7)
+	// - Indirect: neighbor expansion to fear/guilt/judgment (IsDirect=false, weight 0.4)
+	reading := engine.Analyze("resentment")
+if reading.Input == "" {
+		t.Fatal("expected reading")
+	}
+
+	counsellor := reading.CounsellorField
+	if counsellor == nil {
+		t.Fatal("expected counsellor field")
+	}
+
+	// Check source evidence classification
+	directCount := 0
+	propagatedCount := 0
+	for _, src := range counsellor.SourceFields {
+		if src.IsDirectEvidence {
+			directCount++
+			t.Logf("DIRECT: %s (strength=%.2f, depth=%d)", src.Concept, src.Strength, src.Depth)
+		} else {
+			propagatedCount++
+			t.Logf("PROPAGATED: %s (strength=%.2f, depth=%d)", src.Concept, src.Strength, src.Depth)
+		}
+	}
+
+	// resentment itself should be direct (from primitive match)
+	// fear/guilt/judgment are from neighbor expansion, should be propagated
+	if directCount == 0 {
+		t.Error("expected at least one direct evidence source (resentment from primitive match)")
+	}
+	if propagatedCount == 0 {
+		t.Error("expected at least one propagated/neighbor source (fear/guilt/judgment from neighbor)")
+	}
+
+	// Verify suggestions have appropriate confidence based on evidence type
+	for _, sugg := range counsellor.Suggestions {
+		t.Logf("Suggestion: %s -> %s [confidence=%s]", sugg.SourceConcept, sugg.TargetConcept, sugg.Confidence)
+		
+		// Find the source for this suggestion
+		var isDirectSrc bool
+		for _, src := range counsellor.SourceFields {
+			if src.Concept == sugg.SourceConcept {
+				isDirectSrc = src.IsDirectEvidence
+				break
+			}
+		}
+		
+		if isDirectSrc {
+			// Direct evidence: normal confidence (plausible for resentment, verified for some)
+			if sugg.Confidence == "speculative" {
+				t.Errorf("direct evidence source %s should not have speculative confidence, got %s",
+					sugg.SourceConcept, sugg.Confidence)
+			}
+		} else {
+			// Propagated/neighbor evidence: should be downgraded
+			if sugg.Confidence != "speculative" {
+				t.Errorf("propagated/neighbor source %s should have speculative confidence, got %s",
+					sugg.SourceConcept, sugg.Confidence)
+			}
 		}
 	}
 }

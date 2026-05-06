@@ -30,6 +30,7 @@ func runSymbolicChannel(forms Forms, kb *knowledge.Knowledge) ChannelResult {
 			Lens:       "symbolic",
 			Confidence: ConfidenceVerified,
 			Weight:     0.7,
+			IsDirect:   true, // Direct primitive match from symbolic knowledge
 		})
 	}
 
