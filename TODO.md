@@ -75,6 +75,20 @@ Completed and accepted:
 - Default counsel is concise and humble.
 - Work committed locally through `ed68780`.
 
+Architect review status:
+Not accepted yet. Pi completed a useful documentation/test pass, but the hardening is not complete. The current changes do not sufficiently protect active YAML from future float/unknown harmonic meaning fields, and the hardcoded-mapping "tests" are currently documentation logs rather than failing guardrails.
+
+Current blockers:
+- Add a real loader/validation regression proving that a float meaning field in active frequency YAML is rejected, not silently ignored. Example risk: `frequency_hz: 528.0`, `pitch: 432.0`, `color_rgb: [1.0, 0.2, 0.3]`, or `ratio: [1.5, 1]` must not pass as active meaning data.
+- Ensure unknown fields in `frequencies.yaml` are rejected or explicitly warned as data-quality errors when they look like harmonic identity fields. Silent YAML field dropping is not acceptable for the meaning-frequency substrate.
+- Validate integer label ranges, not only integer types:
+  - `labels.note` must be a documented integer range, preferably `0..11`; if `12` is intentionally octave/unison, document and validate that explicitly.
+  - `labels.color` must be `0..360` or a documented integer color-band ID range.
+  - `labels.field` must be non-negative and documented.
+- Replace log-only tests with real assertions for "no hardcoded concept-to-frequency/color/note/EM/chakra mappings in production Go." The test may allow explicitly documented legacy files only if it proves production `HarmonicField` does not import or use them.
+- Clarify electromagnetic status: either there is no active EM schema yet and unknown EM fields are rejected, or there is a minimal integer-backed EM reference schema with validation. Do not leave the docs implying EM validation exists if active data has no EM field.
+- Commit the correction locally and report the final clean status, validation result, tests run, and exact schema decisions.
+
 Context:
 The counsellor layer is now restrained enough to move back to the harmonic core. Before Socrates grows toward audio, light, electromagnetic correspondence, or richer guidance, the meaning-frequency substrate must be audited and hardened.
 
