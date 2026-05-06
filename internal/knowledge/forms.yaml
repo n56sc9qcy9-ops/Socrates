@@ -449,6 +449,11 @@ fragments:
     confidence: curated
     weight: 0.7
 
+# Forms - curated whole-word matches (transmutations source concepts)
+forms:
+    # Entries that can be Counsellor/transmutation sources.
+    # These are words with form/concept pairs that activate correction fields.
+
 # Script words - exact whole-word matches for non-Latin scripts
 script_words:
   # Hebrew (Unicode codepoints)

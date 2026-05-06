@@ -23,6 +23,9 @@ func main() {
 	validateCmd := knowledgeCmd.Bool("validate", false, "validate knowledge data")
 	validateDir := knowledgeCmd.String("dir", "", "directory containing knowledge YAML files to validate")
 
+
+	// Root-level flags (apply to default/decipher mode)
+
 	// Training subcommand
 	trainCmd := flag.NewFlagSet("train", flag.ExitOnError)
 	trainExamplesPath := trainCmd.String("examples", "", "path to training examples YAML file")
@@ -79,12 +82,28 @@ func main() {
 		os.Exit(1)
 	}
 
-	command := os.Args[1]
+	// Parse root-level flags first (before subcommand processing)
+	// We use a simple manual parse for --debug since flag.Parse() may conflict
+	// with subcommand flag sets.
+	args := os.Args[1:]
+	rootDebugMode := false
+	cleaned := make([]string, 0, len(args))
+	for _, arg := range args {
+		if arg == "--debug" || arg == "-debug" {
+			rootDebugMode = true
+			continue
+		}
+		cleaned = append(cleaned, arg)
+	}
+	args = cleaned
+
+	command := args[0]
+	restArgs := args[1:]
 
 	switch command {
 	case "decipher", "descifer":
 		// Parse flags from command line (after the subcommand)
-		decipherCmd.Parse(os.Args[2:])
+		decipherCmd.Parse(restArgs)
 
 		// Get positional args (non-flag arguments)
 		args := decipherCmd.Args()
@@ -93,8 +112,8 @@ func main() {
 		if len(args) >= 1 {
 			input = args[0]
 		} else {
-			// Try to find input as a non-flag arg in the raw arguments
-			for _, arg := range os.Args[2:] {
+			// Try to find input as a non-flag arg in the remaining args
+			for _, arg := range restArgs {
 				if len(arg) > 0 && arg[0] != '-' {
 					input = arg
 					break
@@ -119,7 +138,7 @@ func main() {
 
 		// Render the output based on mode
 		var output string
-		if *debugMode {
+		if *debugMode || rootDebugMode {
 			output = decipher.RenderReadingWithOptions(reading, decipher.DebugRenderOptions())
 		} else {
 			output = decipher.RenderReadingWithOptions(reading, decipher.DefaultRenderOptions())
@@ -127,7 +146,7 @@ func main() {
 		fmt.Print(output)
 
 	case "knowledge":
-		knowledgeCmd.Parse(os.Args[2:])
+		knowledgeCmd.Parse(restArgs)
 
 		// Check for positional subcommand
 		args := knowledgeCmd.Args()
@@ -149,7 +168,7 @@ func main() {
 		}
 
 	case "train":
-		trainCmd.Parse(os.Args[2:])
+		trainCmd.Parse(restArgs)
 
 		// Check for suggest-weights subcommand
 		args := trainCmd.Args()
@@ -180,15 +199,11 @@ func main() {
 		// Root default: treat as decipher input
 		// Join all remaining args into one passage
 		input := command // first arg is part of input
-		if len(os.Args) > 2 {
+		if len(restArgs) > 0 {
 			// Join remaining arguments into one passage
-			for i := 2; i < len(os.Args); i++ {
-				if os.Args[i] != "" {
-					if input != "" {
-						input += " " + os.Args[i]
-					} else {
-						input = os.Args[i]
-					}
+			for _, arg := range restArgs {
+				if arg != "" {
+					input += " " + arg
 				}
 			}
 		}
@@ -220,7 +235,12 @@ func main() {
 		reading := engine.Analyze(input)
 
 		// Render the output based on mode (default to concise)
-		output := decipher.RenderReadingWithOptions(reading, decipher.DefaultRenderOptions())
+		var output string
+		if rootDebugMode {
+			output = decipher.RenderReadingWithOptions(reading, decipher.DebugRenderOptions())
+		} else {
+			output = decipher.RenderReadingWithOptions(reading, decipher.DefaultRenderOptions())
+		}
 		fmt.Print(output)
 	}
 }

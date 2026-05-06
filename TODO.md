@@ -43,12 +43,13 @@ Completed (see `docs/TODO_ARCHIVE.md` and git history for detail):
 - False activation reduction, review-file generation, human review/apply workflow.
 - Knowledge layout consolidation, oversized test split, production responsibility audit.
 - CLI ergonomics cleanup, architecture readiness review, documentation consolidation.
+- Counsellor/transmutation fields: data-backed fields from transmute.yaml, --debug internals, tends-toward language, evidence paths with source/notes. Default concise; no hardcoded behavior.
 - All acceptance criteria green. Readiness report at `docs/ARCHITECTURE_READINESS.md`.
 
 Current git status:
 
 ```text
-## main...origin/main [ahead 46]
+## main...origin/main [ahead 50]
 ```
 
 Key completed metrics (full detail in `docs/ARCHITECTURE_READINESS.md`):

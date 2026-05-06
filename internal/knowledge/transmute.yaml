@@ -1,180 +1,146 @@
-# transmute.yaml - Data-backed counsellor/transmutation fields
-# Extends evidence-first reading with symbolic guidance capabilities.
-#
-# These are curated relational mappings from tension/contracted field to correction/counsel field.
-# NOT fortune telling. NOT oracle. Data-driven counsel from curated relations.
-#
-# Rules:
-# - No hardcoded transmutation logic in Go
-# - All entries must be data-driven with source/lens/confidence
-# - Language must be "if unchanged, this field tends toward..." not "this will happen"
-# - No medical, legal, or clinical claims
-# - No divine certainty claims
-# - Preserve human sovereignty; suggest correction, don't command
+# transmute.yaml - Data-backed counsellor/transmutation relations
+# NOT fortune telling — curated relational guidance from knowledge.
+# Each relation maps a tension/contracted field (From) to a correction field (To).
+# Source describes provenance: curated, traditional, human_review.
+# Confidence describes truth level: verified, plausible, speculative.
+# Lens describes the interpretive lens for the relation.
+# Notes provide context without making fixed-future claims.
 
 transmute_entries:
-  # Each entry maps a source field (tension/contracted) to a correction field.
-  # Required: from, to, kind, confidence, source, lens, weight
-  # Supported kinds: transmutes_to, softens_through, corrects_through, releases_into, grounds_in
-
+  # Transmutations where the target is the direct inverse/corollary
   - from: resentment
     to: forgiveness
     kind: transmutes_to
     confidence: plausible
     source: curated
-    lens: relational_healing
-    weight: 0.7
-    notes: >
-      Resentment is a holding onto past harm. Forgiveness releases without condoning.
+    lens: relational
+    weight: 0.60
+    notes: resentment and forgiveness are distinct emotional registers; forgiveness does not deny the reality of the injury but releases its binding charge
 
   - from: pride
     to: humility
     kind: corrects_through
     confidence: plausible
     source: curated
-    lens: virtue_practice
-    weight: 0.7
-    notes: >
-      Pride inflates self-reference. Humility sees clearly within the whole.
+    lens: relational
+    weight: 0.60
+    notes: pride and humility address self-positioning; neither negates the other's existence
 
   - from: fear
     to: trust
     kind: releases_into
     confidence: plausible
     source: curated
-    lens: relational_healing
-    weight: 0.7
-    notes: >
-      Fear contracts around self-protection. Trust expands toward presence.
+    lens: relational
+    weight: 0.60
+    notes: fear contracts; trust opens; trust does not deny the reality of risk
 
+  # Transmutations where the target softens the contraction
   - from: guilt
     to: mercy
     kind: softens_through
     confidence: plausible
     source: curated
-    lens: virtue_practice
-    weight: 0.6
-    notes: >
-      Guilt contracts around past action. Mercy holds the self with compassion.
+    lens: relational
+    weight: 0.50
+    notes: guilt and mercy address responsibility; mercy does not erase accountability but contextualizes it
 
   - from: shame
     to: self_acceptance
     kind: grounds_in
-    confidence: speculative
+    confidence: plausible
     source: curated
-    lens: relational_healing
-    weight: 0.6
-    notes: >
-      Shame conflates being with doing. Self-acceptance separates identity from action.
+    lens: relational
+    weight: 0.50
+    notes: shame and self-acceptance address identity; self-acceptance does not claim perfection but acknowledges the whole person
 
   - from: attachment
     to: letting_go
-    kind: releases_into
-    confidence: speculative
+    kind: softens_through
+    confidence: plausible
     source: curated
-    lens: virtue_practice
-    weight: 0.6
-    notes: >
-      Attachment clings to permanence. Letting go accepts change without resistance.
+    lens: relational
+    weight: 0.50
+    notes: attachment and letting-go address clinging; letting-go is not abandonment but release of grip
 
   - from: control
     to: surrender
-    kind: transmutes_to
-    confidence: plausible
-    source: curated
-    lens: virtue_practice
-    weight: 0.6
-    notes: >
-      Control attempts to fix the unfixed. Surrender aligns with what is.
-
-  - from: avoidance
-    to: presence
-    kind: corrects_through
-    confidence: speculative
-    source: curated
-    lens: relational_healing
-    weight: 0.5
-    notes: >
-      Avoidance flees from what is. Presence meets what is with open attention.
-
-  - from: judgment
-    to: mercy
-    kind: transmutes_to
-    confidence: plausible
-    source: traditional
-    lens: virtue_practice
-    weight: 0.6
-    notes: >
-      Judgment contracts around comparison. Mercy holds the other with compassion.
-
-  - from: isolation
-    to: connection
     kind: releases_into
     confidence: plausible
     source: curated
-    lens: relational_healing
-    weight: 0.7
-    notes: >
-      Isolation separates self from whole. Connection recognizes shared being.
+    lens: relational
+    weight: 0.50
+    notes: control and surrender address agency; surrender is not passivity but release of rigid force
+
+  - from: avoidance
+    to: presence
+    kind: releases_into
+    confidence: speculative
+    source: curated
+    lens: relational
+    weight: 0.40
+    notes: avoidance and presence address time-orientation; presence does not deny the reality of past or future but locates action in now
+
+  # Transmutations where the target corrects the pattern
+  - from: judgment
+    to: mercy
+    kind: softens_through
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 0.50
+    notes: judgment and mercy address evaluation; mercy does not deny the existence of distinction but tempers its application
+
+  - from: isolation
+    to: connection
+    kind: transmutes_to
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 0.60
+    notes: isolation and connection address relatedness; connection does not erase boundaries but acknowledges the relational field
 
   - from: grasping
     to: openness
-    kind: softens_through
+    kind: releases_into
     confidence: speculative
     source: curated
-    lens: virtue_practice
-    weight: 0.5
-    notes: >
-      Grasping holds tightly. Openness releases and receives what arises.
+    lens: relational
+    weight: 0.40
+    notes: grasping and openness address orientation; openness is not naivety but receptivity to what is
 
   - from: confusion
     to: clarity
-    kind: grounds_in
+    kind: corrects_through
     confidence: speculative
     source: curated
-    lens: virtue_practice
-    weight: 0.5
-    notes: >
-      Confusion arises from unresolved pattern. Clarity emerges through attention and time.
+    lens: relational
+    weight: 0.40
+    notes: confusion and clarity address understanding; clarity does not claim absolute knowledge but acknowledges what is known
 
   - from: rigidity
     to: flexibility
     kind: corrects_through
     confidence: speculative
     source: curated
-    lens: virtue_practice
-    weight: 0.5
-    notes: >
-      Rigidity resists change. Flexibility adapts without losing structure.
+    lens: relational
+    weight: 0.40
+    notes: rigidity and flexibility address form; flexibility does not deny structure but allows adaptation
 
   - from: conflict
     to: harmony
-    kind: transmutes_to
+    kind: softens_through
     confidence: speculative
     source: curated
-    lens: relational_healing
-    weight: 0.5
-    notes: >
-      Conflict arises from opposing fields. Harmony finds common resonance.
+    lens: relational
+    weight: 0.40
+    notes: conflict and harmony address relationship; harmony does not mean absence of tension but integration of differences
 
   - from: stagnation
     to: growth
-    kind: grounds_in
+    kind: releases_into
     confidence: speculative
     source: curated
-    lens: virtue_practice
-    weight: 0.5
-    notes: >
-      Stagnation holds pattern without movement. Growth changes pattern toward potential.
-
-# Supported transmutation kinds:
-#   transmutes_to   - primary transformation (resentment -> forgiveness)
-#   softens_through - gentle release (guilt -> mercy)
-#   corrects_through - alignment shift (pride -> humility)
-#   releases_into  - expansion from contraction (fear -> trust)
-#   grounds_in      - foundation shift (shame -> self_acceptance)
-
-# Supported confidence: verified, plausible, speculative
-# Supported source: curated, traditional, human_review
-# Supported lens: relational_healing, virtue_practice, harmonic_lens
-# Weight: float 0.0-1.0 (integer-convertible)
+    lens: relational
+    weight: 0.40
+    notes: stagnation and growth address movement; growth does not claim a destination but acknowledges process

@@ -99,6 +99,10 @@ func (l *Loader) loadForms(kb *KnowledgeBuilder) error {
 		kb.AddFragment(f.ToFragment())
 	}
 
+	for _, f := range doc.Forms {
+		kb.AddFragment(f.ToForm())
+	}
+
 	for _, w := range doc.ScriptWords {
 		kb.AddScriptWord(w.ToScriptWord())
 	}
@@ -330,7 +334,30 @@ func (c ConceptEntry) ToConcept() Concept {
 // formsDoc represents the YAML structure for forms.
 type formsDoc struct {
 	Fragments   []FragmentEntry   `yaml:"fragments"`
+	Forms       []FormEntry       `yaml:"forms"`
 	ScriptWords []ScriptWordEntry `yaml:"script_words"`
+}
+
+// FormEntry represents a form entry in YAML (whole-word matches).
+type FormEntry struct {
+	Form       string  `yaml:"form"`
+	Script     string  `yaml:"script"`
+	Concept    string  `yaml:"concept"`
+	Source     string  `yaml:"source"`
+	Confidence string  `yaml:"confidence"`
+	Weight     float64 `yaml:"weight"`
+}
+
+// ToForm converts to internal Form type.
+func (f FormEntry) ToForm() Form {
+	return Form{
+		Form:       f.Form,
+		Concept:    f.Concept,
+		Lens:       f.Script, // script field used as lens
+		Source:     f.Source,
+		Confidence: f.Confidence,
+		Weight:     f.Weight,
+	}
 }
 
 // FragmentEntry represents a fragment entry in YAML.

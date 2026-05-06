@@ -119,6 +119,15 @@ func renderDefault(r Reading) string {
 		}
 	}
 
+	// Show counsellor field (data-backed transmutation suggestions)
+	if r.CounsellorField != nil && len(r.CounsellorField.Suggestions) > 0 {
+		sb.WriteString("Counsellor:\n")
+		for _, s := range r.CounsellorField.Suggestions {
+			sb.WriteString(fmt.Sprintf("  - if field remains '%s', tends toward '%s'\n", s.SourceConcept, s.TargetConcept))
+		}
+		sb.WriteString("\n")
+	}
+
 	// Show weak signals / warnings
 	if len(r.WeakSignals) > 0 {
 		sb.WriteString("  Weak signals:\n")
@@ -343,6 +352,27 @@ func renderDebug(r Reading) string {
 	if r.HarmonicField != nil {
 		sb.WriteString("Harmonic Field (from frequency profiles):\n")
 		sb.WriteString(RenderHarmonicField(r.HarmonicField, RenderModeDebug) + "\n\n")
+	}
+
+	// Phase G: Counsellor Field
+	if r.CounsellorField != nil {
+		sb.WriteString("Counsellor Field (from transmutation data):\n")
+		sb.WriteString(fmt.Sprintf("  Source fields: %d\n", len(r.CounsellorField.SourceFields)))
+		for _, src := range r.CounsellorField.SourceFields {
+			sb.WriteString(fmt.Sprintf("    - %s [strength: %.2f, sources: %v]\n",
+				src.Concept, src.Strength, src.EvidenceSources))
+		}
+		sb.WriteString(fmt.Sprintf("  Suggestions: %d\n", len(r.CounsellorField.Suggestions)))
+		for _, s := range r.CounsellorField.Suggestions {
+			sb.WriteString(fmt.Sprintf("    - %s --[%s]--> %s [weight: %.2f, strength: %.2f, %s, %s]\n",
+				s.SourceConcept, s.Kind, s.TargetConcept, s.Weight, s.Strength, s.Confidence, s.Source))
+		}
+		sb.WriteString(fmt.Sprintf("  Evidence paths: %d\n", len(r.CounsellorField.EvidencePaths)))
+		for _, e := range r.CounsellorField.EvidencePaths {
+			sb.WriteString(fmt.Sprintf("    - %s --[%s]--> %s [source: %s, notes: %s]\n",
+				e.SourceConcept, e.Kind, e.TargetConcept, e.DataSourceFile, e.Notes))
+		}
+		sb.WriteString("\n")
 	}
 
 	// Weak Signals
