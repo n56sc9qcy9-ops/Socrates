@@ -14,7 +14,7 @@ transmute_entries:
     confidence: plausible
     source: curated
     lens: relational
-    weight: 0.60
+    weight: 60
     notes: resentment and forgiveness are distinct emotional registers; forgiveness does not deny the reality of the injury but releases its binding charge
 
   - from: pride
@@ -23,7 +23,7 @@ transmute_entries:
     confidence: plausible
     source: curated
     lens: relational
-    weight: 0.60
+    weight: 60
     notes: pride and humility address self-positioning; neither negates the other's existence
 
   - from: fear
@@ -32,7 +32,7 @@ transmute_entries:
     confidence: plausible
     source: curated
     lens: relational
-    weight: 0.60
+    weight: 60
     notes: fear contracts; trust opens; trust does not deny the reality of risk
 
   # Transmutations where the target softens the contraction
@@ -42,7 +42,7 @@ transmute_entries:
     confidence: plausible
     source: curated
     lens: relational
-    weight: 0.50
+    weight: 50
     notes: guilt and mercy address responsibility; mercy does not erase accountability but contextualizes it
 
   - from: shame
@@ -51,7 +51,7 @@ transmute_entries:
     confidence: plausible
     source: curated
     lens: relational
-    weight: 0.50
+    weight: 50
     notes: shame and self-acceptance address identity; self-acceptance does not claim perfection but acknowledges the whole person
 
   - from: attachment
@@ -60,7 +60,7 @@ transmute_entries:
     confidence: plausible
     source: curated
     lens: relational
-    weight: 0.50
+    weight: 50
     notes: attachment and letting-go address clinging; letting-go is not abandonment but release of grip
 
   - from: control
@@ -69,7 +69,7 @@ transmute_entries:
     confidence: plausible
     source: curated
     lens: relational
-    weight: 0.50
+    weight: 50
     notes: control and surrender address agency; surrender is not passivity but release of rigid force
 
   - from: avoidance
@@ -78,7 +78,7 @@ transmute_entries:
     confidence: speculative
     source: curated
     lens: relational
-    weight: 0.40
+    weight: 40
     notes: avoidance and presence address time-orientation; presence does not deny the reality of past or future but locates action in now
 
   # Transmutations where the target corrects the pattern
@@ -88,7 +88,7 @@ transmute_entries:
     confidence: plausible
     source: curated
     lens: relational
-    weight: 0.50
+    weight: 50
     notes: judgment and mercy address evaluation; mercy does not deny the existence of distinction but tempers its application
 
   - from: isolation
@@ -97,7 +97,7 @@ transmute_entries:
     confidence: plausible
     source: curated
     lens: relational
-    weight: 0.60
+    weight: 60
     notes: isolation and connection address relatedness; connection does not erase boundaries but acknowledges the relational field
 
   - from: grasping
@@ -106,7 +106,7 @@ transmute_entries:
     confidence: speculative
     source: curated
     lens: relational
-    weight: 0.40
+    weight: 40
     notes: grasping and openness address orientation; openness is not naivety but receptivity to what is
 
   - from: confusion
@@ -115,7 +115,7 @@ transmute_entries:
     confidence: speculative
     source: curated
     lens: relational
-    weight: 0.40
+    weight: 40
     notes: confusion and clarity address understanding; clarity does not claim absolute knowledge but acknowledges what is known
 
   - from: rigidity
@@ -124,7 +124,7 @@ transmute_entries:
     confidence: speculative
     source: curated
     lens: relational
-    weight: 0.40
+    weight: 40
     notes: rigidity and flexibility address form; flexibility does not deny structure but allows adaptation
 
   - from: conflict
@@ -133,7 +133,7 @@ transmute_entries:
     confidence: speculative
     source: curated
     lens: relational
-    weight: 0.40
+    weight: 40
     notes: conflict and harmony address relationship; harmony does not mean absence of tension but integration of differences
 
   - from: stagnation
@@ -142,5 +142,5 @@ transmute_entries:
     confidence: speculative
     source: curated
     lens: relational
-    weight: 0.40
+    weight: 40
     notes: stagnation and growth address movement; growth does not claim a destination but acknowledges process

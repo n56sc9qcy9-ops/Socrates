@@ -9,76 +9,76 @@ latin:
     - pattern: "in"
       concept: inward
       confidence: plausible
-      weight: 0.4
+      weight: 40
       
     - pattern: "un"
       concept: inward
       confidence: plausible
-      weight: 0.4
+      weight: 40
       
     - pattern: "en"
       concept: inward
       confidence: plausible
-      weight: 0.4
+      weight: 40
       
     - pattern: "on"
       concept: inward
       confidence: plausible
-      weight: 0.4
+      weight: 40
       
     - pattern: "er"
       concept: being
       confidence: speculative
-      weight: 0.3
+      weight: 30
       
     - pattern: "or"
       concept: being
       confidence: speculative
-      weight: 0.3
+      weight: 30
       
     - pattern: "ar"
       concept: being
       confidence: speculative
-      weight: 0.3
+      weight: 30
 
   # Prefix patterns
   prefixes:
     - pattern: "ins"
       concept: inward
       confidence: verified
-      weight: 0.5
+      weight: 50
       
     - pattern: "inh"
       concept: inward
       confidence: verified
-      weight: 0.5
+      weight: 50
       
     - pattern: "inb"
       concept: inward
       confidence: verified
-      weight: 0.5
+      weight: 50
 
   # Suffix patterns
   suffixes:
     - pattern: "ly"
       concept: action
       confidence: speculative
-      weight: 0.3
+      weight: 30
       
     - pattern: "ty"
       concept: action
       confidence: speculative
-      weight: 0.3
+      weight: 30
       
     - pattern: "ry"
       concept: action
       confidence: speculative
-      weight: 0.3
+      weight: 30
       
     - pattern: "gy"
       concept: action
       confidence: speculative
-      weight: 0.3
+      weight: 30
 
   # Vowel structure targets
   # These represent curated observations about orthographic patterns
@@ -87,12 +87,12 @@ latin:
     heavy:
       concept: vowel-heavy-orthography
       confidence: speculative
-      weight: 0.1  # Low weight - this is orthographic, not glyph meaning
+      weight: 10  # Low weight - this is orthographic, not glyph meaning
       lens: vowel-structure
     light:
       concept: consonant-heavy-orthography
       confidence: speculative
-      weight: 0.1  # Low weight - this is orthographic, not glyph meaning
+      weight: 10  # Low weight - this is orthographic, not glyph meaning
       lens: vowel-structure
 
   # Repeated letter patterns
@@ -101,17 +101,17 @@ latin:
     - pattern: "ii"
       concept: repeated-letter-observation
       confidence: speculative
-      weight: 0.1
+      weight: 10
       lens: repetition
     - pattern: "ee"
       concept: repeated-letter-observation
       confidence: speculative
-      weight: 0.1
+      weight: 10
       lens: repetition
     - pattern: "oo"
       concept: repeated-letter-observation
       confidence: speculative
-      weight: 0.1
+      weight: 10
       lens: repetition
 
 # Hebrew letter associations (Unicode codepoints)
@@ -232,19 +232,19 @@ devanagari:
       name: om
       concept: sacred-sound
       confidence: verified
-      weight: 0.9
+      weight: 90
       
     - rune: 0x0902  # Anusvara
       name: anusvara
       concept: nasalization
       confidence: plausible
-      weight: 0.3
+      weight: 30
       
     - rune: 0x0903  # Visarga
       name: visarga
       concept: exhalation
       confidence: plausible
-      weight: 0.3
+      weight: 30
 
 # Han character mappings
 han:
@@ -252,49 +252,49 @@ han:
     - rune: 0x6C14  # 气 (simplified qi)
       readings: [qi, breath, air]
       confidence: verified
-      weight: 0.7
+      weight: 70
       
     - rune: 0x6C23  # 氣 (traditional qi)
       readings: [qi, breath, air]
       confidence: verified
-      weight: 0.7
+      weight: 70
       
     - rune: 0x9053  # 道 (dao/way)
       readings: [dao, way, path]
       confidence: verified
-      weight: 0.7
+      weight: 70
       
     - rune: 0x6C49  # 汉 (han/chinese)
       readings: [han, chinese]
       confidence: verified
-      weight: 0.7
+      weight: 70
       
     - rune: 0x4EBA  # 人 (ren/person)
       readings: [ren, person, human]
       confidence: verified
-      weight: 0.7
+      weight: 70
       
     - rune: 0x4E16  # 世 (shi/world)
       readings: [shi, world]
       confidence: verified
-      weight: 0.7
+      weight: 70
       
     - rune: 0x597D  # 好 (hao/good)
       readings: [hao, good]
       confidence: verified
-      weight: 0.7
+      weight: 70
       
     - rune: 0x751F  # 生 (sheng/life)
       readings: [sheng, life, birth]
       confidence: verified
-      weight: 0.7
+      weight: 70
       
     - rune: 0x8000  # 老 (lao/old)
       readings: [lao, old]
       confidence: verified
-      weight: 0.7
+      weight: 70
       
     - rune: 0x6D77  # 海 (hai/sea)
       readings: [hai, sea]
       confidence: verified
-      weight: 0.7
+      weight: 70

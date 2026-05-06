@@ -167,7 +167,7 @@ func (l *Loader) loadGlyphs(kb *KnowledgeBuilder) error {
 			Pattern:    e.Pattern,
 			Concept:    e.Concept,
 			Confidence: e.Confidence,
-			Weight:     e.Weight,
+			Weight:     float64(e.Weight),
 		})
 	}
 	for _, e := range doc.Latin.Prefixes {
@@ -176,7 +176,7 @@ func (l *Loader) loadGlyphs(kb *KnowledgeBuilder) error {
 			Pattern:    e.Pattern,
 			Concept:    e.Concept,
 			Confidence: e.Confidence,
-			Weight:     e.Weight,
+			Weight:     float64(e.Weight),
 		})
 	}
 	for _, e := range doc.Latin.Suffixes {
@@ -185,7 +185,7 @@ func (l *Loader) loadGlyphs(kb *KnowledgeBuilder) error {
 			Pattern:    e.Pattern,
 			Concept:    e.Concept,
 			Confidence: e.Confidence,
-			Weight:     e.Weight,
+			Weight:     float64(e.Weight),
 		})
 	}
 	kb.AddGlyphPattern(GlyphPattern{
@@ -193,7 +193,7 @@ func (l *Loader) loadGlyphs(kb *KnowledgeBuilder) error {
 		Pattern:    "heavy",
 		Concept:    doc.Latin.VowelStructure.Heavy.Concept,
 		Confidence: doc.Latin.VowelStructure.Heavy.Confidence,
-		Weight:     doc.Latin.VowelStructure.Heavy.Weight,
+		Weight:     float64(doc.Latin.VowelStructure.Heavy.Weight),
 		Lens:       "vowel-structure",
 	})
 	kb.AddGlyphPattern(GlyphPattern{
@@ -201,7 +201,7 @@ func (l *Loader) loadGlyphs(kb *KnowledgeBuilder) error {
 		Pattern:    "light",
 		Concept:    doc.Latin.VowelStructure.Light.Concept,
 		Confidence: doc.Latin.VowelStructure.Light.Confidence,
-		Weight:     doc.Latin.VowelStructure.Light.Weight,
+		Weight:     float64(doc.Latin.VowelStructure.Light.Weight),
 		Lens:       "vowel-structure",
 	})
 	for _, e := range doc.Latin.RepeatedLetters {
@@ -210,7 +210,7 @@ func (l *Loader) loadGlyphs(kb *KnowledgeBuilder) error {
 			Pattern:    e.Pattern,
 			Concept:    e.Concept,
 			Confidence: e.Confidence,
-			Weight:     e.Weight,
+			Weight:     float64(e.Weight),
 			Lens:       "repetition",
 		})
 	}
@@ -221,7 +221,7 @@ func (l *Loader) loadGlyphs(kb *KnowledgeBuilder) error {
 			Pattern:    e.Name,
 			Concept:    e.Concept,
 			Confidence: e.Confidence,
-			Weight:     e.Weight,
+			Weight:     float64(e.Weight),
 		})
 	}
 	for _, e := range doc.Devanagari.SpecialChars {
@@ -231,7 +231,7 @@ func (l *Loader) loadGlyphs(kb *KnowledgeBuilder) error {
 			Pattern:    e.Name,
 			Concept:    e.Concept,
 			Confidence: e.Confidence,
-			Weight:     e.Weight,
+			Weight:     float64(e.Weight),
 		})
 	}
 	for _, e := range doc.Han.Characters {
@@ -241,7 +241,7 @@ func (l *Loader) loadGlyphs(kb *KnowledgeBuilder) error {
 			Pattern:    e.Pattern,
 			Readings:   e.Readings,
 			Confidence: e.Confidence,
-			Weight:     e.Weight,
+			Weight:     float64(e.Weight),
 		})
 	}
 
@@ -345,7 +345,7 @@ type FormEntry struct {
 	Concept    string  `yaml:"concept"`
 	Source     string  `yaml:"source"`
 	Confidence string  `yaml:"confidence"`
-	Weight     float64 `yaml:"weight"`
+	Weight     int `yaml:"weight"`
 }
 
 // ToForm converts to internal Form type.
@@ -356,7 +356,7 @@ func (f FormEntry) ToForm() Form {
 		Lens:       f.Script, // script field used as lens
 		Source:     f.Source,
 		Confidence: f.Confidence,
-		Weight:     f.Weight,
+		Weight:     float64(f.Weight),
 	}
 }
 
@@ -367,7 +367,7 @@ type FragmentEntry struct {
 	Lens       string  `yaml:"lens"`
 	Source     string  `yaml:"source"`
 	Confidence string  `yaml:"confidence"`
-	Weight     float64 `yaml:"weight"`
+	Weight     int `yaml:"weight"`
 }
 
 // ToFragment converts to internal Form type.
@@ -378,7 +378,7 @@ func (f FragmentEntry) ToFragment() Form {
 		Lens:       f.Lens,
 		Source:     f.Source,
 		Confidence: f.Confidence,
-		Weight:     f.Weight,
+		Weight:     float64(f.Weight),
 	}
 }
 
@@ -390,7 +390,7 @@ type ScriptWordEntry struct {
 	Meanings   []string `yaml:"meanings"`
 	Source     string   `yaml:"source"`
 	Confidence string   `yaml:"confidence"`
-	Weight     float64  `yaml:"weight"`
+	Weight     int  `yaml:"weight"`
 }
 
 // ToScriptWord converts to internal ScriptWord type.
@@ -402,7 +402,7 @@ func (s ScriptWordEntry) ToScriptWord() ScriptWord {
 		Meanings:   s.Meanings,
 		Source:     s.Source,
 		Confidence: s.Confidence,
-		Weight:     s.Weight,
+		Weight:     float64(s.Weight),
 	}
 }
 
@@ -424,7 +424,7 @@ type TransmuteEntry struct {
 	Confidence string  `yaml:"confidence"`
 	Source     string  `yaml:"source"`
 	Lens       string  `yaml:"lens"`
-	Weight     float64 `yaml:"weight"`
+	Weight     int `yaml:"weight"`
 	Notes      string  `yaml:"notes"`
 }
 
@@ -437,7 +437,7 @@ func (e TransmuteEntry) ToTransmutation() TransmutationRelation {
 		Confidence: e.Confidence,
 		Source:     e.Source,
 		Lens:       e.Lens,
-		Weight:     e.Weight,
+		Weight:     float64(e.Weight),
 		Notes:      e.Notes,
 	}
 }
@@ -448,7 +448,7 @@ type RelationEntry struct {
 	To     string  `yaml:"to"`
 	Type   string  `yaml:"type"`
 	Source string  `yaml:"source"`
-	Weight float64 `yaml:"weight"`
+	Weight int `yaml:"weight"`
 }
 
 // ToRelation converts to internal Relation type.
@@ -458,7 +458,7 @@ func (r RelationEntry) ToRelation() Relation {
 		To:     r.To,
 		Type:   r.Type,
 		Source: r.Source,
-		Weight: r.Weight,
+		Weight: float64(r.Weight),
 	}
 }
 
@@ -482,28 +482,28 @@ type LatinBigramEntry struct {
 	Pattern    string  `yaml:"pattern"`
 	Concept    string  `yaml:"concept"`
 	Confidence string  `yaml:"confidence"`
-	Weight     float64 `yaml:"weight"`
+	Weight     int `yaml:"weight"`
 }
 
 type LatinPrefixEntry struct {
 	Pattern    string  `yaml:"pattern"`
 	Concept    string  `yaml:"concept"`
 	Confidence string  `yaml:"confidence"`
-	Weight     float64 `yaml:"weight"`
+	Weight     int `yaml:"weight"`
 }
 
 type LatinSuffixEntry struct {
 	Pattern    string  `yaml:"pattern"`
 	Concept    string  `yaml:"concept"`
 	Confidence string  `yaml:"confidence"`
-	Weight     float64 `yaml:"weight"`
+	Weight     int `yaml:"weight"`
 }
 
 type LatinRepeatedEntry struct {
 	Pattern    string  `yaml:"pattern"`
 	Concept    string  `yaml:"concept"`
 	Confidence string  `yaml:"confidence"`
-	Weight     float64 `yaml:"weight"`
+	Weight     int `yaml:"weight"`
 	Lens       string  `yaml:"lens"`
 }
 
@@ -515,7 +515,7 @@ type VowelStructureEntry struct {
 type VowelStructureItem struct {
 	Concept    string  `yaml:"concept"`
 	Confidence string  `yaml:"confidence"`
-	Weight     float64 `yaml:"weight"`
+	Weight     int `yaml:"weight"`
 	Lens       string  `yaml:"lens"`
 }
 
@@ -528,7 +528,7 @@ type HebrewLetterEntry struct {
 	Name       string  `yaml:"name"`
 	Concept    string  `yaml:"concept"`
 	Confidence string  `yaml:"confidence"`
-	Weight     float64 `yaml:"weight"`
+	Weight     int `yaml:"weight"`
 }
 
 type DevanagariGlyphs struct {
@@ -540,7 +540,7 @@ type DevanagariCharEntry struct {
 	Name       string  `yaml:"name"`
 	Concept    string  `yaml:"concept"`
 	Confidence string  `yaml:"confidence"`
-	Weight     float64 `yaml:"weight"`
+	Weight     int `yaml:"weight"`
 }
 
 type HanGlyphs struct {
@@ -552,7 +552,7 @@ type HanCharEntry struct {
 	Pattern    string   `yaml:"pattern"`
 	Readings   []string `yaml:"readings"`
 	Confidence string   `yaml:"confidence"`
-	Weight     float64  `yaml:"weight"`
+	Weight     int  `yaml:"weight"`
 }
 
 // ============================================================

@@ -130,8 +130,8 @@ func TestRelationsByType(t *testing.T) {
 		if r.From == "" || r.To == "" {
 			t.Errorf("relation missing from/to: %+v", r)
 		}
-		if r.Weight <= 0 || r.Weight > 1 {
-			t.Errorf("relation %s->%s has invalid weight: %f", r.From, r.To, r.Weight)
+		if r.Weight <= 0 || r.Weight > 100 {
+			t.Errorf("relation %s->%s has invalid weight: %d", r.From, r.To, int(r.Weight))
 		}
 	}
 }

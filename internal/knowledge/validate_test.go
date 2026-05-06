@@ -173,7 +173,7 @@ func TestValidateForms_InvalidWeight(t *testing.T) {
 
 	found := false
 	for _, err := range result.Errors {
-		if containsString(err.Message, "weight must be in (0, 1]") {
+		if containsString(err.Message, "weight must be in [1, 100]") {
 			found = true
 			break
 		}
@@ -187,7 +187,7 @@ func TestValidateForms_WeightTooHigh(t *testing.T) {
 	kb := &Knowledge{
 		Concepts: []Concept{{ID: "test", Name: "test"}},
 		Forms: []Form{
-			{Form: "test", Concept: "test", Weight: 1.5}, // weight > 1
+			{Form: "test", Concept: "test", Weight: 150}, // weight > 1
 		},
 	}
 
@@ -195,7 +195,7 @@ func TestValidateForms_WeightTooHigh(t *testing.T) {
 
 	found := false
 	for _, err := range result.Errors {
-		if containsString(err.Message, "weight must be in (0, 1]") {
+		if containsString(err.Message, "weight must be in [1, 100]") {
 			found = true
 			break
 		}
@@ -347,7 +347,7 @@ func TestValidateRelations_InvalidWeight(t *testing.T) {
 
 	found := false
 	for _, err := range result.Errors {
-		if containsString(err.Message, "weight must be in (0, 1]") {
+		if containsString(err.Message, "weight must be in [1, 100]") {
 			found = true
 			break
 		}

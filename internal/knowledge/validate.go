@@ -304,8 +304,8 @@ func validateForms(forms []Form, kb *Knowledge, result *ValidationResult) {
 		}
 
 		// Validate weight
-		if f.Weight <= 0 || f.Weight > 1 {
-			result.AddError(field+".weight", "weight must be in (0, 1]; got "+ftos(f.Weight))
+		if f.Weight <= 0 || f.Weight > 100 {
+			result.AddError(field+".weight", "weight must be in [1, 100]; got "+ftos(f.Weight))
 		}
 	}
 }
@@ -340,8 +340,8 @@ func validateScriptWords(words []ScriptWord, kb *Knowledge, result *ValidationRe
 		}
 
 		// Validate weight
-		if w.Weight <= 0 || w.Weight > 1 {
-			result.AddError(field+".weight", "weight must be in (0, 1]; got "+ftos(w.Weight))
+		if w.Weight <= 0 || w.Weight > 100 {
+			result.AddError(field+".weight", "weight must be in [1, 100]; got "+ftos(w.Weight))
 		}
 
 		// Validate source/provenance
@@ -388,8 +388,8 @@ func validateRelations(relations []Relation, kb *Knowledge, result *ValidationRe
 		}
 
 		// Validate weight
-		if r.Weight <= 0 || r.Weight > 1 {
-			result.AddError(field+".weight", "weight must be in (0, 1]; got "+ftos(r.Weight))
+		if r.Weight <= 0 || r.Weight > 100 {
+			result.AddError(field+".weight", "weight must be in [1, 100]; got "+ftos(r.Weight))
 		}
 	}
 }
@@ -567,7 +567,7 @@ func validateTransmutations(transmutations []TransmutationRelation, kb *Knowledg
 
 		// Validate weight
 		if t.Weight < 0 || t.Weight > 1 {
-			result.AddError(field+".weight", "weight must be in [0, 1]; got "+ftos(t.Weight))
+			result.AddError(field+".weight", "weight must be in [0, 100]; got "+ftos(t.Weight))
 		}
 	}
 }

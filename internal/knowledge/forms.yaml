@@ -9,445 +9,445 @@ fragments:
     concept: inward
     lens: english
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   - form: "in"
     concept: into
     lens: english
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   - form: "in"
     concept: one
     lens: sound
     confidence: plausible
-    weight: 0.4
+    weight: 40
     
   - form: "spire"
     concept: spirit
     lens: english
     confidence: plausible
-    weight: 0.5
+    weight: 50
     
   - form: "spire"
     concept: breath
     lens: sound
     confidence: speculative
-    weight: 0.3
+    weight: 30
     
   - form: "spirit"
     concept: spirit
     lens: latin
     confidence: verified
-    weight: 0.7
+    weight: 70
     
   - form: "spirit"
     concept: breath
     lens: etymology
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   - form: "en"
     concept: in
     lens: english
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   - form: "en"
     concept: one
     lens: norwegian
     confidence: plausible
-    weight: 0.4
+    weight: 40
     
   - form: "er"
     concept: is_are
     lens: norwegian
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   - form: "gi"
     concept: give
     lens: norwegian
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   - form: "gi"
     concept: life-force
     lens: sound
     confidence: speculative
-    weight: 0.3
+    weight: 30
     
   - form: "chi"
     concept: life-force
     lens: chinese
     confidence: verified
-    weight: 0.7
+    weight: 70
     
   - form: "chi"
     concept: chi
     lens: greek
     confidence: plausible
-    weight: 0.5
+    weight: 50
     
   - form: "chi"
     concept: christos
     lens: symbolic
     confidence: speculative
-    weight: 0.3
+    weight: 30
     
   - form: "qi"
     concept: life-force
     lens: chinese
     confidence: verified
-    weight: 0.7
+    weight: 70
     
   - form: "qi"
     concept: breath
     lens: chinese
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   - form: "skall"
     concept: shell
     lens: norwegian
     confidence: verified
-    weight: 0.7
+    weight: 70
     
   - form: "skall"
     concept: skull
     lens: norwegian
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   - form: "shell"
     concept: shell
     lens: english
     confidence: verified
-    weight: 0.7
+    weight: 70
     
   - form: "shell"
     concept: scale
     lens: english
     confidence: plausible
-    weight: 0.5
+    weight: 50
     
   - form: "one"
     concept: one
     lens: english
     confidence: verified
-    weight: 0.7
+    weight: 70
     
   - form: "one"
     concept: unity
     lens: symbolic
     confidence: plausible
-    weight: 0.5
+    weight: 50
     
   - form: "all"
     concept: totality
     lens: english
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   - form: "all"
     concept: whole
     lens: symbolic
     confidence: plausible
-    weight: 0.4
+    weight: 40
     
   - form: "life"
     concept: life
     lens: english
     confidence: verified
-    weight: 0.7
+    weight: 70
     
   - form: "life"
     concept: liv
     lens: norwegian
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   # Norwegian fragments
   - form: "liv"
     concept: life
     lens: norwegian
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   - form: "ånd"
     concept: spirit
     lens: norwegian
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   - form: "ånd"
     concept: breath
     lens: etymology
     confidence: plausible
-    weight: 0.4
+    weight: 40
     
   - form: "lys"
     concept: light
     lens: norwegian
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   - form: "ord"
     concept: word
     lens: norwegian
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   - form: "vei"
     concept: way
     lens: norwegian
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   - form: "vei"
     concept: path
     lens: symbolic
     confidence: plausible
-    weight: 0.4
+    weight: 40
     
   # Hebrew transliteration fragments
   - form: "ruach"
     concept: breath
     lens: hebrew
     confidence: verified
-    weight: 0.7
+    weight: 70
     
   - form: "ruach"
     concept: wind
     lens: hebrew
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   - form: "ruach"
     concept: spirit
     lens: hebrew
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   - form: "davar"
     concept: word
     lens: hebrew
     confidence: verified
-    weight: 0.7
+    weight: 70
     
   - form: "davar"
     concept: thing
     lens: hebrew
     confidence: verified
-    weight: 0.5
+    weight: 50
     
   - form: "emet"
     concept: truth
     lens: hebrew
     confidence: verified
-    weight: 0.7
+    weight: 70
     
   - form: "or"
     concept: light
     lens: hebrew
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   - form: "shem"
     concept: name
     lens: hebrew
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   - form: "lev"
     concept: heart
     lens: hebrew
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   - form: "echad"
     concept: one
     lens: hebrew
     confidence: verified
-    weight: 0.7
+    weight: 70
     
   - form: "ahavah"
     concept: love
     lens: hebrew
     confidence: verified
-    weight: 0.7
+    weight: 70
     
   # Sanskrit fragments
   - form: "prana"
     concept: breath
     lens: sanskrit
     confidence: verified
-    weight: 0.7
+    weight: 70
     
   - form: "prana"
     concept: life-force
     lens: sanskrit
     confidence: verified
-    weight: 0.7
+    weight: 70
     
   - form: "atman"
     concept: self
     lens: sanskrit
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   - form: "atman"
     concept: soul
     lens: sanskrit
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   - form: "om"
     concept: sacred-sound
     lens: sanskrit
     confidence: verified
-    weight: 0.8
+    weight: 80
     
   - form: "om"
     concept: totality
     lens: symbolic
     confidence: plausible
-    weight: 0.5
+    weight: 50
     
   - form: "mantra"
     concept: sacred-utterance
     lens: sanskrit
     confidence: verified
-    weight: 0.7
+    weight: 70
     
   - form: "mantra"
     concept: instrument-of-thought
     lens: etymology
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   - form: "ananda"
     concept: bliss
     lens: sanskrit
     confidence: verified
-    weight: 0.7
+    weight: 70
     
   # Chinese fragments
   - form: "dao"
     concept: way
     lens: chinese
     confidence: verified
-    weight: 0.7
+    weight: 70
     
   - form: "dao"
     concept: path
     lens: chinese
     confidence: verified
-    weight: 0.7
+    weight: 70
     
   - form: "de"
     concept: virtue
     lens: chinese
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   - form: "de"
     concept: power
     lens: chinese
     confidence: plausible
-    weight: 0.5
+    weight: 50
     
   - form: "xin"
     concept: heart-mind
     lens: chinese
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   - form: "yi"
     concept: one
     lens: chinese
     confidence: verified
-    weight: 0.7
+    weight: 70
     
   # Greek fragments
   - form: "logos"
     concept: word
     lens: greek
     confidence: verified
-    weight: 0.7
+    weight: 70
     
   - form: "logos"
     concept: reason
     lens: greek
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   - form: "logos"
     concept: account
     lens: etymology
     confidence: plausible
-    weight: 0.4
+    weight: 40
     
   - form: "pneuma"
     concept: breath
     lens: greek
     confidence: verified
-    weight: 0.7
+    weight: 70
     
   - form: "pneuma"
     concept: spirit
     lens: greek
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   - form: "psyche"
     concept: soul
     lens: greek
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   - form: "psyche"
     concept: mind
     lens: greek
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   - form: "theos"
     concept: god
     lens: greek
     confidence: verified
-    weight: 0.6
+    weight: 60
     
   # Love in multiple languages
   - form: "kjærlighet"
     concept: love
     lens: norwegian
     confidence: curated
-    weight: 0.7
+    weight: 70
     
   - form: "愛"
     concept: love
     lens: han
     confidence: verified
-    weight: 0.8
+    weight: 80
     
   - form: "爱"
     concept: love
     lens: han
     confidence: verified
-    weight: 0.8
+    weight: 80
     
   - form: "ahava"
     concept: love
     lens: hebrew
     confidence: curated
-    weight: 0.7
+    weight: 70
     
   - form: "ahavah"
     concept: love
     lens: hebrew
     confidence: curated
-    weight: 0.7
+    weight: 70
 
 # Forms - curated whole-word matches (transmutations source concepts)
 forms:
@@ -462,56 +462,56 @@ script_words:
     runes: [0x05E8, 0x05D5, 0x05D7]
     meanings: [breath, wind, spirit]
     confidence: verified
-    weight: 0.8
+    weight: 80
     
   - script: hebrew
     word: "אמת"
     runes: [0x05D0, 0x05DE, 0x05EA]
     meanings: [truth]
     confidence: verified
-    weight: 0.8
+    weight: 80
     
   - script: hebrew
     word: "אור"
     runes: [0x05D0, 0x05D5, 0x05E8]
     meanings: [light]
     confidence: verified
-    weight: 0.8
+    weight: 80
     
   - script: hebrew
     word: "דבר"
     runes: [0x05D3, 0x05D1, 0x05E8]
     meanings: [word, thing]
     confidence: verified
-    weight: 0.8
+    weight: 80
     
   - script: hebrew
     word: "שם"
     runes: [0x05E9, 0x05DD]
     meanings: [name]
     confidence: verified
-    weight: 0.7
+    weight: 70
     
   - script: hebrew
     word: "לב"
     runes: [0x05DC, 0x05D1]
     meanings: [heart]
     confidence: verified
-    weight: 0.7
+    weight: 70
     
   - script: hebrew
     word: "חיים"
     runes: [0x05D7, 0x05D9, 0x05DD]
     meanings: [life]
     confidence: verified
-    weight: 0.8
+    weight: 80
     
   - script: hebrew
     word: "אהבה"
     runes: [0x05D0, 0x05D4, 0x05D1, 0x05D4]
     meanings: [love]
     confidence: verified
-    weight: 0.8
+    weight: 80
     
   # Sanskrit/Devanagari
   - script: devanagari
@@ -519,35 +519,35 @@ script_words:
     runes: [0x092A, 0x094D, 0x0930, 0x093E, 0x0923]
     meanings: [breath, life-force, prana]
     confidence: verified
-    weight: 0.9
+    weight: 90
     
   - script: devanagari
     word: "आत्मन्"
     runes: [0x0906, 0x0924, 0x094D, 0x092E]
     meanings: [self, soul, atman]
     confidence: verified
-    weight: 0.8
+    weight: 80
     
   - script: devanagari
     word: "ॐ"
     runes: [0x0950]
     meanings: [sacred-sound, totality, om]
     confidence: verified
-    weight: 0.9
+    weight: 90
     
   - script: devanagari
     word: "मंत्र"
     runes: [0x092E, 0x0902, 0x0924, 0x094D, 0x0930]
     meanings: [mantra, sacred-utterance]
     confidence: verified
-    weight: 0.8
+    weight: 80
     
   - script: devanagari
     word: "अनंद"
     runes: [0x0905, 0x0928, 0x0902, 0x0926]
     meanings: [bliss, ananda]
     confidence: verified
-    weight: 0.8
+    weight: 80
     
   # Chinese (Han)
   - script: han
@@ -555,45 +555,45 @@ script_words:
     runes: [0x9053]
     meanings: [way, path, dao]
     confidence: verified
-    weight: 0.9
+    weight: 90
     
   - script: han
     word: "气"
     runes: [0x6C14]
     meanings: [breath, air, qi]
     confidence: verified
-    weight: 0.8
+    weight: 80
     
   - script: han
     word: "氣"
     runes: [0x6C23]
     meanings: [breath, air, qi]
     confidence: verified
-    weight: 0.8
+    weight: 80
     
   - script: han
     word: "生"
     runes: [0x751F]
     meanings: [life, birth, sheng]
     confidence: verified
-    weight: 0.8
+    weight: 80
     
   - script: han
     word: "人"
     runes: [0x4EBA]
     meanings: [person, human, ren]
     confidence: verified
-    weight: 0.8
+    weight: 80
     
   - script: han
     word: "心"
     runes: [0x5FC3]
     meanings: [heart, xin]
     confidence: verified
-    weight: 0.8    
+    weight: 80    
   - script: hebrew
     word: "אל"
     runes: [0x05D0, 0x05DC]
     meanings: [god, power, divine]
     confidence: verified
-    weight: 0.8
+    weight: 80

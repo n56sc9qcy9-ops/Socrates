@@ -7,263 +7,263 @@ relations:
   - from: one
     to: being
     type: generates
-    weight: 0.8
+    weight: 80
     
   - from: one
     to: source
     type: leads_to
-    weight: 0.7
+    weight: 70
     
   - from: being
     to: life
     type: manifests
-    weight: 0.8
+    weight: 80
     
   - from: being
     to: truth
     type: contains
-    weight: 0.7
+    weight: 70
     
   - from: life
     to: breath
     type: requires
-    weight: 0.9
+    weight: 90
     
   - from: life
     to: spirit
     type: expresses
-    weight: 0.8
+    weight: 80
     
   - from: life
     to: creation
     type: produces
-    weight: 0.7
+    weight: 70
     
   # Breath/spirit relations
   - from: breath
     to: spirit
     type: embodies
-    weight: 0.8
+    weight: 80
     
   - from: breath
     to: sound
     type: creates
-    weight: 0.7
+    weight: 70
     
   - from: breath
     to: life
     type: sustains
-    weight: 0.9
+    weight: 90
     
   # Word relations
   - from: word
     to: truth
     type: reveals
-    weight: 0.8
+    weight: 80
     
   - from: word
     to: name
     type: bestows
-    weight: 0.7
+    weight: 70
     
   - from: word
     to: sound
     type: manifests_as
-    weight: 0.8
+    weight: 80
     
   - from: word
     to: source
     type: proceeds_from
-    weight: 0.7
+    weight: 70
     
   # Name relations
   - from: name
     to: word
     type: expressed_as
-    weight: 0.7
+    weight: 70
     
   - from: name
     to: truth
     type: reveals
-    weight: 0.6
+    weight: 60
     
   # Truth relations
   - from: truth
     to: light
     type: manifests_as
-    weight: 0.8
+    weight: 80
     
   - from: truth
     to: word
     type: expressed_in
-    weight: 0.7
+    weight: 70
     
   - from: truth
     to: being
     type: grounds
-    weight: 0.6
+    weight: 60
     
   # Light relations
   - from: light
     to: fire
     type: connects_to
-    weight: 0.7
+    weight: 70
     
   - from: light
     to: source
     type: proceeds_from
-    weight: 0.8
+    weight: 80
     
   # Love relations
   - from: love
     to: heart
     type: inhabits
-    weight: 0.8
+    weight: 80
     
   - from: love
     to: truth
     type: aligned_with
-    weight: 0.7
+    weight: 70
     
   # Give relations
   - from: give
     to: source
     type: from
-    weight: 0.8
+    weight: 80
     
   - from: give
     to: life
     type: sustains
-    weight: 0.7
+    weight: 70
     
   # Path relations
   - from: path
     to: word
     type: expressed_through
-    weight: 0.6
+    weight: 60
     
   - from: path
     to: source
     type: leads_to
-    weight: 0.7
+    weight: 70
     
   # Heart relations
   - from: heart
     to: love
     type: source_of
-    weight: 0.8
+    weight: 80
     
   - from: heart
     to: mind
     type: connects_to
-    weight: 0.7
+    weight: 70
     
   - from: heart
     to: life
     type: sustains
-    weight: 0.6
+    weight: 60
     
   # Mind relations
   - from: mind
     to: spirit
     type: manifests
-    weight: 0.7
+    weight: 70
     
   - from: mind
     to: word
     type: produces
-    weight: 0.6
+    weight: 60
     
   - from: mind
     to: being
     type: grounds
-    weight: 0.6
+    weight: 60
     
   # Sound relations
   - from: sound
     to: word
     type: expresses
-    weight: 0.7
+    weight: 70
     
   - from: sound
     to: breath
     type: requires
-    weight: 0.6
+    weight: 60
     
   - from: sound
     to: being
     type: reveals
-    weight: 0.5
+    weight: 50
     
   # Elemental relations
   - from: fire
     to: truth
     type: reveals
-    weight: 0.6
+    weight: 60
     
   - from: fire
     to: source
     type: emanates_from
-    weight: 0.7
+    weight: 70
     
   - from: water
     to: life
     type: sustains
-    weight: 0.8
+    weight: 80
     
   - from: water
     to: source
     type: flows_from
-    weight: 0.7
+    weight: 70
     
   - from: air
     to: breath
     type: provides
-    weight: 0.8
+    weight: 80
     
   - from: air
     to: life
     type: sustains
-    weight: 0.7
+    weight: 70
     
   - from: earth
     to: source
     type: grounds_in
-    weight: 0.6
+    weight: 60
     
   - from: earth
     to: being
     type: supports
-    weight: 0.6
+    weight: 60
     
   # Source relations
   - from: source
     to: light
     type: emanates
-    weight: 0.8
+    weight: 80
     
   - from: source
     to: truth
     type: reveals
-    weight: 0.7
+    weight: 70
     
   - from: source
     to: one
     type: contains
-    weight: 0.6
+    weight: 60
     
   # Creation relations
   - from: creation
     to: life
     type: bestows
-    weight: 0.7
+    weight: 70
     
   - from: creation
     to: source
     type: from
-    weight: 0.8
+    weight: 80
     
   - from: creation
     to: word
     type: through
-    weight: 0.6
+    weight: 60

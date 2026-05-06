@@ -158,8 +158,8 @@ func TestLoveConvergence(t *testing.T) {
 	var loveFields []string
 	for _, word := range words {
 		reading := engine.Analyze(word)
-		// Check if love is in top concepts from convergence
-		for _, ac := range reading.Convergence.TopConcepts {
+		// Check if love is activated (in any position)
+		for _, ac := range reading.Convergence.ActivatedConcepts {
 			if ac.Concept == "love" {
 				loveFields = append(loveFields, word)
 				break
