@@ -219,6 +219,27 @@ The engine should compare active fields by integer math:
 
 No float comparison is needed for the core model.
 
+## Current Schema Status
+
+**Active frequency schema** (`internal/knowledge/frequencies.yaml`):
+- No active `em_band_id` or `frequency_hz` fields exist yet.
+- Current fields: `meaning_frequency_id`, `concepts`, `vector []int{3}`, `ratio []int{2}`, `archetype`, `labels {note, color, field}`, `confidence`, `source`, `lens`, `weight int`.
+- **Unknown YAML fields are accepted** (YAML silently ignores them); this is a known data-quality risk.
+
+**EM status**: No active EM schema exists yet. The target model (above) includes `em_bands` with `wl_nm`, `hz` as optional integer references, but this is not yet active.
+
+## Validation Rules
+
+| Field | Validation |
+|-------|------------|
+| `vector` | Must be exactly 3 integers |
+| `ratio` | Must be exactly 2 integers [num, denom], denom ≠ 0 |
+| `weight` | Integer in range [0, 100] |
+| `labels.note` | Non-negative integer |
+| `labels.color` | Integer in range [0, 360] |
+| `labels.field` | Non-negative integer |
+| `archetype` | Must match known archetype ID or be empty |
+
 ## Boundary
 
 Audio rendering is later. The first goal is a concise integer harmonic field model that can say:
