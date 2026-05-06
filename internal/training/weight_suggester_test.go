@@ -148,12 +148,12 @@ func TestSuggestionsNotApplied(t *testing.T) {
 	suggester.WriteSuggestions()
 
 	// Verify review file exists, active YAML does not
-	if _, err := os.Stat("/tmp/test_review_not_applied.yaml"); os.IsNotExist(err) {
-		t.Errorf("Review file should exist at /tmp/test_review_not_applied.yaml")
+	if _, err := os.Stat(suggester.ReviewPath); os.IsNotExist(err) {
+		t.Errorf("Review file should exist at %s", suggester.ReviewPath)
 	}
 
 	// Verify active weights file is unchanged
-	activePath := "/Users/bot/Socrates/training/ranking_weights.yaml"
+	activePath := filepath.Join(repoRoot(), "training/ranking_weights.yaml")
 	if info, err := os.Stat(activePath); err == nil {
 		// File exists, should not have been modified by suggestion generation
 		t.Logf("Active weights file exists at %s, size %d bytes (should be unchanged)", activePath, info.Size())
