@@ -68,14 +68,15 @@ Task:
 Calibrate counsellor/transmutation fields so they remain humble, evidence-first, and not overdiagnostic.
 
 Architect review status:
-Not accepted yet. Pi consolidated the working tree and fixed raw percentage weight normalization, but the example debug output still labels neighbor-derived sources as `direct`.
+Not accepted yet. Pi fixed the main evidence classification path and the working tree is clean, but default counsellor ranking and evidence-path classification still need correction.
 
 Current blockers:
-- The sample debug output shows sources such as `resentment -> neighbor: fear` rendered as `direct`. That is incorrect. Neighbor-derived evidence must remain distinguishable from direct form/glyph/script evidence all the way into `CounsellorField`.
-- Do not rely only on `PassageField.Depth` if a channel has already emitted neighbor concepts as direct signals. Source/evidence type must preserve whether the concept came from exact/direct evidence, fuzzy evidence, graph expansion, or symbolic neighbor expansion.
-- Propagated/neighbor-only counsellor suggestions must be visibly weaker than direct evidence and must not flood default output.
-- Add a regression test using a real engine analysis where a direct source such as `resentment` activates neighbors such as `fear`, `guilt`, or `judgment`; those neighbor-derived counsellor sources must not render as `direct`.
-- Final report must include example default and debug output after the weight-scale correction.
+- Default counsellor output must prioritize direct, stronger, higher-confidence suggestions before propagated/speculative suggestions. In the current sample, propagated `guilt` and `fear` appear before direct `resentment -> forgiveness`; that is not acceptable for default guidance.
+- Add deterministic ranking for counsellor suggestions before default rendering. Recommended ordering: direct evidence first, then confidence, then strength, then stable lexical tie-breakers.
+- `TransmutationEvidence.IsDirectSource` must use the same evidence classification as `TransmutationSource.IsDirectEvidence`, not only `Depth == 0`. A symbolic neighbor expansion can have depth 0 but still be indirect.
+- Debug output should make it obvious when a default-hidden suggestion was hidden by ranking/cap, not because it lacked data.
+- Add or update regression tests proving that real engine analysis ranks the direct `resentment -> forgiveness` path ahead of neighbor-derived correction paths in default output.
+- Final report must include example default and debug output after ranking and evidence-path classification are corrected.
 
 Context:
 The first counsellor/transmutation layer is implemented and committed. It loads `internal/knowledge/transmute.yaml`, validates transmutation relations, builds a `CounsellorField`, and renders default/debug output with evidence paths. The implementation is directionally correct, but the first output sample shows an architectural risk:
