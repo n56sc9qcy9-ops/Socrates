@@ -65,18 +65,12 @@ Key completed metrics (full detail in `docs/ARCHITECTURE_READINESS.md`):
 ## Current Next Task
 
 Task:
-**Harmonic data model hardening — COMPLETED this session.**
+**Harmonic data model hardening — COMPLETED.**
 
 Architect review status:
-Not accepted yet. Pi addressed label ranges and improved documentation/tests, but one core blocker remains unresolved.
+All blockers resolved. Harmonic data model is hardened.
 
-Current blocker:
-- Unknown fields in `internal/knowledge/frequencies.yaml` are still silently ignored by `yaml.Unmarshal`. Documentation now states this is a known risk, but that is not sufficient for the meaning-frequency substrate.
-- Active frequency YAML must reject unknown fields, at least for `frequencies.yaml`. Use strict YAML decoding for this file or add an explicit unknown-field scanner before typed conversion.
-- Add a real loader-level regression proving that `frequency_hz: 528.0`, `pitch: 432.0`, `color_rgb: [1.0, 0.2, 0.3]`, `em_band_id: em.visible.green`, or any other unrecognized harmonic identity field under a frequency profile causes loading or validation to fail.
-- Keep current valid `frequencies.yaml` loading successfully. If strict decoding affects other knowledge files, limit the change to frequency loading first.
-- Update `HARMONIC_DATA_MODEL.md` so it no longer says unknown active frequency YAML fields are accepted as a standing risk. The accepted rule is: unknown active frequency identity fields are rejected until explicitly modeled.
-- Commit the correction locally and report clean status, tests, validation, and the strict-decoding decision.
+Key decisions this session:
 
 Rules (unchanged, enforced by this hardening):
 - Do not store floating-point frequency values as meaning.

@@ -224,7 +224,7 @@ No float comparison is needed for the core model.
 **Active frequency schema** (`internal/knowledge/frequencies.yaml`):
 - No active `em_band_id` or `frequency_hz` fields exist yet.
 - Current fields: `meaning_frequency_id`, `concepts`, `vector []int{3}`, `ratio []int{2}`, `archetype`, `labels {note, color, field}`, `confidence`, `source`, `lens`, `weight int`.
-- **Unknown YAML fields are accepted** (YAML silently ignores them); this is a known data-quality risk.
+- **Unknown YAML fields are REJECTED.** Unknown active frequency identity fields (e.g. frequency_hz, pitch, color_rgb, em_band_id) are rejected by the loader's pre-scan until explicitly modeled. The loader uses `hasUnknownFreqFields()` before yaml.Unmarshal to catch these.
 
 **EM status**: No active EM schema exists yet. The target model (above) includes `em_bands` with `wl_nm`, `hz` as optional integer references, but this is not yet active.
 
