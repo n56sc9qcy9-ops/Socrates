@@ -1,6 +1,7 @@
 package knowledge
 
 import (
+	"os"
 	"strings"
 	"testing"
 )
@@ -617,9 +618,75 @@ func TestValidateFrequencyProfiles_MultipleErrors(t *testing.T) {
 	}
 }
 
-// TestValidateFrequencyProfiles_IntegerOnly verifies that integer values are used
-// throughout frequency profiles. This is a core architectural rule: meaning-frequency
-// identity is integer-based, not float-based.
+// TestValidateFrequencyProfiles_IntegerLabelRanges verifies integer label range validation.
+// Note: 0-11 semitones per octave, 12 is valid for octave/unison.
+// Color: 0-360 hue degrees.
+// Field: non-negative integer.
+func TestValidateFrequencyProfiles_IntegerLabelRanges(t *testing.T) {
+	testCases := []struct {
+		name      string
+		labels    IntFrequencyLabels
+		shouldErr bool
+		errField  string
+	}{
+		{"valid_note_0_to_11", IntFrequencyLabels{Note: 0, Color: 0, Field: 0}, false, ""},
+		{"valid_note_12_octave", IntFrequencyLabels{Note: 12, Color: 0, Field: 0}, false, ""},
+		{"valid_color_0", IntFrequencyLabels{Note: 0, Color: 0, Field: 0}, false, ""},
+		{"valid_color_360", IntFrequencyLabels{Note: 0, Color: 360, Field: 0}, false, ""},
+		{"valid_field_0", IntFrequencyLabels{Note: 0, Color: 0, Field: 0}, false, ""},
+		{"valid_field_100", IntFrequencyLabels{Note: 0, Color: 0, Field: 100}, false, ""},
+		{"invalid_negative_note", IntFrequencyLabels{Note: -1, Color: 0, Field: 0}, true, "note"},
+		{"invalid_negative_color", IntFrequencyLabels{Note: 0, Color: -1, Field: 0}, true, "color"},
+		{"invalid_negative_field", IntFrequencyLabels{Note: 0, Color: 0, Field: -1}, true, "field"},
+		{"invalid_color_over_360", IntFrequencyLabels{Note: 0, Color: 361, Field: 0}, true, "color"},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			kb := &Knowledge{
+				Concepts: []Concept{
+					{ID: "breath", Name: "Breath", Aliases: []string{"breath"}},
+				},
+				FrequencyProfiles: []FrequencyProfile{
+					{
+						MeaningFrequencyID: "test-labels",
+						Concepts:           []string{"breath"},
+							Vector:             []int{1, 2, 1},
+							Ratio:              []int{1, 1},
+							Labels:             tc.labels,
+							Confidence:         "verified",
+							Weight:             80,
+						},
+					},
+				}
+			kb.BuildIndexes()
+
+			result := ValidateKnowledge(kb)
+
+			if tc.shouldErr {
+				if result.IsValid() {
+					t.Errorf("Labels %+v should fail validation", tc.labels)
+				}
+				// Check error field
+				hasFieldErr := false
+				for _, err := range result.Errors {
+					if strings.Contains(err.Field, tc.errField) {
+						hasFieldErr = true
+						break
+					}
+				}
+				if !hasFieldErr {
+					t.Errorf("Expected error for field '%s', got: %v", tc.errField, result.Errors)
+				}
+			} else {
+				if !result.IsValid() {
+					t.Errorf("Labels %+v should pass validation: %v", tc.labels, result.Errors)
+				}
+			}
+		})
+	}
+}
+
 func TestValidateFrequencyProfiles_IntegerOnly(t *testing.T) {
 	kb := &Knowledge{
 		Concepts: []Concept{
@@ -701,7 +768,7 @@ func TestValidateFrequencyProfiles_IntegerWeight(t *testing.T) {
 	}
 }
 
-// TestValidateFrequencyProfiles_IntLabels verifies integer labels are enforced.
+// TestValidateFrequencyProfiles_IntLabels verifies labels pass basic integer validation.
 func TestValidateFrequencyProfiles_IntLabels(t *testing.T) {
 	kb := &Knowledge{
 		Concepts: []Concept{
@@ -737,11 +804,23 @@ func TestHarmonicFieldUsesIntegerData(t *testing.T) {
 	// - socrates/internal/knowledge (contains FrequencyProfile with integer fields)
 	// - NOT socrates/internal/resonance (contains legacy float Frequency structs)
 	//
-	// This is verified by the fact that harmonic_field.go imports only "knowledge"
-	// and uses FrequencyProfile.Vector ([]int), FrequencyProfile.Ratio ([]int),
-	// FrequencyProfile.Labels (IntFrequencyLabels with int fields), and
-	// FrequencyProfile.Weight (int).
-	//
+	// Read harmonic_field.go and verify it imports only knowledge, not resonance.
+	data, err := os.ReadFile("../../internal/decipher/harmonic_field.go")
+	if err != nil {
+		t.Fatalf("Failed to read harmonic_field.go: %v", err)
+	}
+	content := string(data)
+
+	// Verify HarmonicField does NOT import resonance (would use float constants)
+	if strings.Contains(content, `"socrates/internal/resonance"`) {
+		t.Error("HarmonicField must NOT import socrates/internal/resonance (legacy float examples)")
+	}
+
+	// Verify HarmonicField imports knowledge (uses integer FrequencyProfile)
+	if !strings.Contains(content, `"socrates/internal/knowledge"`) {
+		t.Error("HarmonicField should import socrates/internal/knowledge (integer FrequencyProfile)")
+	}
+
 	// Runtime evidence scores (float64) are used for ranking but are NOT stored
 	// as meaning-frequency identity.
 	t.Logf("HarmonicField imports: socrates/internal/knowledge only")

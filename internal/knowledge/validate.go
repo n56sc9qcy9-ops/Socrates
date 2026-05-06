@@ -486,6 +486,31 @@ func validateFrequencyProfiles(profiles []FrequencyProfile, kb *Knowledge, resul
 		if fp.Weight < 0 || fp.Weight > 100 {
 			result.AddError(field+".weight", "weight must be integer in range [0, 100]; got "+itoa(fp.Weight))
 		}
+
+		// Validate integer label ranges
+		validateFrequencyProfileLabels(fp, field, result)
+	}
+}
+
+// validateFrequencyProfileLabels validates integer label ranges.
+// Note: 0-11 semitones per octave, 12 is valid (represents octave/unison).
+// Color: 0-360 hue degrees.
+// Field: non-negative integer.
+func validateFrequencyProfileLabels(fp FrequencyProfile, field string, result *ValidationResult) {
+	// Note range: 0-11 standard, 12 allowed for octave/unison representation
+	// Negative notes are invalid
+	if fp.Labels.Note < 0 {
+		result.AddError(field+".labels.note", "note index must be non-negative; got "+itoa(fp.Labels.Note))
+	}
+
+	// Color range: 0-360 hue degrees
+	if fp.Labels.Color < 0 || fp.Labels.Color > 360 {
+		result.AddError(field+".labels.color", "color hue must be in range [0, 360]; got "+itoa(fp.Labels.Color))
+	}
+
+	// Field must be non-negative
+	if fp.Labels.Field < 0 {
+		result.AddError(field+".labels.field", "field ID must be non-negative; got "+itoa(fp.Labels.Field))
 	}
 }
 
