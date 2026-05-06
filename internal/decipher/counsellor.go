@@ -2,6 +2,7 @@ package decipher
 
 import (
 	"math"
+	"sort"
 
 	"socrates/internal/knowledge"
 )
@@ -44,6 +45,9 @@ func BuildCounsellorField(passageFields PassageFields, kb *knowledge.Knowledge) 
 	if len(suggestions) == 0 {
 		return nil
 	}
+
+	// Sort suggestions by evidence quality for default display
+	sortSuggestionsByEvidence(suggestions, sourceFields)
 
 	// Build evidence paths
 	evidencePaths := buildEvidencePaths(sourceFields, kb)
@@ -148,7 +152,7 @@ func buildEvidencePaths(sources []TransmutationSource, kb *knowledge.Knowledge) 
 				continue
 			}
 
-			isDirect := src.Depth == 0
+			isDirect := src.Depth == 0 && src.IsDirectEvidence
 			paths = append(paths, TransmutationEvidence{
 				SourceConcept:   src.Concept,
 				TargetConcept:   t.To,
@@ -161,4 +165,58 @@ func buildEvidencePaths(sources []TransmutationSource, kb *knowledge.Knowledge) 
 	}
 
 	return paths
+}
+
+// sortSuggestionsByEvidence ranks suggestions for default output display.
+// Ordering: direct evidence first, then confidence (verified > plausible > speculative),
+// then strength (higher first), then stable lexical tie-breaker.
+func sortSuggestionsByEvidence(suggestions []TransmutationSuggestion, sources []TransmutationSource) {
+	// Build a map for quick source lookup
+	isDirectMap := make(map[string]bool)
+	for _, src := range sources {
+		isDirectMap[src.Concept] = src.IsDirectEvidence
+	}
+
+	sort.Slice(suggestions, func(i, j int) bool {
+		a, b := &suggestions[i], &suggestions[j]
+
+		// 1. Direct evidence first
+		aDirect := isDirectMap[a.SourceConcept]
+		bDirect := isDirectMap[b.SourceConcept]
+		if aDirect != bDirect {
+			return aDirect // true before false
+		}
+
+		// 2. Confidence: verified > plausible > speculative
+		confA := confidenceWeight(a.Confidence)
+		confB := confidenceWeight(b.Confidence)
+		if confA != confB {
+			return confA > confB
+		}
+
+		// 3. Strength (higher first)
+		if a.Strength != b.Strength {
+			return a.Strength > b.Strength
+		}
+
+		// 4. Stable lexical tie-breaker
+		if a.SourceConcept != b.SourceConcept {
+			return a.SourceConcept < b.SourceConcept
+		}
+		return a.TargetConcept < b.TargetConcept
+	})
+}
+
+// confidenceWeight returns a numeric weight for sorting by confidence.
+func confidenceWeight(conf string) int {
+	switch conf {
+	case ConfidenceVerified:
+		return 3
+	case ConfidencePlausible:
+		return 2
+	case ConfidenceSpeculative:
+		return 1
+	default:
+		return 0
+	}
 }

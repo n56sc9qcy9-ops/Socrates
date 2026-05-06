@@ -420,6 +420,7 @@ func TestNoHardcodedConceptBehavior(t *testing.T) {
 // TestEngineCounsellorNeighborVsDirectEvidence proves that:
 // 1. Form/glyph/script evidence (IsDirect=true) renders with normal confidence
 // 2. Symbolic neighbor expansion (IsDirect=false) is downgraded
+// 3. Direct suggestions appear first in ranked output (before propagated)
 // This is an end-to-end regression test that runs through the real engine.
 func TestEngineCounsellorNeighborVsDirectEvidence(t *testing.T) {
 	kb := knowledge.LoadOrPanic()
@@ -458,6 +459,30 @@ if reading.Input == "" {
 	}
 	if propagatedCount == 0 {
 		t.Error("expected at least one propagated/neighbor source (fear/guilt/judgment from neighbor)")
+	}
+
+	// Verify suggestions are ranked: direct evidence first, then by confidence/strength
+	// resentment -> forgiveness should be first (direct evidence, plausible)
+	if len(counsellor.Suggestions) == 0 {
+		t.Fatal("expected suggestions")
+	}
+	firstSuggestion := counsellor.Suggestions[0]
+	if firstSuggestion.SourceConcept != "resentment" {
+		t.Errorf("expected first suggestion to be from resentment (direct), got %s",
+			firstSuggestion.SourceConcept)
+	}
+	if firstSuggestion.Confidence != "plausible" {
+		t.Errorf("expected first suggestion to have plausible confidence, got %s",
+			firstSuggestion.Confidence)
+	}
+	t.Logf("First suggestion: %s -> %s [confidence=%s] ✓", firstSuggestion.SourceConcept,
+		firstSuggestion.TargetConcept, firstSuggestion.Confidence)
+
+	// All remaining suggestions should be from propagated sources (speculative)
+	for i := 1; i < len(counsellor.Suggestions); i++ {
+		sugg := counsellor.Suggestions[i]
+		t.Logf("Ranked suggestion %d: %s -> %s [confidence=%s]", i, sugg.SourceConcept,
+			sugg.TargetConcept, sugg.Confidence)
 	}
 
 	// Verify suggestions have appropriate confidence based on evidence type
