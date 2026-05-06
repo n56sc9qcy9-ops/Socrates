@@ -160,6 +160,9 @@ type TransmutationSource struct {
 	// Strength is the activation strength (0-1).
 	Strength float64
 
+	// Depth is the propagation depth (0 = direct, 1+ = graph-expanded/neighbor).
+	Depth int
+
 	// EvidenceSources are where this field was activated from.
 	EvidenceSources []string
 }
@@ -194,10 +197,11 @@ type TransmutationSuggestion struct {
 // TransmutationEvidence traces a suggestion back to its data source.
 type TransmutationEvidence struct {
 	SourceConcept   string
-	TargetConcept  string
-	Kind           string
-	DataSourceFile string
-	Notes          string
+	TargetConcept   string
+	Kind            string
+	DataSourceFile  string
+	Notes           string
+	IsDirectSource  bool // true if from direct concept, false if from graph-propagated neighbor
 }
 
 // Reading is the complete output of the decipher engine.

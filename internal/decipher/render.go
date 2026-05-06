@@ -120,10 +120,22 @@ func renderDefault(r Reading) string {
 	}
 
 	// Show counsellor field (data-backed transmutation suggestions)
+	// Default: show top 3 suggestions only, with humble phrasing
 	if r.CounsellorField != nil && len(r.CounsellorField.Suggestions) > 0 {
 		sb.WriteString("Counsellor:\n")
-		for _, s := range r.CounsellorField.Suggestions {
-			sb.WriteString(fmt.Sprintf("  - if field remains '%s', tends toward '%s'\n", s.SourceConcept, s.TargetConcept))
+		// Cap at 3 suggestions for default output to avoid flooding
+		maxSuggestions := 3
+		if len(r.CounsellorField.Suggestions) < maxSuggestions {
+			maxSuggestions = len(r.CounsellorField.Suggestions)
+		}
+		for i := 0; i < maxSuggestions; i++ {
+			s := r.CounsellorField.Suggestions[i]
+			sb.WriteString(fmt.Sprintf("  - possible field '%s' may be softened through '%s'\n",
+				s.SourceConcept, s.TargetConcept))
+		}
+		if len(r.CounsellorField.Suggestions) > maxSuggestions {
+			sb.WriteString(fmt.Sprintf("  ... +%d more (see --debug)\n",
+				len(r.CounsellorField.Suggestions)-maxSuggestions))
 		}
 		sb.WriteString("\n")
 	}
@@ -359,8 +371,12 @@ func renderDebug(r Reading) string {
 		sb.WriteString("Counsellor Field (from transmutation data):\n")
 		sb.WriteString(fmt.Sprintf("  Source fields: %d\n", len(r.CounsellorField.SourceFields)))
 		for _, src := range r.CounsellorField.SourceFields {
-			sb.WriteString(fmt.Sprintf("    - %s [strength: %.2f, sources: %v]\n",
-				src.Concept, src.Strength, src.EvidenceSources))
+			depthStr := "direct"
+			if src.Depth > 0 {
+				depthStr = "propagated"
+			}
+			sb.WriteString(fmt.Sprintf("    - %s [strength: %.2f, %s, sources: %v]\n",
+				src.Concept, src.Strength, depthStr, src.EvidenceSources))
 		}
 		sb.WriteString(fmt.Sprintf("  Suggestions: %d\n", len(r.CounsellorField.Suggestions)))
 		for _, s := range r.CounsellorField.Suggestions {
@@ -369,8 +385,12 @@ func renderDebug(r Reading) string {
 		}
 		sb.WriteString(fmt.Sprintf("  Evidence paths: %d\n", len(r.CounsellorField.EvidencePaths)))
 		for _, e := range r.CounsellorField.EvidencePaths {
-			sb.WriteString(fmt.Sprintf("    - %s --[%s]--> %s [source: %s, notes: %s]\n",
-				e.SourceConcept, e.Kind, e.TargetConcept, e.DataSourceFile, e.Notes))
+			sourceType := "direct"
+			if !e.IsDirectSource {
+				sourceType = "propagated"
+			}
+			sb.WriteString(fmt.Sprintf("    - %s --[%s]--> %s [source: %s, %s]\n",
+				e.SourceConcept, e.Kind, e.TargetConcept, e.DataSourceFile, sourceType))
 		}
 		sb.WriteString("\n")
 	}

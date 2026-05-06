@@ -82,6 +82,7 @@ func findTransmutationSources(passageFields PassageFields, kb *knowledge.Knowled
 		sources = append(sources, TransmutationSource{
 			Concept:         field.Concept,
 			Strength:        field.Strength,
+			Depth:           field.Depth,
 			EvidenceSources: field.TokenSources,
 		})
 	}
@@ -96,17 +97,31 @@ func buildSuggestions(sources []TransmutationSource, kb *knowledge.Knowledge) []
 	for _, src := range sources {
 		transmutations := kb.GetTransmutationsFrom(src.Concept)
 		for _, t := range transmutations {
-			// Combined strength = source field strength × relation weight
-			combinedStrength := src.Strength * t.Weight
+			// Combined strength = source field strength × relation weight (normalized to 0-1)
+			// Weight is stored as integer percentage (0-100), source strength is normalized (0-1)
+			combinedStrength := src.Strength * t.Weight / 100.0
 			if combinedStrength < counsellorMinCombinedStrength {
 				continue
+			}
+
+			// Downgrade confidence for propagated/neighbor sources
+			// Direct concepts (depth 0) use normal confidence
+			// Graph-expanded neighbors get downgraded to prevent overconfident counsel
+			suggestionConf := t.Confidence
+			if src.Depth > 0 {
+				if t.Confidence == ConfidenceVerified {
+					suggestionConf = ConfidencePlausible
+				} else if t.Confidence == ConfidencePlausible {
+					suggestionConf = ConfidenceSpeculative
+				}
+				// ConfidenceSpeculative stays speculative
 			}
 
 			suggestions = append(suggestions, TransmutationSuggestion{
 				SourceConcept:   src.Concept,
 				TargetConcept:   t.To,
 				Kind:            t.Kind,
-				Confidence:      t.Confidence,
+				Confidence:      suggestionConf,
 				Source:          t.Source,
 				Lens:            t.Lens,
 				Weight:          t.Weight,
@@ -125,17 +140,19 @@ func buildEvidencePaths(sources []TransmutationSource, kb *knowledge.Knowledge) 
 	for _, src := range sources {
 		transmutations := kb.GetTransmutationsFrom(src.Concept)
 		for _, t := range transmutations {
-			combinedStrength := src.Strength * t.Weight
+			combinedStrength := src.Strength * t.Weight / 100.0
 			if combinedStrength < counsellorMinCombinedStrength {
 				continue
 			}
 
+			isDirect := src.Depth == 0
 			paths = append(paths, TransmutationEvidence{
 				SourceConcept:   src.Concept,
 				TargetConcept:   t.To,
 				Kind:            t.Kind,
 				DataSourceFile:  "internal/knowledge/transmute.yaml",
 				Notes:           t.Notes,
+				IsDirectSource:  isDirect,
 			})
 		}
 	}

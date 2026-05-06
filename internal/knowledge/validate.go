@@ -566,7 +566,7 @@ func validateTransmutations(transmutations []TransmutationRelation, kb *Knowledg
 		}
 
 		// Validate weight
-		if t.Weight < 0 || t.Weight > 1 {
+		if t.Weight < 0 || t.Weight > 100 {
 			result.AddError(field+".weight", "weight must be in [0, 100]; got "+ftos(t.Weight))
 		}
 	}

@@ -1,6 +1,8 @@
 package decipher
 
 import (
+	"os"
+	"strings"
 	"testing"
 
 	"socrates/internal/knowledge"
@@ -209,5 +211,208 @@ func TestTransmutationConfidence(t *testing.T) {
 	// resentment -> forgiveness should be "plausible"
 	if field.Suggestions[0].Confidence != "plausible" {
 		t.Errorf("expected confidence 'plausible', got '%s'", field.Suggestions[0].Confidence)
+	}
+}
+
+func TestCounsellorDirectEvidenceProducesSuggestion(t *testing.T) {
+	kb := knowledge.LoadOrPanic()
+
+	// Create passage field with direct concept (depth 0)
+	passageFields := PassageFields{
+		{Concept: "resentment", Strength: 0.8, Depth: 0, TokenSources: []string{"resentment"}},
+	}
+
+	field := BuildCounsellorField(passageFields, kb)
+
+	if field == nil {
+		t.Fatal("expected counsellor field for direct evidence")
+	}
+
+	if len(field.Suggestions) == 0 {
+		t.Fatal("expected suggestion for direct resentment")
+	}
+
+	// Direct evidence should have normal confidence (plausible for resentment)
+	if field.Suggestions[0].Confidence != "plausible" {
+		t.Errorf("expected plausible confidence for direct evidence, got %s", field.Suggestions[0].Confidence)
+	}
+}
+
+func TestCounsellorPropagatedNeighborEvidenceDowngraded(t *testing.T) {
+	kb := knowledge.LoadOrPanic()
+
+	// Create passage field with propagated concept (depth 1) - simulating graph expansion
+	// In real usage, depth 1 means it came from a neighbor relation, not direct evidence
+	passageFields := PassageFields{
+		{Concept: "fear", Strength: 0.4, Depth: 1, TokenSources: []string{"resentment -> neighbor: fear"}},
+	}
+
+	field := BuildCounsellorField(passageFields, kb)
+
+	if field == nil {
+		t.Fatal("expected counsellor field for propagated evidence")
+	}
+
+
+	if len(field.Suggestions) == 0 {
+		t.Fatal("expected suggestion for propagated fear")
+	}
+
+	// Propagated evidence (depth 1) should have downgraded confidence
+	// fear has confidence "plausible" in transmute.yaml, so depth 1 should downgrade to "speculative"
+	if field.Suggestions[0].Confidence != "speculative" {
+		t.Errorf("expected speculative confidence for depth 1 propagated evidence, got %s", field.Suggestions[0].Confidence)
+	}
+}
+
+func TestCounsellorDefaultOutputNotCommanding(t *testing.T) {
+	kb := knowledge.LoadOrPanic()
+
+	// Create reading with counsellor field
+	passageFields := PassageFields{
+		{Concept: "resentment", Strength: 0.8, Depth: 0, TokenSources: []string{"resentment"}},
+	}
+	field := BuildCounsellorField(passageFields, kb)
+
+	reading := Reading{
+		Input:           "resentment",
+		CounsellorField: field,
+	}
+
+	output := RenderReading(reading)
+
+	// Default output should not contain commanding language
+	commandingPhrases := []string{
+		"if field remains",
+		"you should",
+		"must",
+		"always",
+		"never",
+	}
+	for _, phrase := range commandingPhrases {
+		if strings.Contains(output, phrase) {
+			t.Errorf("default output contains commanding phrase: %s", phrase)
+		}
+	}
+
+	// Should contain humble phrasing
+	if !strings.Contains(output, "may be") && !strings.Contains(output, "possible") {
+		t.Errorf("default output should contain humble phrasing like 'may be' or 'possible'")
+	}
+}
+
+func TestCounsellorDefaultOutputCapped(t *testing.T) {
+	kb := knowledge.LoadOrPanic()
+
+	// Create many passage fields that would produce many suggestions
+	passageFields := PassageFields{
+		{Concept: "resentment", Strength: 0.8, Depth: 0, TokenSources: []string{"resentment"}},
+		{Concept: "guilt", Strength: 0.8, Depth: 0, TokenSources: []string{"guilt"}},
+		{Concept: "judgment", Strength: 0.8, Depth: 0, TokenSources: []string{"judgment"}},
+		{Concept: "fear", Strength: 0.8, Depth: 0, TokenSources: []string{"fear"}},
+		{Concept: "shame", Strength: 0.8, Depth: 0, TokenSources: []string{"shame"}},
+		{Concept: "pride", Strength: 0.8, Depth: 0, TokenSources: []string{"pride"}},
+		{Concept: "attachment", Strength: 0.8, Depth: 0, TokenSources: []string{"attachment"}},
+		{Concept: "control", Strength: 0.8, Depth: 0, TokenSources: []string{"control"}},
+	}
+
+	field := BuildCounsellorField(passageFields, kb)
+
+	reading := Reading{
+		Input:           "many tensions",
+		CounsellorField: field,
+	}
+
+	output := RenderReading(reading)
+
+	// Count suggestions shown - each line has exactly one suggestion
+	// Output format: "  - possible field 'X' may be softened through 'Y'"
+	// We count the "may be softened" pattern which appears once per suggestion
+	suggestionCount := strings.Count(output, "may be softened")
+
+	// Default output should be capped at 3 suggestions
+	if suggestionCount > 3 {
+		t.Errorf("default output should be capped at 3 suggestions, found %d", suggestionCount)
+	}
+
+	// Should indicate more exist in debug mode
+	if !strings.Contains(output, "+") && field != nil && len(field.Suggestions) > 3 {
+		t.Errorf("default output should indicate when suggestions are truncated")
+	}
+}
+
+func TestCounsellorDebugOutputShowsReasoning(t *testing.T) {
+	kb := knowledge.LoadOrPanic()
+
+	// Create reading with mixed direct and propagated concepts
+	passageFields := PassageFields{
+		{Concept: "resentment", Strength: 0.8, Depth: 0, TokenSources: []string{"direct"}},
+		{Concept: "guilt", Strength: 0.6, Depth: 1, TokenSources: []string{"propagated"}},
+	}
+	field := BuildCounsellorField(passageFields, kb)
+
+	reading := Reading{
+		Input:           "mixed evidence",
+		CounsellorField: field,
+	}
+
+	output := RenderReadingWithOptions(reading, DebugRenderOptions())
+
+	// Debug output should show all suggestions
+	if !strings.Contains(output, "Source fields:") {
+		t.Errorf("debug output should show source fields")
+	}
+
+	// Debug output should show evidence paths
+	if !strings.Contains(output, "Evidence paths:") {
+		t.Errorf("debug output should show evidence paths")
+	}
+
+	// Debug output should show strength values
+	if !strings.Contains(output, "strength:") {
+		t.Errorf("debug output should show strength values")
+	}
+}
+
+func TestNoHardcodedConceptBehavior(t *testing.T) {
+	kb := knowledge.LoadOrPanic()
+
+	// Get all transmutation source concepts from data
+	dataSources := make(map[string]bool)
+	for _, tr := range kb.AllTransmutations() {
+		dataSources[tr.From] = true
+	}
+
+	// Verify specific concepts exist in data (not hardcoded in Go)
+	specialConcepts := []string{"resentment", "forgiveness", "humility", "fear", "trust", "love"}
+	for _, concept := range specialConcepts {
+		// If the concept is a transmutation target, it should be in the data sources
+		found := false
+		for _, tr := range kb.AllTransmutations() {
+			if tr.From == concept || tr.To == concept {
+				found = true
+				break
+			}
+		}
+		if !found && concept != "love" {
+			// love might not have a transmutation - that's ok
+			t.Logf("concept %s not found as transmutation target", concept)
+		}
+	}
+
+	// Verify counsellor.go doesn't contain hardcoded concept checks
+	counsellorCode, err := os.ReadFile("counsellor.go")
+	if err != nil {
+		t.Fatal("could not read counsellor.go")
+	}
+
+	hardcodedConcepts := []string{"resentment", "forgiveness", "humility", "fear", "trust", "love"}
+	for _, concept := range hardcodedConcepts {
+		// These concepts appearing in string literals in counsellor.go would indicate hardcoding
+		// We check they don't appear in case-sensitive contexts that would indicate special handling
+		pattern := "\"" + concept + "\""
+		if strings.Contains(string(counsellorCode), pattern) {
+			t.Errorf("counsellor.go contains hardcoded concept reference: %s", concept)
+		}
 	}
 }
