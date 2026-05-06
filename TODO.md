@@ -67,22 +67,16 @@ Key completed metrics (full detail in `docs/ARCHITECTURE_READINESS.md`):
 Task:
 **Harmonic data model hardening — COMPLETED this session.**
 
-All blockers addressed:
-1. Float meaning fields blocked by typed loader structs ([]int, not interface{})
-2. Unknown YAML fields documented as known risk (not silently fixed — would break valid data)
-3. Integer label range validation: note ≥0, color 0-360, field ≥0
-4. Real assertions in `TestHarmonicFieldUsesIntegerData` (reads harmonic_field.go)
-5. EM status clarified: no active EM schema, target model documented
+Architect review status:
+Not accepted yet. Pi addressed label ranges and improved documentation/tests, but one core blocker remains unresolved.
 
-Architect review: Ready for review.
-
-Current blockers (all addressed this session):
-- ~~Float meaning fields in active frequency YAML~~ - **BLOCKED** - Loader uses typed structs ([]int fields), YAML floats cannot inject.
-- ~~Unknown YAML fields silently ignored~~ - **DOCUMENTED** - Known data-quality risk; silent fix would break valid data.
-- ~~Integer label range validation~~ - **DONE** - `validateFrequencyProfileLabels()` in validate.go: note ≥0, color 0-360, field ≥0.
-- ~~Log-only hardcoded-mapping tests~~ - **DONE** - `TestHarmonicFieldUsesIntegerData` reads harmonic_field.go, asserts no resonance import.
-- ~~Electromagnetic status unclear~~ - **DONE** - No active EM schema; target model in HARMONIC_DATA_MODEL.md.
-- ~~Commit and report~~ - **DONE** - Committed through `3fde47e`.
+Current blocker:
+- Unknown fields in `internal/knowledge/frequencies.yaml` are still silently ignored by `yaml.Unmarshal`. Documentation now states this is a known risk, but that is not sufficient for the meaning-frequency substrate.
+- Active frequency YAML must reject unknown fields, at least for `frequencies.yaml`. Use strict YAML decoding for this file or add an explicit unknown-field scanner before typed conversion.
+- Add a real loader-level regression proving that `frequency_hz: 528.0`, `pitch: 432.0`, `color_rgb: [1.0, 0.2, 0.3]`, `em_band_id: em.visible.green`, or any other unrecognized harmonic identity field under a frequency profile causes loading or validation to fail.
+- Keep current valid `frequencies.yaml` loading successfully. If strict decoding affects other knowledge files, limit the change to frequency loading first.
+- Update `HARMONIC_DATA_MODEL.md` so it no longer says unknown active frequency YAML fields are accepted as a standing risk. The accepted rule is: unknown active frequency identity fields are rejected until explicitly modeled.
+- Commit the correction locally and report clean status, tests, validation, and the strict-decoding decision.
 
 Rules (unchanged, enforced by this hardening):
 - Do not store floating-point frequency values as meaning.
