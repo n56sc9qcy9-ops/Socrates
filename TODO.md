@@ -48,12 +48,13 @@ Completed (see `docs/TODO_ARCHIVE.md` and git history for detail):
 - Counsellor precision: natural-passage regression tests, direct field ranking over structural noise, deduplicated counsellor suggestions/evidence paths, neutral `feel` handling, structural debug labels, and concise prose alignment.
 - Knowledge curation hygiene after counsellor expansion: validation warnings reduced from 183 to 149, no unknown concept warnings, no canonical-ID alias warnings, and accepted counsellor behavior preserved.
 - All acceptance criteria green. Readiness report at `docs/ARCHITECTURE_READINESS.md`.
-- Sanskrit/Devanagari support: exact Devanagari ScriptWord meanings now participate in the generic passage-field and harmonic-field path; known terms such as `प्राण`, `सत्य`, and `ॐ` activate direct verified fields where curated data exists, while unknown Devanagari such as `कवि` remains weak/speculative. Arabic and Thai were not added.
+- Sanskrit/Devanagari support: exact Devanagari ScriptWord meanings now participate in the generic passage-field and harmonic-field path; known terms such as `प्राण`, `सत्य`, and `ॐ` activate direct verified fields where curated data exists, while unknown Devanagari such as `कवि` remains weak/speculative.
+- Real-life Socrates testing: `docs/REAL_LIFE_TESTING.md` covers 22 seeker-style passages across emotional, spiritual, Sanskrit seed, mixed, edge-case, and infrastructure checks. The report is accepted with three follow-up observations: transliterated Sanskrit gaps, preposition noise, and a possible future resentment false-negative curation gap.
 
 Current git status:
 
 ```text
-## main...origin/main [ahead 85]
+## main...origin/main [ahead 87]
 ```
 
 Key completed metrics (full detail in `docs/ARCHITECTURE_READINESS.md`):
@@ -70,38 +71,37 @@ Key completed metrics (full detail in `docs/ARCHITECTURE_READINESS.md`):
 ## Current Next Task
 
 Task:
-**Real-life Socrates testing after Sanskrit/Devanagari support.**
+**Curate transliterated Sanskrit forms.**
 
 Architect review status:
-Sanskrit/Devanagari support is accepted after the follow-up fix:
-- exact ScriptWord meanings are indexed as Forms in both builder and rebuilt-index paths
-- non-Latin whole-word inputs remain whole tokens for passage/harmonic activation
-- `प्राण` activates direct verified fields for `prana`, `breath`, and `life-force` and produces a harmonic field
-- `सत्य` activates direct verified `truth` and produces a harmonic field
-- `कवि` remains weak/speculative and does not produce a harmonic field
-- Hebrew/Han existing script behavior and all prior counsellor/harmonic checks still pass
-- no Arabic or Thai runtime knowledge was added
+Real-life testing is accepted:
+- `docs/REAL_LIFE_TESTING.md` exists and is committed
+- 22 passages were tested across plain emotional, spiritual alignment, Sanskrit seeds, mixed Sanskrit/English, edge cases, and infrastructure checks
+- direct emotional/spiritual evidence generally outranks structural noise
+- known Sanskrit seed terms remain first-class through passage/harmonic fields
+- unknown `कवि` remains weak/speculative
+- tests, validation, and training remained green
 
 Current blocker:
-- None in the code path. The next risk is whether Socrates feels spiritually useful, grounded, and non-authoritarian in real usage.
-- Do not add Arabic, Thai, new language families, audio rendering, or large new knowledge during this task.
+- Mixed English/Sanskrit passages fail for common Latin transliterations that are not yet in curated data. `prana` and `agni` work because they already exist in `forms.yaml`; `dharma`, `satya`, `karma`, and `jnana` do not.
+- This is a knowledge curation task, not a code architecture task.
+- Do not add new parser behavior, new fuzzy rules, new runtime channels, audio rendering, or broad new knowledge during this task.
 
 Required investigation:
-- Create a small real-life testing protocol/report. Prefer a concise doc such as `docs/REAL_LIFE_TESTING.md` unless a better existing doc already owns this.
-- Test Socrates manually with a fixed set of seeker-style prompts, including:
-  - plain emotional passages: loneliness, sadness, fear, emptiness, resentment, longing, peace
-  - spiritual alignment passages: truth, love, light, surrender, trust, faith, humility
-  - Sanskrit seeds: `प्राण`, `सत्य`, `ॐ`, `धर्म`, `अग्नि`, `मंत्र`
-  - mixed passages, for example English emotional text containing one Sanskrit term
-- For each case, record:
-  - top fields and whether direct evidence outranks structural noise
-  - whether the reading is useful without claiming absolute truth about the person
-  - whether suggestions remain evidence-backed and confidence-labeled
-  - whether harmonic fields appear only when curated profiles support them
-  - whether unknown or weak inputs remain humble/speculative
-- Treat failures as review artifacts first. Do not silently add runtime knowledge to make examples pass.
-- If a serious failure appears, stop and document the smallest correction needed.
-- If the testing report is green, recommend the next architecture choice: deepen real-life testing, start harmonic/audio rendering, or consider Arabic later.
+- Add curated Latin transliteration entries in `internal/knowledge/forms.yaml` for:
+  - `dharma` -> `path`
+  - `satya` -> `truth`
+  - `karma` -> an existing appropriate concept only if a defensible existing concept exists; otherwise document why it is deferred
+  - `jnana` -> an existing appropriate concept only if a defensible existing concept exists; otherwise document why it is deferred
+- Use existing data shape: source, lens, confidence, and weight must be explicit.
+- Prefer conservative confidence. If the mapping is traditional but broad, use `plausible`; use `verified` only when the current knowledge conventions clearly justify it.
+- Do not create new concepts unless absolutely necessary. If a needed concept is absent, defer that form with a note instead of expanding the ontology casually.
+- Add focused tests proving mixed English/Sanskrit inputs activate the curated transliterated form directly:
+  - `I practice dharma every day` should surface `path`
+  - `satya is the foundation of all practice` should surface `truth`
+  - any added `karma`/`jnana` mapping must have a test
+- Preserve existing Devanagari behavior for `धर्म`, `सत्य`, `प्राण`, and unknown `कवि`.
+- Update `docs/REAL_LIFE_TESTING.md` only if the observed mixed-passage limitation changes materially.
 
 Rules (unchanged):
 - No hardcoded semantic word lists in production Go.
@@ -121,14 +121,14 @@ Reference:
 
 Acceptance Criteria:
 
-- A real-life testing report/protocol exists and is committed.
-- The report includes the exact prompts tested and representative CLI outputs or summaries.
-- The report separates spiritual usefulness from evidence support; Socrates must not present itself as absolute truth about the person.
-- Direct emotional/spiritual evidence continues to outrank structural noise in plain passages.
-- Known Sanskrit terms remain first-class through passage/harmonic fields.
-- Unknown or weak inputs remain weak/speculative.
-- No Arabic, Thai, or broad new script family is added.
-- No runtime knowledge is silently mutated as part of testing unless a documented blocker requires a minimal fix.
+- Curated transliterated Sanskrit form entries are added only where there is a defensible existing target concept.
+- `dharma` activates `path` directly in mixed English/Sanskrit passage analysis.
+- `satya` activates `truth` directly in mixed English/Sanskrit passage analysis.
+- `karma` and `jnana` are either curated with tests or explicitly deferred with a short reason.
+- Devanagari Sanskrit seed behavior remains unchanged.
+- Unknown Devanagari input remains weak/speculative.
+- No broad new knowledge area or runtime channel is introduced.
+- No production Go semantic word maps or word-specific branches are introduced.
 - `./bin/socrates knowledge validate` passes with no errors.
 - `go test ./...` passes.
 - Work is committed locally and not pushed.
@@ -136,13 +136,12 @@ Acceptance Criteria:
 
 ## Next After This
 
-After Sanskrit/Devanagari support:
-- Real-life Socrates testing before adding another script family
-- Arabic later if real-life testing supports adding it
+After transliterated Sanskrit curation:
+- Preposition handling for standalone fragments such as `in`
 - Harmonic/audio rendering layer
 - Consult `docs/ARCHITECTURE_READINESS.md` before major new feature layers
 
 ## Nice To Have Later
 
-- extended script support (Arabic, Thai, etc.)
+- extended script support
 - harmonic/audio rendering layer

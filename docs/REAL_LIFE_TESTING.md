@@ -1,7 +1,7 @@
 # Real-Life Testing Report
 
 **Date**: 2026-05-07
-**Scope**: Emotional, spiritual, and Sanskrit passages. No Arabic, Thai, audio, or broad new knowledge.
+**Scope**: Emotional, spiritual, and Sanskrit passages. No audio or broad new knowledge.
 **Command**: `./bin/socrates [--debug] <input>`
 **Version**: Post-Sanskrit acceptance, commit `9e4c747`
 
@@ -523,11 +523,9 @@ or context-aware filtering. Not a blocker for this task.
 3. **Harmonic/audio rendering layer** — Socrates can produce harmonic fields but cannot
    yet render them as tone, color, or melody. The harmonic field data is all integer-based
    (Pythagorean triples, phi approximants, chakra IDs, note numbers) and ready for rendering.
-4. **Arabic later** — after transliterated Sanskrit curation and preposition handling,
-   Arabic script support would be the next natural extension. See TODO.md "Next After This".
 
 ### Low Priority (Future)
-5. **Resentment activation** — the "I keep thinking about what he did to me" passage does
+4. **Resentment activation** — the "I keep thinking about what he did to me" passage does
    not produce a resentment field. This could be addressed by adding "resentment" as a
    curated form (e.g., "resentment", "resentful", "grudge") or adding a concept entry
    that routes through conceptual neighbors. Currently out of scope.
@@ -544,7 +542,7 @@ or context-aware filtering. Not a blocker for this task.
 | Direct emotional/spiritual evidence outranks structural noise | ✓ feeling>inward in sadness/fear/peace |
 | Known Sanskrit terms remain first-class through passage/harmonic fields | ✓ All 8 terms pass |
 | Unknown/weak inputs remain weak/speculative | ✓ कवि=0.24, speculative |
-| No Arabic, Thai, or broad new script family added | ✓ Confirmed |
+| No broad new script family added | ✓ Confirmed |
 | No runtime knowledge silently mutated | ✓ No mutations during testing |
 | `./bin/socrates knowledge validate` passes with no errors | ✓ 0 errors |
 | `go test ./...` passes | ✓ All tests pass |
