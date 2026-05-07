@@ -15,30 +15,48 @@ func runFragmentChannel(forms Forms, kb *knowledge.Knowledge) ChannelResult {
 	// (same primitive found via different fragment parts should only appear once)
 	emittedPrimitives := make(map[string]bool)
 
+	// Determine which tokens are standalone function words.
+	// Signals from these tokens will be flagged as IsStandaloneToken.
+	standaloneTokens := make(map[string]bool)
+	for _, token := range forms.Tokens {
+		if IsPrepositionOrFunctionWord(token) {
+			standaloneTokens[token] = true
+		}
+	}
+
 	// First: exact whole-token matching
-	exactSignals := runWholeTokenMatching(forms, kb)
+	exactSignals := runWholeTokenMatching(forms, kb, standaloneTokens)
 	signals = append(signals, exactSignals...)
 
 	// For non-Latin scripts (but not Han, Hebrew, Devanagari which use ScriptWord)
 	// check if the whole form matches a fragment seed (e.g., transliterated words)
-	nonLatinSignals := runNonLatinWholeTokenMatching(forms, kb)
+	nonLatinSignals := runNonLatinWholeTokenMatching(forms, kb, standaloneTokens)
 	signals = append(signals, nonLatinSignals...)
 
-	// Second: fragment path analysis (knowledge base only)
+	// Second: fragment path analysis (knowledge base only).
+	// Fragment matches from standalone tokens are flagged as IsStandaloneToken
+	// so downstream ranking can suppress structural noise from function words.
 	for _, path := range forms.Fragments {
 		for _, part := range path.Parts {
+			// Determine if this part came from a standalone token.
+			// A fragment part is standalone only if it equals a standalone token exactly
+			// (e.g., 'in' in 'in my heart' → standalone; 'in' in 'inside' → not standalone).
+			isStandalone := standaloneTokens[part]
+
 			// Lookup fragment seeds from knowledge base
 			seeds := knowledgeBasedFragmentLookup(part, kb)
 			for _, seed := range seeds {
 				for _, lens := range seed.Lenses {
-					signals = append(signals, Signal{
-						Text:       "fragment '" + part + "' -> " + lens.Target,
-						Target:     lens.Target,
-						Channel:    "Fragment",
-						Lens:       lens.Lens,
-						Confidence: lens.Confidence,
-						Weight:     lens.Weight(path.Confidence),
-					})
+					sig := Signal{
+						Text:              "fragment '" + part + "' -> " + lens.Target,
+						Target:            lens.Target,
+						Channel:           "Fragment",
+						Lens:              lens.Lens,
+						Confidence:        lens.Confidence,
+						Weight:            lens.Weight(path.Confidence),
+						IsStandaloneToken: isStandalone,
+					}
+					signals = append(signals, sig)
 				}
 			}
 
@@ -49,12 +67,13 @@ func runFragmentChannel(forms Forms, kb *knowledge.Knowledge) ChannelResult {
 				if !emittedPrimitives[prim.ID] {
 					emittedPrimitives[prim.ID] = true
 					signals = append(signals, Signal{
-						Text:       "primitive '" + prim.Name + "' matches " + prim.Name,
-						Target:     prim.ID,
-						Channel:    "Fragment",
-						Lens:       "primitive",
-						Confidence: ConfidenceVerified,
-						Weight:     0.6,
+						Text:              "primitive '" + prim.Name + "' matches " + prim.Name,
+						Target:            prim.ID,
+						Channel:           "Fragment",
+						Lens:              "primitive",
+						Confidence:        ConfidenceVerified,
+						Weight:            0.6,
+						IsStandaloneToken: isStandalone,
 					})
 				}
 			}
@@ -73,7 +92,7 @@ func runFragmentChannel(forms Forms, kb *knowledge.Knowledge) ChannelResult {
 // runWholeTokenMatching checks if the entire input matches a known word/seed.
 // This provides exact whole-token matching for words like prana, ruach, logos, mantra.
 // ONLY processes Latin script - non-Latin scripts use runScriptWordChannel.
-func runWholeTokenMatching(forms Forms, kb *knowledge.Knowledge) []Signal {
+func runWholeTokenMatching(forms Forms, kb *knowledge.Knowledge, standaloneTokens map[string]bool) []Signal {
 	signals := make([]Signal, 0)
 
 	// Only process Latin script - non-Latin scripts use runScriptWordChannel
@@ -83,6 +102,7 @@ func runWholeTokenMatching(forms Forms, kb *knowledge.Knowledge) []Signal {
 	}
 
 	input := forms.Normalized
+	isStandalone := standaloneTokens[input]
 
 	// Check fragment seeds for exact whole-token match from knowledge base
 	seeds := knowledgeBasedFragmentLookup(input, kb)
@@ -90,13 +110,14 @@ func runWholeTokenMatching(forms Forms, kb *knowledge.Knowledge) []Signal {
 		if seed.Fragment == input {
 			for _, lens := range seed.Lenses {
 				signals = append(signals, Signal{
-					Text:       "exact whole-token match: " + input,
-					Target:     lens.Target,
-					Channel:    "Fragment",
-					Lens:       lens.Lens,
-					Confidence: lens.Confidence,
-					Weight:     lens.BaseWeight,
-					IsDirect:   true, // Direct form evidence from knowledge base
+					Text:              "exact whole-token match: " + input,
+					Target:            lens.Target,
+					Channel:           "Fragment",
+					Lens:              lens.Lens,
+					Confidence:        lens.Confidence,
+					Weight:            lens.BaseWeight,
+					IsDirect:          true, // Direct form evidence from knowledge base
+					IsStandaloneToken: isStandalone,
 				})
 			}
 		}
@@ -110,7 +131,7 @@ func runWholeTokenMatching(forms Forms, kb *knowledge.Knowledge) []Signal {
 // Unlike runWholeTokenMatching which only handles Latin script, this handles forms
 // like Han 愛, Hebrew transliterated words, etc. that are stored in the fragment
 // section of forms.yaml rather than as ScriptWords.
-func runNonLatinWholeTokenMatching(forms Forms, kb *knowledge.Knowledge) []Signal {
+func runNonLatinWholeTokenMatching(forms Forms, kb *knowledge.Knowledge, standaloneTokens map[string]bool) []Signal {
 	signals := make([]Signal, 0)
 
 	// Only process non-Latin scripts
@@ -120,6 +141,7 @@ func runNonLatinWholeTokenMatching(forms Forms, kb *knowledge.Knowledge) []Signa
 	}
 
 	input := forms.Normalized
+	isStandalone := standaloneTokens[input]
 
 	// Check fragment seeds for exact whole-token match from knowledge base
 	seeds := knowledgeBasedFragmentLookup(input, kb)
@@ -127,13 +149,14 @@ func runNonLatinWholeTokenMatching(forms Forms, kb *knowledge.Knowledge) []Signa
 		if seed.Fragment == input {
 			for _, lens := range seed.Lenses {
 				signals = append(signals, Signal{
-					Text:       "exact whole-token match: " + input,
-					Target:     lens.Target,
-					Channel:    "Fragment",
-					Lens:       lens.Lens,
-					Confidence: lens.Confidence,
-					Weight:     lens.BaseWeight,
-					IsDirect:   true, // Direct form evidence from knowledge base
+					Text:              "exact whole-token match: " + input,
+					Target:            lens.Target,
+					Channel:           "Fragment",
+					Lens:              lens.Lens,
+					Confidence:        lens.Confidence,
+					Weight:            lens.BaseWeight,
+					IsDirect:          true, // Direct form evidence from knowledge base
+					IsStandaloneToken: isStandalone,
 				})
 			}
 		}

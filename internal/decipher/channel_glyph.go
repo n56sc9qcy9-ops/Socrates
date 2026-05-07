@@ -13,9 +13,27 @@ func runGlyphChannel(forms Forms, kb *knowledge.Knowledge) ChannelResult {
 	input := forms.Normalized
 	script := forms.Script
 
+	// Determine which tokens are standalone function words.
+	// Signals from these tokens will be flagged as IsStandaloneToken.
+	standaloneTokens := make(map[string]bool)
+	for _, token := range forms.Tokens {
+		if IsPrepositionOrFunctionWord(token) {
+			standaloneTokens[token] = true
+		}
+	}
+
 	switch script {
 	case ScriptLatin:
-		signals = append(signals, analyzeLatinGlyphs(input, kb)...)
+		latinSignals := analyzeLatinGlyphs(input, kb)
+		// Tag signals that come from standalone tokens (single-token input only).
+		// For multi-token input, we can't distinguish which token each pattern
+		// came from, so we don't mark signals as standalone.
+		if standaloneTokens[input] && len(forms.Tokens) == 1 {
+			for i := range latinSignals {
+				latinSignals[i].IsStandaloneToken = true
+			}
+		}
+		signals = append(signals, latinSignals...)
 	case ScriptHebrew:
 		signals = append(signals, analyzeHebrewGlyphs(forms.Runes, kb)...)
 	case ScriptDevanagari:

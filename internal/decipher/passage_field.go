@@ -111,8 +111,9 @@ func (pf PassageFields) GetField(concept string) *PassageField {
 }
 
 // TopFields returns the top N fields, prioritizing direct concept evidence.
-// Fields with direct evidence (exact matches, curated fragments) rank above
-// propagated/graph-expanded fields, regardless of accumulated strength.
+// Primary sort: IsDirectEvidence (direct > structural).
+// Secondary sort: Depth (depth-0 > depth-1+), then strength descending.
+// This ensures genuine semantic signals outrank graph-expanded structural noise.
 func (pf PassageFields) TopFields(n int) PassageFields {
 	if len(pf) <= n {
 		return pf
@@ -122,20 +123,44 @@ func (pf PassageFields) TopFields(n int) PassageFields {
 	copy(sorted, pf)
 	for i := 0; i < len(sorted)-1; i++ {
 		for j := i + 1; j < len(sorted); j++ {
-			// Primary sort: direct evidence fields rank above propagated
+			// Primary: IsDirectEvidence (direct before structural)
+			swap := false
 			if !sorted[i].IsDirectEvidence && sorted[j].IsDirectEvidence {
-				sorted[i], sorted[j] = sorted[j], sorted[i]
-				continue
-			}
-			if sorted[i].IsDirectEvidence == sorted[j].IsDirectEvidence {
-				// Secondary: within same evidence type, sort by strength (descending)
-				if sorted[j].Strength > sorted[i].Strength {
-					sorted[i], sorted[j] = sorted[j], sorted[i]
+				swap = true
+			} else if sorted[i].IsDirectEvidence == sorted[j].IsDirectEvidence {
+				// Same directness: depth ascending (depth-0 before depth-1+)
+				if sorted[i].Depth > sorted[j].Depth {
+					swap = true
+				} else if sorted[i].Depth == sorted[j].Depth {
+					// Same depth: strength descending
+					if sorted[j].Strength > sorted[i].Strength {
+						swap = true
+					}
 				}
+			}
+			if swap {
+				sorted[i], sorted[j] = sorted[j], sorted[i]
 			}
 		}
 	}
 	return sorted[:n]
+}
+
+// HasOnlyStandaloneDirectEvidence returns true if this field's only direct evidence
+// (IsDirect=true) comes from standalone preposition/function word tokens.
+// This is used to suppress structural noise from short function words while
+// preserving genuine direct evidence from real words.
+func (pf *PassageField) HasOnlyStandaloneDirectEvidence() bool {
+	hasDirect := false
+	for _, ev := range pf.EvidencePaths {
+		if ev.IsDirect {
+			hasDirect = true
+			if !ev.IsStandaloneToken {
+				return false // Found genuine direct evidence
+			}
+		}
+	}
+	return hasDirect // true only if all direct evidence is standalone-token
 }
 
 // BuildPassageFieldsFromGraph constructs PassageFields from an activation graph.
@@ -233,15 +258,18 @@ func AnalyzePassageFromTokens(tokens []string, kb *knowledge.Knowledge) PassageF
 		}
 		signals := AnalyzePassageTokens(passageTokens, kb)
 
-		// Mark signals with original token as source
+		// Mark signals with original token as source, preserving standalone token flag.
+		// The standalone flag tracks whether the signal came from a standalone
+		// preposition/function word (not embedded in a larger word).
 		for _, sig := range signals {
 			allPassageSignals = append(allPassageSignals, PassageSignal{
-				Token:      token, // Original token from passage
-				Concept:    sig.Concept,
-				Weight:     sig.Weight,
-				Confidence: sig.Confidence,
-				MatchForm:  token,
-				MatchScore: 1.0,
+				Token:              token, // Original token from passage
+				Concept:            sig.Concept,
+				Weight:             sig.Weight,
+				Confidence:         sig.Confidence,
+				MatchForm:          token,
+				MatchScore:         1.0,
+				IsStandaloneToken: sig.IsStandaloneToken,
 			})
 		}
 

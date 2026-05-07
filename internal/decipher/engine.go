@@ -66,6 +66,7 @@ func (e *Engine) Analyze(input string) Reading {
 
 	// Build and propagate through the activation graph
 	activationGraph := BuildGraphFromEvidence(channels, passageSignals, fuzzyMatches, conceptExpansions, e.Knowledge)
+	activationGraph.FinalizeDepths()
 	activationGraph.PropagateActivation()
 	convergence := activationGraph.ToConvergenceResult()
 

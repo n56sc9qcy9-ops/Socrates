@@ -19,6 +19,10 @@ type EvidencePath struct {
 	// IsDirect is true if this evidence comes from direct form/glyph/script evidence,
 	// false if it comes from symbolic neighbor expansion or other indirect sources.
 	IsDirect    bool
+	// IsStandaloneToken is true if this evidence comes from a standalone
+	// preposition/function word (not embedded in a larger word). Used to suppress
+	// structural noise while preserving meaningful fragments inside real words.
+	IsStandaloneToken bool
 
 	// Match information
 	MatchForm  string
@@ -65,6 +69,11 @@ type ActivationNode struct {
 	// Graph position
 	Depth   int  // Distance from direct evidence (0 = direct)
 	Visited bool // For cycle detection during propagation
+
+	// IsSource indicates this node should act as a propagation source.
+	// True if node has direct evidence OR was explicitly created as a source
+	// (nodes without evidence but with non-zero strength are sources).
+	IsSource bool
 }
 
 // EvidencePaths returns the evidence paths for this node.
@@ -143,6 +152,9 @@ func (g *ActivationGraph) AddNode(concept string, strength float64, confidence s
 		return node
 	}
 
+	// Nodes with non-zero strength are sources (e.g., graph-only nodes in tests)
+	isSource := strength > 0
+
 	node := &ActivationNode{
 		Concept:      concept,
 		Strength:     strength,
@@ -150,6 +162,7 @@ func (g *ActivationGraph) AddNode(concept string, strength float64, confidence s
 		Confidence:   confidence,
 		Depth:        0,
 		Evidence:     make([]EvidencePath, 0),
+		IsSource:     isSource,
 	}
 	g.Nodes[concept] = node
 	return node
@@ -253,12 +266,13 @@ func BuildGraphFromEvidence(
 					key := ch.Name + "|" + sig.Text
 					if _, exists := channelEvidence[key]; !exists {
 						channelEvidence[key] = EvidencePath{
-							SourceToken: sig.Text,
-							SourceForm:  ch.Name + "|" + sig.Text,
-							SourceType:  "direct_channel",
-							Confidence:  sig.Confidence,
-							Weight:      sig.Weight,
-							IsDirect:    sig.IsDirect,
+							SourceToken:         sig.Text,
+							SourceForm:          ch.Name + "|" + sig.Text,
+							SourceType:          "direct_channel",
+							Confidence:         sig.Confidence,
+							Weight:             sig.Weight,
+							IsDirect:           sig.IsDirect,
+							IsStandaloneToken:  sig.IsStandaloneToken,
 						}
 					}
 					if sig.Confidence == ConfidenceVerified {
@@ -275,6 +289,13 @@ func BuildGraphFromEvidence(
 		}
 
 		node := g.AddNode(concept, totalWeight, maxConfidence)
+		// Mark as source if any evidence is direct
+		for _, ev := range channelEvidence {
+			if ev.IsDirect {
+				node.IsSource = true
+				break
+			}
+		}
 		for _, ev := range channelEvidence {
 			node.AddEvidence(ev)
 		}
@@ -283,15 +304,17 @@ func BuildGraphFromEvidence(
 	// Phase 2: Add passage signals as depth-0 nodes
 	for _, sig := range passageSignals {
 		node := g.AddNode(sig.Concept, sig.Weight, sig.Confidence)
+		node.IsSource = true // Passage signals are sources
 		evidence := EvidencePath{
-			SourceToken: sig.Token,
-			SourceForm:  sig.Token,
-			SourceType:  "passage_signal",
-			MatchForm:   sig.MatchForm,
-			MatchScore:  sig.MatchScore,
-			Confidence:  sig.Confidence,
-			Weight:      sig.Weight,
-			IsDirect:    true, // Passage signals are direct evidence
+			SourceToken:         sig.Token,
+			SourceForm:          sig.Token,
+			SourceType:          "passage_signal",
+			MatchForm:           sig.MatchForm,
+			MatchScore:          sig.MatchScore,
+			Confidence:          sig.Confidence,
+			Weight:              sig.Weight,
+			IsDirect:            true, // Passage signals have direct evidence
+			IsStandaloneToken:  sig.IsStandaloneToken,
 		}
 		node.AddEvidence(evidence)
 	}
@@ -360,7 +383,12 @@ func BuildGraphFromEvidence(
 		}
 	}
 
-	// Phase 5: Reset visited flags for propagation
+	// Phase 5: Finalize depths for standalone-only nodes.
+	// Nodes whose only evidence comes from standalone preposition/function tokens
+	// should be treated as depth-1 structural noise, not genuine semantic signals.
+	g.FinalizeDepths()
+
+	// Phase 6: Reset visited flags for propagation
 	g.resetVisited()
 
 	return g
@@ -385,15 +413,26 @@ func (g *ActivationGraph) resetVisited() {
 // Activation Propagation
 // =============================================================================
 
+// hasDirectEvidence returns true if the node has any direct evidence.
+func hasDirectEvidence(node *ActivationNode) bool {
+	for _, ev := range node.Evidence {
+		if ev.IsDirect {
+			return true
+		}
+	}
+	return false
+}
+
 // PropagateActivation propagates activation through graph edges with decay.
 // Uses path-local visited tracking for deterministic cycle-safe propagation.
 func (g *ActivationGraph) PropagateActivation() {
-	// Propagate from each depth-0 (direct) node with a fresh path-local visited set
+	// Propagate from nodes marked as sources (nodes with direct evidence
+	// or nodes explicitly created with non-zero strength).
 	for _, node := range g.Nodes {
-		if node.Depth == 0 {
+		if node.IsSource {
 			visitedInPath := make(map[string]bool)
 			visitedInPath[node.Concept] = true
-			g.propagateFrom(node, node.Strength, 0, visitedInPath)
+			g.propagateFrom(node, node.BaseStrength, 0, visitedInPath)
 		}
 	}
 
@@ -402,8 +441,29 @@ func (g *ActivationGraph) PropagateActivation() {
 	g.DirectCount = 0
 	for _, node := range g.Nodes {
 		g.TotalStrength += node.Strength
-		if node.Depth == 0 {
+		// Count nodes marked as sources (direct evidence or explicit sources)
+		if node.IsSource {
 			g.DirectCount++
+		}
+	}
+}
+
+// FinalizeDepths marks nodes whose only evidence comes from standalone preposition/
+// function word tokens as depth-1 (structural). This prevents short function words
+// from dominating semantic analysis while preserving genuine direct evidence.
+func (g *ActivationGraph) FinalizeDepths() {
+	for _, node := range g.Nodes {
+		// Check if all evidence is from standalone tokens
+		allStandalone := true
+		for _, ev := range node.Evidence {
+			if !ev.IsStandaloneToken {
+				allStandalone = false
+				break
+			}
+		}
+		// If no evidence or all evidence from standalone tokens, mark as depth-1
+		if len(node.Evidence) > 0 && allStandalone {
+			node.Depth = 1
 		}
 	}
 }
@@ -411,6 +471,9 @@ func (g *ActivationGraph) PropagateActivation() {
 // propagateFrom propagates activation from a source node through its edges.
 // Uses path-local visited tracking for deterministic cycle-safe propagation.
 func (g *ActivationGraph) propagateFrom(source *ActivationNode, strength float64, depth int, visitedInPath map[string]bool) {
+	// Check if we've reached max depth BEFORE processing edges
+	// depth=0 is source, depth=1 is first-hop neighbor, etc.
+	// So we should stop if depth >= MaxDepth (not depth+1 >= MaxDepth)
 	if depth >= g.MaxDepth {
 		return // Bounded depth
 	}
@@ -581,11 +644,20 @@ func (g *ActivationGraph) ToConvergenceResult() ConvergenceResult {
 	topNodes := g.GetTopNodes(3)
 	topConcepts := make([]ActivatedConcept, len(topNodes))
 	for i, node := range topNodes {
+		// Check if any evidence path has IsDirect=true.
+		// This mirrors BuildPassageFieldsFromGraph's logic.
+		isDirect := false
+		for _, ev := range node.EvidencePaths() {
+			if ev.IsDirect {
+				isDirect = true
+				break
+			}
+		}
 		topConcepts[i] = ActivatedConcept{
 			Concept:           node.Concept,
 			Strength:         node.Strength,
 			Confidence:       node.Confidence,
-			IsDirectEvidence: node.Depth == 0, // depth 0 = direct evidence
+			IsDirectEvidence: isDirect,
 		}
 	}
 
@@ -603,12 +675,20 @@ func (g *ActivationGraph) ToConvergenceResult() ConvergenceResult {
 			sources = []string{"graph"}
 		}
 
+			// Check if any evidence path has IsDirect=true
+		isDirect := false
+		for _, ev := range node.EvidencePaths() {
+			if ev.IsDirect {
+				isDirect = true
+				break
+			}
+		}
 		activated = append(activated, ActivatedConcept{
 			Concept:           node.Concept,
 			Strength:         node.Strength,
 			Sources:          sources,
 			Confidence:       node.Confidence,
-			IsDirectEvidence: node.Depth == 0, // depth 0 = direct evidence
+			IsDirectEvidence: isDirect,
 		})
 	}
 

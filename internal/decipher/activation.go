@@ -117,6 +117,10 @@ type PassageSignal struct {
 	Confidence string
 	MatchForm  string
 	MatchScore float64
+	// IsStandaloneToken is true if this signal comes from a standalone
+	// preposition/function word. Used to suppress structural noise while
+	// preserving meaningful direct matches from real words.
+	IsStandaloneToken bool
 }
 
 // EvidenceID returns a deterministic identity for this signal.
@@ -146,9 +150,13 @@ func AnalyzePassageTokens(tokens []string, kb *knowledge.Knowledge) []PassageSig
 	anchors := GetAllAnchors(kb)
 
 	for _, token := range tokens {
+		// Track if this token is a standalone preposition/function word.
+		isStandalone := IsPrepositionOrFunctionWord(token)
+
 		// First: check for direct form match in knowledge base
 		// If a token has ANY curated form, use it and skip fuzzy matching
-		// to prevent false positives from similar but unrelated words
+		// to prevent false positives from similar but unrelated words.
+		// Standalone tokens still get processed but flagged for downstream suppression.
 		matchedToken := ""
 		directForms := kb.GetFormsByText(token)
 		for _, form := range directForms {
@@ -156,12 +164,13 @@ func AnalyzePassageTokens(tokens []string, kb *knowledge.Knowledge) []PassageSig
 			// Skip speculative forms to avoid noise
 			if form.Confidence != ConfidenceSpeculative {
 				signals = append(signals, PassageSignal{
-					Token:      token,
-					Concept:    form.Concept,
-					Weight:     float64(form.Weight),
-					Confidence: form.Confidence,
-					MatchForm:  token,
-					MatchScore: 1.0,
+					Token:              token,
+					Concept:            form.Concept,
+					Weight:             float64(form.Weight),
+					Confidence:         form.Confidence,
+					MatchForm:          token,
+					MatchScore:         1.0,
+					IsStandaloneToken: isStandalone,
 				})
 				matchedToken = token
 				break
@@ -181,12 +190,13 @@ func AnalyzePassageTokens(tokens []string, kb *knowledge.Knowledge) []PassageSig
 				for _, anchor := range anchors {
 					if anchor.Form == match.AnchorForm {
 						signals = append(signals, PassageSignal{
-							Token:      token,
-							Concept:    anchor.Concept,
-							Weight:     match.Weight,
-							Confidence: computeSignalConfidence(anchor.Confidence, match.Weight),
-							MatchForm:  match.AnchorForm,
-							MatchScore: match.Weight,
+							Token:              token,
+							Concept:            anchor.Concept,
+							Weight:             match.Weight,
+							Confidence:         computeSignalConfidence(anchor.Confidence, match.Weight),
+							MatchForm:          match.AnchorForm,
+							MatchScore:         match.Weight,
+							IsStandaloneToken: isStandalone,
 						})
 						break
 					}

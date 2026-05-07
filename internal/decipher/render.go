@@ -28,13 +28,19 @@ func renderDefault(r Reading) string {
 	sb.WriteString("Input:\n")
 	sb.WriteString("  " + r.Input + "\n\n")
 
-	// Top Evidence Paths (convergence-based, not candidate dumps)
+	// Top Evidence Paths - align with top passage fields for consistency
 	sb.WriteString("Evidence:\n")
 
-	// Show top concepts from convergence with their evidence paths
-	if len(r.Convergence.TopConcepts) > 0 {
+	// Use top passage fields for consistent evidence display
+	if len(r.PassageFields) > 0 {
+		topFields := r.PassageFields.TopFields(3)
+		for _, field := range topFields {
+			sb.WriteString(fmt.Sprintf("  - %s [%.0f%%, via: %s]\n",
+				field.Concept, field.Strength*100, strings.Join(field.TokenSources, ", ")))
+		}
+	} else if len(r.Convergence.TopConcepts) > 0 {
+		// Fallback to convergence top concepts if no passage fields
 		for _, tc := range r.Convergence.TopConcepts {
-			// Show concept with strength and source evidence
 			if len(tc.Sources) > 0 {
 				sb.WriteString(fmt.Sprintf("  - %s [%.0f%%, via: %s]\n",
 					tc.Concept, tc.Strength*100, strings.Join(tc.Sources, ", ")))

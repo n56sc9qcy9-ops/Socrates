@@ -91,6 +91,31 @@ type FragmentPath struct {
 	Confidence float64
 }
 
+// IsPrepositionOrFunctionWord returns true if s is a common standalone preposition
+// or function word that should not trigger structural fragment semantics.
+// This is a data-defined set of high-frequency English function words that are
+// too ambiguous to carry semantic weight on their own.
+// Returns false for empty strings and words longer than 4 characters.
+func IsPrepositionOrFunctionWord(s string) bool {
+	switch s {
+	// Common prepositions
+	case "in", "on", "at", "to", "of", "by", "as", "up", "an", "am",
+		// Common verbs / auxiliaries (standalone can be structural noise)
+		"is", "it", "if", "so", "we", "me", "my", "do", "no",
+		"be", "he", "us", "go",
+		// Articles
+		"a", "i",
+		// Conjunctions
+		"and", "the",
+		// Common short function words
+		"but", "not", "for", "his", "her", "its", "our", "your",
+		"can", "all", "any":
+		return len(s) <= 4 // Safety: only single/two/three-char words qualify
+	default:
+		return false
+	}
+}
+
 // Signal represents a resonance signal found by a channel.
 type Signal struct {
 	Text       string
@@ -102,6 +127,11 @@ type Signal struct {
 	// IsDirect indicates this signal comes from direct form/glyph/script evidence
 	// (not from symbolic neighbor expansion). Used to distinguish evidence provenance.
 	IsDirect bool
+	// IsStandaloneToken indicates this signal comes from a standalone preposition,
+	// article, or function word (not embedded in a larger word). Used to suppress
+	// structural noise from short function words while preserving meaningful
+	// fragments inside real words.
+	IsStandaloneToken bool
 }
 
 // EvidenceID returns a deterministic identity for this signal.
