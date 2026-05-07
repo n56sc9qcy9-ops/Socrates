@@ -308,6 +308,8 @@ func renderDebug(r Reading) string {
 	if len(r.PassageFields) > 0 {
 		sb.WriteString(fmt.Sprintf("Passage Fields (%d total):\n", len(r.PassageFields)))
 		for _, field := range r.PassageFields {
+			// Primary label: direct if IsDirectEvidence, structural if not
+			// Override with depth label when depth > 0 (graph-expanded from direct evidence)
 			depthStr := "direct"
 			if !field.IsDirectEvidence {
 				depthStr = "structural"

@@ -101,8 +101,16 @@ func (e *Engine) Analyze(input string) Reading {
 	discoveryScore := CalculateFinalScore(scoreComponents)
 	finalScore := (baseScore.Overall + discoveryScore) / 2.0
 
+	// Collect top field concept IDs for prose alignment.
+	// Use TopFields(3) to get the semantically most important fields,
+	// prioritizing direct evidence over structural noise.
+	var topFieldConcepts []string
+	for _, f := range passageFields.TopFields(3) {
+		topFieldConcepts = append(topFieldConcepts, f.Concept)
+	}
+
 	// Generate concise reading
-	reading := generateConciseReading(input, converging, weakSignals, convergence)
+	reading := generateConciseReading(input, converging, weakSignals, convergence, topFieldConcepts)
 
 	// Generate warnings
 	warnings := generateWarnings(input, converging, weakSignals)
@@ -402,17 +410,20 @@ func calculateOverallScore(channels []ChannelResult, converging []Pattern, allSi
 
 // generateConciseReading creates a narrative reading from patterns.
 // Uses ConvergenceResult for generic concept activation instead of semantic buckets.
-func generateConciseReading(input string, converging []Pattern, weakSignals []Pattern, convergence ConvergenceResult) string {
+// topFields guides TopConcept selection so prose reflects field activation order.
+func generateConciseReading(input string, converging []Pattern, weakSignals []Pattern, convergence ConvergenceResult, topFields []string) string {
 	if len(converging) == 0 && len(weakSignals) == 0 && len(convergence.ActivatedConcepts) == 0 {
 		return "Limited resonance patterns detected for this input."
 	}
 
 	var parts []string
 
-	// Add passage-level activated concepts
-	if len(convergence.TopConcepts) > 0 {
+	// Add passage-level activated concepts, guided by top fields
+	// so prose reflects field activation order rather than raw signal strength.
+	if len(convergence.ActivatedConcepts) > 0 {
+		topConcepts := findTopConceptsWithFields(convergence.ActivatedConcepts, topFields, 3)
 		var conceptNames []string
-		for _, ac := range convergence.TopConcepts {
+		for _, ac := range topConcepts {
 			if ac.Strength > 0.3 {
 				conceptNames = append(conceptNames, ac.Concept)
 			}

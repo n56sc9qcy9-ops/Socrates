@@ -1,6 +1,8 @@
 package decipher
 
 import (
+	"sort"
+
 	"socrates/internal/knowledge"
 )
 
@@ -454,20 +456,20 @@ func (g *ActivationGraph) propagateFrom(source *ActivationNode, strength float64
 // =============================================================================
 
 // GetTopNodes returns the top N nodes by activation strength.
+// Priority: direct evidence (Depth=0) first, then by strength descending.
 func (g *ActivationGraph) GetTopNodes(n int) []*ActivationNode {
 	nodes := make([]*ActivationNode, 0, len(g.Nodes))
 	for _, node := range g.Nodes {
 		nodes = append(nodes, node)
 	}
 
-	// Sort by strength descending
-	for i := 0; i < len(nodes)-1; i++ {
-		for j := i + 1; j < len(nodes); j++ {
-			if nodes[j].Strength > nodes[i].Strength {
-				nodes[i], nodes[j] = nodes[j], nodes[i]
-			}
+	// Sort: direct evidence (Depth=0) first, then by strength descending
+	sort.Slice(nodes, func(i, j int) bool {
+		if nodes[i].Depth != nodes[j].Depth {
+			return nodes[i].Depth < nodes[j].Depth // 0 before 1 before 2
 		}
-	}
+		return nodes[i].Strength > nodes[j].Strength
+	})
 
 	if len(nodes) > n {
 		return nodes[:n]
@@ -580,9 +582,10 @@ func (g *ActivationGraph) ToConvergenceResult() ConvergenceResult {
 	topConcepts := make([]ActivatedConcept, len(topNodes))
 	for i, node := range topNodes {
 		topConcepts[i] = ActivatedConcept{
-			Concept:    node.Concept,
-			Strength:   node.Strength,
-			Confidence: node.Confidence,
+			Concept:           node.Concept,
+			Strength:         node.Strength,
+			Confidence:       node.Confidence,
+			IsDirectEvidence: node.Depth == 0, // depth 0 = direct evidence
 		}
 	}
 
@@ -601,10 +604,11 @@ func (g *ActivationGraph) ToConvergenceResult() ConvergenceResult {
 		}
 
 		activated = append(activated, ActivatedConcept{
-			Concept:    node.Concept,
-			Strength:   node.Strength,
-			Sources:    sources,
-			Confidence: node.Confidence,
+			Concept:           node.Concept,
+			Strength:         node.Strength,
+			Sources:          sources,
+			Confidence:       node.Confidence,
+			IsDirectEvidence: node.Depth == 0, // depth 0 = direct evidence
 		})
 	}
 

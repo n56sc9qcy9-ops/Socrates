@@ -1,6 +1,8 @@
 package decipher
 
 import (
+	"sort"
+
 	"socrates/internal/knowledge"
 )
 
@@ -44,18 +46,62 @@ func DetectConvergence(passageSignals []PassageSignal, directConcepts []string, 
 }
 
 // findTopConcepts returns the top N concepts by activation strength.
+// Priority: direct evidence > by strength descending.
+// This ensures the prose reading reflects verified field activations, not just signal strength.
 func findTopConcepts(activated []ActivatedConcept, n int) []ActivatedConcept {
-	// Sort by strength descending
+	if len(activated) <= n {
+		return activated
+	}
+
 	sorted := make([]ActivatedConcept, len(activated))
 	copy(sorted, activated)
 
-	for i := 0; i < len(sorted)-1; i++ {
-		for j := i + 1; j < len(sorted); j++ {
-			if sorted[j].Strength > sorted[i].Strength {
-				sorted[i], sorted[j] = sorted[j], sorted[i]
-			}
+	// Sort: direct evidence first, then by strength descending
+	sort.Slice(sorted, func(i, j int) bool {
+		if sorted[i].IsDirectEvidence != sorted[j].IsDirectEvidence {
+			return sorted[i].IsDirectEvidence // true before false
 		}
+		return sorted[i].Strength > sorted[j].Strength
+	})
+
+	if len(sorted) > n {
+		return sorted[:n]
 	}
+	return sorted
+}
+
+// findTopConceptsWithFields returns the top N concepts, preferring concepts
+// that appear in the top passage fields when available.
+// Priority: direct evidence > in-field > by strength.
+func findTopConceptsWithFields(activated []ActivatedConcept, topFields []string, n int) []ActivatedConcept {
+	if len(activated) <= n {
+		return activated
+	}
+
+	// Build a set of top field concept IDs for fast lookup
+	fieldSet := make(map[string]bool)
+	for _, f := range topFields {
+		fieldSet[f] = true
+	}
+
+	// Sort: direct evidence first, then in-field, then by strength descending
+	sorted := make([]ActivatedConcept, len(activated))
+	copy(sorted, activated)
+
+	sort.Slice(sorted, func(i, j int) bool {
+		// 1. Direct evidence first
+		if sorted[i].IsDirectEvidence != sorted[j].IsDirectEvidence {
+			return sorted[i].IsDirectEvidence
+		}
+		// 2. In top fields (by strength)
+		inFieldI := fieldSet[sorted[i].Concept]
+		inFieldJ := fieldSet[sorted[j].Concept]
+		if inFieldI != inFieldJ {
+			return inFieldI
+		}
+		// 3. By strength descending
+		return sorted[i].Strength > sorted[j].Strength
+	})
 
 	if len(sorted) > n {
 		return sorted[:n]

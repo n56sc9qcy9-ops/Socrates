@@ -128,10 +128,11 @@ func (ps PassageSignal) EvidenceID() string {
 
 // ActivatedConcept represents a concept activated through form matching.
 type ActivatedConcept struct {
-	Concept    string
-	Strength   float64
-	Sources    []string // tokens that activated this concept
-	Confidence string
+	Concept           string
+	Strength         float64
+	Sources          []string // tokens that activated this concept
+	Confidence       string
+	IsDirectEvidence bool     // true if activation has direct (not graph-propagated) evidence
 }
 
 // AnalyzePassageTokens analyzes tokens for passage-level signals.
@@ -238,10 +239,11 @@ func ComputeActivatedConcepts(signals []PassageSignal, directConcepts []string, 
 			}
 		} else {
 			activated[sig.Concept] = &ActivatedConcept{
-				Concept:    sig.Concept,
-				Strength:   sig.Weight,
-				Sources:    []string{sig.Token},
-				Confidence: sig.Confidence,
+				Concept:           sig.Concept,
+				Strength:         sig.Weight,
+				Sources:          []string{sig.Token},
+				Confidence:       sig.Confidence,
+				IsDirectEvidence: true, // passage signals have direct evidence
 			}
 		}
 	}
@@ -278,6 +280,7 @@ func ComputeActivatedConcepts(signals []PassageSignal, directConcepts []string, 
 					Strength:   rel.Weight * 0.5,
 					Sources:    []string{"graph_expansion"},
 					Confidence: ConfidencePlausible,
+				IsDirectEvidence: false, // graph expansion is indirect
 				}
 			}
 		}
