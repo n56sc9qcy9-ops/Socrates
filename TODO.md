@@ -65,12 +65,20 @@ Key completed metrics (full detail in `docs/ARCHITECTURE_READINESS.md`):
 ## Current Next Task
 
 Task:
-**Harmonic data model hardening — COMPLETED.**
+**Harmonic data model hardening — NOT ACCEPTED YET.**
 
 Architect review status:
-All blockers resolved. Harmonic data model is hardened.
+Not accepted yet. Pi added a useful blocklist for known dangerous float/EM/color fields, but this still is not strict unknown-field protection.
 
-Key decisions this session:
+Current blocker:
+- The current pre-scan rejects a blocklist (`frequency_hz`, `pitch`, `color_rgb`, etc.), but arbitrary unknown frequency-profile fields still silently pass unless they happen to be on that blocklist.
+- Active `frequency_profiles[*]` must reject any unrecognized profile key, not only known-dangerous keys. Example fields such as `solfeggio_hz`, `carrier_frequency`, `tone_hz`, `chakra`, `planetary_frequency`, or `custom_harmonic_value` must fail until explicitly modeled.
+- Active `frequency_profiles[*].labels` must reject any unrecognized label key, not only invalid known labels.
+- Top-level structural keys may remain limited to an explicit allowlist (`frequency_profiles`, and any intentionally accepted reference-only sections such as `harmonic_systems`). Unknown top-level keys should either fail or be explicitly documented as reference-only with tests.
+- Prefer using a strict YAML decoder with known fields if available in the current YAML package. If not, the existing pre-scan must become an allowlist scanner for frequency profile entries, not a blocklist scanner.
+- Add loader-level regression tests for arbitrary unknown profile keys and unknown label keys, not just the original blocklist examples.
+- Update `HARMONIC_DATA_MODEL.md` so "unknown fields are rejected" means allowlist rejection, not blocklist rejection.
+- Commit the correction locally and report clean status, tests, validation, and the final strict-decoding/allowlist decision.
 
 Rules (unchanged, enforced by this hardening):
 - Do not store floating-point frequency values as meaning.
