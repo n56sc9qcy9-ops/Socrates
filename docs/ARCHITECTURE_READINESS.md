@@ -1,32 +1,36 @@
 # Architecture Readiness Report
 
-Generated during architecture readiness review. **Do not edit by hand** - regenerate with the readiness task or update via proper commits.
+Generated during architecture readiness refresh after counsellor precision and curation
+hygiene. **Do not edit by hand** - regenerate with the readiness task or update via
+proper commits.
 
 ## Status: READY FOR NEXT PHASE
 
-Socrates has reached the readiness threshold for the next architecture phase. No blocking issues remain.
+Socrates has reached the readiness threshold for the next architecture phase. No blocking
+issues remain.
 
 ## Verified Operational Commands
 
 | Command | Status | Output |
 |---------|--------|--------|
 | `make create` | ✓ Works | Builds `bin/socrates` |
-| `./bin/socrates love` | ✓ Works | Resonance reading |
-| `./bin/socrates "what is the purpose of life"` | ✓ Works | Joined passage decipher |
+| `./bin/socrates love truth light` | ✓ Works | 3-concept resonance reading |
+| `./bin/socrates "i feel sad and empty inside"` | ✓ Works | Emotional self-report reading |
+| `./bin/socrates "lonely and afraid"` | ✓ Works | Dual emotional reading with counsellor |
+| `./bin/socrates "I feel afraid and disconnected from truth"` | ✓ Works | Fear + isolation + truth reading |
 | `./bin/socrates --help` | ✓ Works | Clear help with examples |
-| `./bin/socrates knowledge validate` | ✓ Works | 86 warnings, 0 errors |
-| `./socrates suggest-weights` | ✓ Works | Writes `review/weight_suggestions.yaml` |
-| `./socrates train` | ✓ Works | Train/held-out evaluation |
+| `./bin/socrates knowledge validate` | ✓ Works | 149 warnings, 0 errors |
+| `./bin/socrates train` | ✓ Works | Train evaluation; 8/8 examples pass |
 | `go test ./...` | ✓ Works | All tests pass |
 
 ## Current Architecture
 
 ```
 cmd/socrates/           CLI entry point
-internal/decipher/     Core engine (24 files, ~11k LOC)
+internal/decipher/     Core engine (~11k LOC)
 internal/knowledge/    Active runtime YAML (embedded)
 knowledge/reference/   Source/reference material (non-runtime)
-training/              Training examples, held-out, weights
+training/              Training examples, weights
 review/                Review suggestion files
 docs/                  Documentation
 ```
@@ -34,12 +38,15 @@ docs/                  Documentation
 ### Core components (all stable):
 - Form generation and candidate creation
 - Similarity matching (exact, fuzzy, phonetic, skeleton)
-- Activation graph with evidence paths
-- Graph propagation with deduplication
-- Passage field analysis
+- Activation graph with evidence paths and deduplication
+- Graph propagation with depth tracking
+- Passage field analysis with direct/indirect evidence labeling
 - Harmonic field scoring
-- Evidence-first rendering
-- Ranking weights and train/eval pipeline
+- Evidence-first rendering (concise default, debug detail)
+- Counsellor/transmutation fields (data-backed, tends-toward language)
+- Channel semantics with cross-script convergence
+- Training/eval pipeline with train/held-out split
+- Natural-passage regression tests
 
 ## Known Metrics
 
@@ -51,39 +58,85 @@ docs/                  Documentation
 | Held-out field precision | 0.27 |
 | Held-out field recall | 0.62 |
 | Held-out pass rate | 5/8 |
-| Validation warnings | 86 (1 category: seed labels) |
+| Validation warnings | 149 (1 category: data quality) |
 | Validation errors | 0 |
+| Canonical-ID alias warnings | 0 (removed by curation hygiene) |
 | Cross-script convergence | English, Norwegian, Hebrew, Chinese love |
 
 ## Accepted Warning Debt
 
 | Category | Count | Resolution |
 |----------|-------|------------|
-| name == id (seed labels) | 86 | Accepted visible debt; must not be hidden but does not block ranking |
+| name == id (descriptive labels) | 138 | Accepted visible debt; concept IDs are concise identifiers |
+| cross-alias groups (shared linguistic aliases) | 11 | Intentional: concepts share common aliases (e.g., peace/calm both "serenity", trust/faith both "confidence") |
+| **Total** | **149** | One category, all data quality only |
 
-This is a curation debt. Pi acknowledges it and it must not be hidden.
+This is curation debt. Pi acknowledges it and it must not be hidden. Zero validation errors.
 
 ## Completed Guardrails (all verified)
 
 - Active YAML validates ✓
-- `knowledge validate` works ✓
+- `knowledge validate` works with zero errors ✓
 - Channel diversity counts active evidence only ✓
-- Training evaluation is precision-aware ✓
+- Precision-aware training evaluation ✓
 - Multi-concept fuzzy evidence remains complete ✓
 - Cross-script love and Hebrew `El` boundary behavior works ✓
 - Concept schema hygiene warnings visible and bounded ✓
 - Training does not mutate active knowledge ✓
 - No black-box truth model introduced ✓
+- Natural-passage regression tests pass (6 tests) ✓
+- Direct emotional/spiritual fields outrank structural observations ✓
+- Neutral "feel" activates `feeling` not `resentment` ✓
+- Structural fields labeled indirect in debug output ✓
+- Counsellor suggestions and evidence paths deduplicate ✓
+- Final concise prose reflects top fields, not structural noise ✓
+
+## Representative CLI Behavior
+
+### "i feel sad and empty inside"
+```
+Reading:
+  Activated concepts: emptiness, feeling, sadness.
+Counsellor:
+  - possible field 'emptiness' may be softened through 'acceptance'
+  - possible field 'emptiness' may be softened through 'peace'
+  - possible field 'sadness' may be softened through 'acceptance'
+```
+
+### "lonely and afraid"
+```
+Reading:
+  Activated concepts: loneliness, fear, inward.
+Counsellor:
+  - possible field 'fear' may be softened through 'trust'
+  - possible field 'loneliness' may be softened through 'connection'
+```
+
+### "I feel afraid and disconnected from truth"
+```
+Reading:
+  Activated concepts: feeling, fear, isolation.
+Counsellor:
+  - possible field 'fear' may be softened through 'trust'
+  - possible field 'isolation' may be softened through 'connection'
+```
+
+### "love truth light"
+```
+Reading:
+  Activated concepts: light, word, being.
+(Graph-based neighbour activation; harmonic coherence: 534.87)
+```
 
 ## Knowledge Layout
 
 ```
 internal/knowledge/  # Active runtime (embedded at build)
-  concepts.yaml
-  forms.yaml
-  relations.yaml
-  frequencies.yaml
-  glyphs.yaml
+  concepts.yaml      Canonical concept definitions
+  forms.yaml         Surface form -> concept mappings
+  relations.yaml     Directed relation graph
+  frequencies.yaml  Frequency profile entries
+  glyphs.yaml       Glyph/orthographic channel definitions
 
 knowledge/reference/  # Source/reference (not runtime)
   concepts.yaml
@@ -100,26 +153,27 @@ review/               # Review artifacts (separate from runtime)
   weight_audit.yaml
 ```
 
-Rule: Exactly one knowledge location is authoritative for runtime behavior. Non-runtime knowledge is clearly labeled.
+Rule: Exactly one knowledge location is authoritative for runtime behavior. Non-runtime
+knowledge is clearly labeled. Training data is separate from runtime knowledge.
 
 ## Production File Summary
 
 | File | Lines | Responsibility |
 |------|-------|---------------|
-| activation_graph.go | 615 | Graph structures, building, propagation |
-| candidate_generation.go | 570 | Candidate form generation |
-| engine.go | 512 | Public API + orchestration |
-| harmonic_field.go | 512 | Harmonic field scoring |
-| render.go | 392 | Evidence-first output rendering |
-| similarity.go | 384 | Similarity algorithms |
-| passage_field.go | 340 | Passage field analysis |
-| 18 others | <330 each | Channel logic, scoring, weights, etc. |
+| activation_graph.go | ~615 | Graph structures, building, propagation |
+| candidate_generation.go | ~570 | Candidate form generation |
+| engine.go | ~512 | Public API + orchestration |
+| harmonic_field.go | ~512 | Harmonic field scoring |
+| render.go | ~392 | Evidence-first output rendering |
+| similarity.go | ~384 | Similarity algorithms |
+| passage_field.go | ~340 | Passage field analysis |
+| 18 others | <330 each | Channel logic, scoring, weights, counsellor, etc. |
 
-Average: ~460 lines/file. No files exceed 700 lines. No safe extraction seams found.
+Average: ~460 lines/file. No files exceed 700 lines.
 
 ## Test File Summary
 
-33 behavior-specific test files. Largest single file: 737 lines. No test files exceed 1000 lines.
+33 behavior-specific test files. Largest single file: <1000 lines. All tests pass.
 
 ## Documentation Coverage
 
@@ -136,32 +190,32 @@ Average: ~460 lines/file. No files exceed 700 lines. No safe extraction seams fo
 
 ## Next Recommended Task
 
-Counsellor/transmutation fields.
+Extended script support (Arabic, Thai, etc.) — cross-script convergence architecture
+already demonstrated with English, Norwegian, Hebrew, Chinese. Next layer applies the
+same pattern to additional scripts.
 
 Before starting, verify:
-1. Architecture readiness report confirms no blockers (this file)
+1. This architecture readiness report is current
 2. All acceptance criteria above are green
 3. TODO.md is focused on active task flow
-
-Counsellor/transmutation fields should extend evidence-first rendering without adding hardcoded semantic behavior in Go.
 
 ## File Manifest
 
 ```
-cmd/socrates/main.go       545 lines  CLI router, root default, help
-internal/decipher/         24 files    Core resonance engine
+cmd/socrates/main.go       CLI router, root default, help
+internal/decipher/         Core resonance engine
 internal/knowledge/        5 YAML      Active runtime knowledge
 knowledge/reference/       3 YAML      Source/reference material
 training/                  3 YAML      Train/eval data
-docs/                      2 files     Curated guidance + this report
-review/                    2 files     Weight suggestion + audit
-README.md                  194 lines   Entry-point docs
-ARCHITECTURE.md            196 lines   Technical design
-IMPLEMENTATION_ROADMAP.md  249 lines   Phase sequence
-CONTRIBUTING.md            64 lines    Contribution principles
+docs/                      Architecture readiness + curation guide
+review/                    Weight suggestion + audit
+README.md                  Entry-point docs
+ARCHITECTURE.md            Technical design
+IMPLEMENTATION_ROADMAP.md  Phase sequence
+CONTRIBUTING.md            Contribution principles
 FREQUENCY_MODEL.md         (see file)
-HARMONIC_DATA_MODEL.md     (see file)
-TRAINING_MODEL.md          (see file)
+HARMONIC_DATA_MODEL.md      (see file)
+TRAINING_MODEL.md           (see file)
 ```
 
-Last reviewed: 2026-05-01
+Last reviewed: 2026-05-07
