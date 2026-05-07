@@ -42,7 +42,7 @@ frequency_profiles:
     weight: 90
 
   - meaning_frequency_id: truth-light-illumination
-    concepts: [truth, light, real, illumination, emet, or]
+    concepts: [truth, light, real, illumination, emet, or, satya]
     vector: [4, 3, 2]
     ratio: [4, 3]
     archetype: pythagorean_triple_3  # 4:5:6 triangular
@@ -112,7 +112,7 @@ frequency_profiles:
     weight: 80
 
   - meaning_frequency_id: path-way-dao
-    concepts: [path, way, road, dao, vei]
+    concepts: [path, way, road, dao, vei, dharma]
     vector: [3, 4, 2]
     ratio: [3, 4]
     archetype: phi_approximant_2  # 3:5

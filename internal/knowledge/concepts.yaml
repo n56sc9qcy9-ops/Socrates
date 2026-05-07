@@ -46,7 +46,7 @@ concepts:
 
   - id: truth
     name: truth
-    aliases: [real, genuine, emet]
+    aliases: [real, genuine, emet, satya]
     neighbors: [light, word, being]
 
 
@@ -70,7 +70,7 @@ concepts:
 
   - id: path
     name: path
-    aliases: [way, road, dao, vei]
+    aliases: [way, road, dao, vei, dharma]
     neighbors: [word, source]
 
 
@@ -147,7 +147,7 @@ concepts:
 
   - id: action
     name: action
-    aliases: [doing, act]
+    aliases: [doing, act, karma]
     neighbors: [give, word]
 
 
@@ -471,7 +471,7 @@ concepts:
 
   - id: wisdom
     name: wisdom
-    aliases: [understanding]
+    aliases: [understanding, jnana]
     neighbors: [truth, mind]
 
 

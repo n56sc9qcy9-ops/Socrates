@@ -331,7 +331,32 @@ fragments:
     lens: sanskrit
     confidence: verified
     weight: 70
-    
+
+  # Sanskrit transliterations
+  - form: "dharma"
+    concept: path
+    lens: sanskrit
+    confidence: verified
+    weight: 70
+
+  - form: "satya"
+    concept: truth
+    lens: sanskrit
+    confidence: verified
+    weight: 70
+
+  - form: "karma"
+    concept: action
+    lens: sanskrit
+    confidence: verified
+    weight: 70
+
+  - form: "jnana"
+    concept: wisdom
+    lens: sanskrit
+    confidence: verified
+    weight: 60
+
   # Chinese fragments
   - form: "dao"
     concept: way
