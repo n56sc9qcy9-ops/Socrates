@@ -76,12 +76,12 @@ func DetectScript(s string) ScriptType {
 // Forms holds generated forms from input processing.
 type Forms struct {
 	Normalized   string
-	Original      string   // Original input string (preserved before tokenization)
-	Script        ScriptType
-	Tokens        []string
-	Runes         []rune
-	PhoneticKeys  []string
-	Fragments     []FragmentPath
+	Original     string // Original input string (preserved before tokenization)
+	Script       ScriptType
+	Tokens       []string
+	Runes        []rune
+	PhoneticKeys []string
+	Fragments    []FragmentPath
 }
 
 // FragmentPath represents a possible split of the input into fragments.
@@ -101,7 +101,7 @@ type Signal struct {
 	Weight     float64
 	// IsDirect indicates this signal comes from direct form/glyph/script evidence
 	// (not from symbolic neighbor expansion). Used to distinguish evidence provenance.
-	IsDirect   bool
+	IsDirect bool
 }
 
 // EvidenceID returns a deterministic identity for this signal.
@@ -204,12 +204,12 @@ type TransmutationSuggestion struct {
 
 // TransmutationEvidence traces a suggestion back to its data source.
 type TransmutationEvidence struct {
-	SourceConcept   string
-	TargetConcept   string
-	Kind            string
-	DataSourceFile  string
-	Notes           string
-	IsDirectSource  bool // true if from direct concept, false if from graph-propagated neighbor
+	SourceConcept  string
+	TargetConcept  string
+	Kind           string
+	DataSourceFile string
+	Notes          string
+	IsDirectSource bool // true if from direct concept, false if from graph-propagated neighbor
 }
 
 // Reading is the complete output of the decipher engine.

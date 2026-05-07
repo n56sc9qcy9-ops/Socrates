@@ -7,18 +7,18 @@ import (
 // PassageField represents a concept field activated by passage tokens.
 // Groups activation by concept with evidence from multiple token sources.
 type PassageField struct {
-	Concept           string
-	Strength          float64
-	Confidence        string
-	Depth             int            // 0 = direct, 1+ = graph-expanded
-	TokenSources      []string       // Original tokens that activated this field
-	EvidencePaths     []EvidencePath // Evidence paths explaining this field
-	RelationPaths     []string       // Relation paths through the activation graph
-	EvidenceCount     int            // Number of distinct evidence paths supporting this field
+	Concept       string
+	Strength      float64
+	Confidence    string
+	Depth         int            // 0 = direct, 1+ = graph-expanded
+	TokenSources  []string       // Original tokens that activated this field
+	EvidencePaths []EvidencePath // Evidence paths explaining this field
+	RelationPaths []string       // Relation paths through the activation graph
+	EvidenceCount int            // Number of distinct evidence paths supporting this field
 	// IsDirectEvidence is true if this field has any direct form/glyph/script evidence.
 	// False means evidence comes only from symbolic neighbor expansion or other indirect sources.
 	// Used by counsellor to distinguish direct evidence from propagated suggestions.
-	IsDirectEvidence  bool
+	IsDirectEvidence bool
 }
 
 // Gate returns true if this passage field passes a harmonic field gate.
@@ -157,15 +157,15 @@ func BuildPassageFieldsFromGraph(graph *ActivationGraph) PassageFields {
 		}
 
 		field := &PassageField{
-			Concept:           node.Concept,
-			Strength:          node.Strength,
-			Confidence:        node.Confidence,
-			Depth:             node.Depth,
-			TokenSources:      []string{},
-			EvidencePaths:     make([]EvidencePath, 0),
-			RelationPaths:     []string{},
-			EvidenceCount:     evidCount,
-			IsDirectEvidence:  isDirectEvidence,
+			Concept:          node.Concept,
+			Strength:         node.Strength,
+			Confidence:       node.Confidence,
+			Depth:            node.Depth,
+			TokenSources:     []string{},
+			EvidencePaths:    make([]EvidencePath, 0),
+			RelationPaths:    []string{},
+			EvidenceCount:    evidCount,
+			IsDirectEvidence: isDirectEvidence,
 		}
 
 		// Collect token sources from evidence

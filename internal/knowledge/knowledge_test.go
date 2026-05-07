@@ -94,6 +94,35 @@ func TestScriptWordsByScript(t *testing.T) {
 	}
 }
 
+func TestBuildIndexesIndexesScriptWordsAsForms(t *testing.T) {
+	kb := &Knowledge{
+		ScriptWords: []ScriptWord{
+			{
+				Script:     "devanagari",
+				Word:       "प्राण",
+				Meanings:   []string{"breath", "life-force"},
+				Source:     "traditional",
+				Confidence: "verified",
+				Weight:     90,
+			},
+		},
+	}
+	kb.BuildIndexes()
+
+	forms := kb.GetFormsByText("प्राण")
+	if len(forms) != 2 {
+		t.Fatalf("expected two forms indexed from script word, got %d: %#v", len(forms), forms)
+	}
+
+	byConcept := kb.GetFormsByConcept("breath")
+	if len(byConcept) != 1 {
+		t.Fatalf("expected breath concept to be indexed from script word, got %d: %#v", len(byConcept), byConcept)
+	}
+	if byConcept[0].Confidence != "verified" || byConcept[0].Source != "traditional" {
+		t.Fatalf("script word form lost provenance: %#v", byConcept[0])
+	}
+}
+
 func TestFormsByConcept(t *testing.T) {
 	kb, err := LoadFromEmbed()
 	if err != nil {

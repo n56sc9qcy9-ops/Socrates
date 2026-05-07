@@ -48,11 +48,12 @@ Completed (see `docs/TODO_ARCHIVE.md` and git history for detail):
 - Counsellor precision: natural-passage regression tests, direct field ranking over structural noise, deduplicated counsellor suggestions/evidence paths, neutral `feel` handling, structural debug labels, and concise prose alignment.
 - Knowledge curation hygiene after counsellor expansion: validation warnings reduced from 183 to 149, no unknown concept warnings, no canonical-ID alias warnings, and accepted counsellor behavior preserved.
 - All acceptance criteria green. Readiness report at `docs/ARCHITECTURE_READINESS.md`.
+- Sanskrit/Devanagari support: exact Devanagari ScriptWord meanings now participate in the generic passage-field and harmonic-field path; known terms such as `प्राण`, `सत्य`, and `ॐ` activate direct verified fields where curated data exists, while unknown Devanagari such as `कवि` remains weak/speculative. Arabic and Thai were not added.
 
 Current git status:
 
 ```text
-## main...origin/main [ahead 80]
+## main...origin/main [ahead 85]
 ```
 
 Key completed metrics (full detail in `docs/ARCHITECTURE_READINESS.md`):
@@ -69,51 +70,38 @@ Key completed metrics (full detail in `docs/ARCHITECTURE_READINESS.md`):
 ## Current Next Task
 
 Task:
-**Sanskrit/Devanagari support.**
+**Real-life Socrates testing after Sanskrit/Devanagari support.**
 
 Architect review status:
-Harmonic data model hardening is accepted.
-
-Counsellor precision is accepted after the follow-up fixes:
-- focused natural-passage regression tests exist
-- direct emotional/spiritual fields outrank structural observations in reviewed passages
-- counsellor suggestions and evidence paths deduplicate
-- neutral `feel` activates `feeling`, not `resentment`
-- structural fields render as structural in debug output
-- final prose no longer promotes structural-only signals
-
-Knowledge curation hygiene is accepted:
-- validation warnings reduced from 183 to 149
-- validation has zero errors and only one warning category
-- no `unknown concepts` warnings remain
-- canonical-ID alias warnings were removed by moving relationships to neighbors/relations
-- natural-passage counsellor precision tests still pass
-
-Architecture readiness refresh is accepted:
-- `docs/ARCHITECTURE_READINESS.md` reflects post-counsellor architecture
-- validation count is `149` warnings, `0` errors, one warning category
-- `./bin/socrates train` currently has 8/8 train examples and no held-out split in the default run
-- representative CLI behavior is documented
-- accepted warning debt remains explicit
+Sanskrit/Devanagari support is accepted after the follow-up fix:
+- exact ScriptWord meanings are indexed as Forms in both builder and rebuilt-index paths
+- non-Latin whole-word inputs remain whole tokens for passage/harmonic activation
+- `प्राण` activates direct verified fields for `prana`, `breath`, and `life-force` and produces a harmonic field
+- `सत्य` activates direct verified `truth` and produces a harmonic field
+- `कवि` remains weak/speculative and does not produce a harmonic field
+- Hebrew/Han existing script behavior and all prior counsellor/harmonic checks still pass
+- no Arabic or Thai runtime knowledge was added
 
 Current blocker:
-- Sanskrit/Devanagari commit `72194ec` is **not accepted yet**.
-- The ScriptWord channel correctly activates Sanskrit concepts, but those exact script-word concepts do not flow into `PassageFields`/harmonic field activation. Example: `./bin/socrates "प्राण" --debug` shows ScriptWord signals for `breath`, `life-force`, and `prana`, but `Passage Fields` contains only `unknown`, so the harmonic field is absent and the top fields do not show the direct Sanskrit meaning.
-- The same issue appears for `सत्य`: ScriptWord activates `truth`, but top fields show only `unknown`, while top concepts are graph neighbors (`light`, `word`, `being`). Channel evidence alone is not enough; Sanskrit must participate in the same first-class passage/harmonic field path as Latin emotional concepts.
-- Do not add Arabic or Thai in this task. Fix Sanskrit/Devanagari only.
+- None in the code path. The next risk is whether Socrates feels spiritually useful, grounded, and non-authoritarian in real usage.
+- Do not add Arabic, Thai, new language families, audio rendering, or large new knowledge during this task.
 
 Required investigation:
-- Inspect why `Engine.Analyze`/`AnalyzePassageFromTokens` loses exact ScriptWord concepts for non-Latin whole-word input.
-- Fix the generic activation path so exact ScriptWord signals can become direct passage fields and harmonic-field inputs without special-casing Sanskrit words.
-- Add tests proving:
-  - `प्राण` has top passage fields including `breath` or `life-force`, not only `unknown`
-  - `सत्य` has top passage fields including `truth`
-  - a Sanskrit field with a frequency profile produces a harmonic field when curated profile data exists
-  - `कवि` remains weak/unknown and does not produce overconfident counsellor guidance
-  - existing Hebrew/Han ScriptWord behavior still passes
-- Keep default output concise and debug output evidence-rich.
-- Keep the existing Sanskrit tests, but strengthen them so they fail if evidence stays channel-only and never reaches passage fields.
-- Update docs only after Sanskrit/Devanagari is first-class through passage/harmonic activation.
+- Create a small real-life testing protocol/report. Prefer a concise doc such as `docs/REAL_LIFE_TESTING.md` unless a better existing doc already owns this.
+- Test Socrates manually with a fixed set of seeker-style prompts, including:
+  - plain emotional passages: loneliness, sadness, fear, emptiness, resentment, longing, peace
+  - spiritual alignment passages: truth, love, light, surrender, trust, faith, humility
+  - Sanskrit seeds: `प्राण`, `सत्य`, `ॐ`, `धर्म`, `अग्नि`, `मंत्र`
+  - mixed passages, for example English emotional text containing one Sanskrit term
+- For each case, record:
+  - top fields and whether direct evidence outranks structural noise
+  - whether the reading is useful without claiming absolute truth about the person
+  - whether suggestions remain evidence-backed and confidence-labeled
+  - whether harmonic fields appear only when curated profiles support them
+  - whether unknown or weak inputs remain humble/speculative
+- Treat failures as review artifacts first. Do not silently add runtime knowledge to make examples pass.
+- If a serious failure appears, stop and document the smallest correction needed.
+- If the testing report is green, recommend the next architecture choice: deepen real-life testing, start harmonic/audio rendering, or consider Arabic later.
 
 Rules (unchanged):
 - No hardcoded semantic word lists in production Go.
@@ -133,14 +121,14 @@ Reference:
 
 Acceptance Criteria:
 
-- Sanskrit/Devanagari is supported through generic detection/channel/data flow.
-- New script support is covered by tests.
-- Exact Devanagari ScriptWord meanings feed direct passage fields and, where frequency profiles exist, harmonic field activation.
-- Default output for known Sanskrit terms shows the Sanskrit meaning as a top field or activated concept, not only as a channel detail.
-- Unknown Devanagari input remains weak/speculative and does not produce counsellor guidance.
-- No production Go semantic word maps or word-specific branches are introduced.
-- New runtime knowledge validates with zero errors and labeled confidence/source/lens.
-- Existing harmonic core, natural-passage counsellor precision, training evaluation, review/apply workflow, validation, and existing cross-script convergence still pass.
+- A real-life testing report/protocol exists and is committed.
+- The report includes the exact prompts tested and representative CLI outputs or summaries.
+- The report separates spiritual usefulness from evidence support; Socrates must not present itself as absolute truth about the person.
+- Direct emotional/spiritual evidence continues to outrank structural noise in plain passages.
+- Known Sanskrit terms remain first-class through passage/harmonic fields.
+- Unknown or weak inputs remain weak/speculative.
+- No Arabic, Thai, or broad new script family is added.
+- No runtime knowledge is silently mutated as part of testing unless a documented blocker requires a minimal fix.
 - `./bin/socrates knowledge validate` passes with no errors.
 - `go test ./...` passes.
 - Work is committed locally and not pushed.

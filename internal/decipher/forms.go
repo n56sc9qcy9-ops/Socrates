@@ -20,12 +20,12 @@ func GenerateForms(input string) Forms {
 
 	return Forms{
 		Normalized:   normalized,
-		Original:      input,
-		Script:        script,
-		Tokens:        tokens,
-		Runes:         runes,
-		PhoneticKeys:  phoneticKeys,
-		Fragments:     fragments,
+		Original:     input,
+		Script:       script,
+		Tokens:       tokens,
+		Runes:        runes,
+		PhoneticKeys: phoneticKeys,
+		Fragments:    fragments,
 	}
 }
 

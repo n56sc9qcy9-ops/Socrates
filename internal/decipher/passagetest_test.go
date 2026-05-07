@@ -1,8 +1,8 @@
 package decipher
 
 import (
-	"testing"
 	"socrates/internal/knowledge"
+	"testing"
 )
 
 // TestSanskritDevanagariPassageFields verifies Devanagari ScriptWord concepts

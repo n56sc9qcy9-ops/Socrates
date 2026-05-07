@@ -77,7 +77,7 @@ type Knowledge struct {
 	glyphPatternsByScript      map[string][]GlyphPattern
 	glyphPatternsByRune        map[uint32][]GlyphPattern
 	frequencyProfilesByConcept map[string][]FrequencyProfile
-	frequencyProfilesByID     map[string]FrequencyProfile
+	frequencyProfilesByID      map[string]FrequencyProfile
 }
 
 // NewKnowledgeBuilder builds a Knowledge struct incrementally.
@@ -203,7 +203,6 @@ func (b *KnowledgeBuilder) Build() *Knowledge {
 		}
 	}
 
-
 	// Index relations
 	for _, r := range kb.Relations {
 		kb.relationsFrom[r.From] = append(kb.relationsFrom[r.From], r)
@@ -274,6 +273,22 @@ func (kb *Knowledge) BuildIndexes() {
 	// Index script words by script
 	for _, w := range kb.ScriptWords {
 		kb.scriptWordsByScript[w.Script] = append(kb.scriptWordsByScript[w.Script], w)
+	}
+
+	// Index script words as forms by text so AnalyzePassageTokens can find them.
+	// Enables non-Latin script words to flow through passage/harmonic field activation.
+	for _, w := range kb.ScriptWords {
+		for _, meaning := range w.Meanings {
+			f := Form{
+				Form:       w.Word,
+				Concept:    meaning,
+				Source:     w.Source,
+				Confidence: w.Confidence,
+				Weight:     w.Weight,
+			}
+			kb.formByText[w.Word] = append(kb.formByText[w.Word], f)
+			kb.formsByConcept[meaning] = append(kb.formsByConcept[meaning], f)
+		}
 	}
 
 	// Index relations
