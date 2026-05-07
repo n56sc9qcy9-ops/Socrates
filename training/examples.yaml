@@ -114,3 +114,81 @@ examples:
     expected_quality: consonant
     confidence: curated
     source: human_review
+
+  # Regression: Sanskrit transliterations activate direct concept fields
+  - id: ex.sanskrit.dharma
+    input: dharma
+    expected_concepts:
+      - path
+      - word
+      - source
+    expected_fields:
+      - path-way-dao
+    expected_quality: consonant
+    confidence: curated
+    source: human_review
+    notes: "dharma transliteration activates path via forms.yaml form entry; word/source co-activate as path neighbors"
+
+  - id: ex.sanskrit.satya
+    input: satya
+    expected_concepts:
+      - truth
+      - light
+      - word
+      - being
+    expected_fields:
+      - truth-light-illumination
+    expected_quality: consonant
+    confidence: curated
+    source: human_review
+    notes: "satya transliteration activates truth via forms.yaml; light/word/being co-activate as truth neighbors"
+
+  - id: ex.sanskrit.karma
+    input: karma
+    expected_concepts:
+      - action
+      - give
+      - word
+    expected_fields: []
+    expected_quality: consonant
+    confidence: curated
+    source: human_review
+    notes: "karma transliteration activates action via forms.yaml; give/word co-activate as action neighbors"
+
+  - id: ex.sanskrit.jnana
+    input: jnana
+    expected_concepts:
+      - wisdom
+      - truth
+      - mind
+    expected_fields: []
+    expected_quality: consonant
+    confidence: curated
+    source: human_review
+    notes: "jnana transliteration activates wisdom via forms.yaml; truth/mind co-activate as wisdom neighbors"
+
+  # Regression: mixed passage with transliterated Sanskrit
+  - id: ex.sanskrit.mixed-dharma
+    input: I practice dharma every day
+    expected_concepts:
+      - path
+      - word
+      - source
+    expected_fields:
+      - path-way-dao
+    expected_quality: consonant
+    confidence: curated
+    source: human_review
+    notes: "dharma in mixed English passage activates path, not just structural noise; practice→joy is structural noise, not semantic activation"
+
+  # Regression: plain emotional, no false resentment
+  - id: ex.regression.feel-no-resentment
+    input: I feel
+    expected_concepts:
+      - feeling
+      - bitterness
+    expected_fields: []
+    expected_quality: unresolved_tension
+    confidence: curated
+    source: human_review
+    notes: "I feel activates feeling directly; bitterness may activate as co-concept (vowel skeleton proximity). Resentment must NOT appear as top field."
