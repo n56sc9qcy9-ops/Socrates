@@ -110,7 +110,9 @@ func (pf PassageFields) GetField(concept string) *PassageField {
 	return nil
 }
 
-// TopFields returns the top N fields by strength.
+// TopFields returns the top N fields, prioritizing direct concept evidence.
+// Fields with direct evidence (exact matches, curated fragments) rank above
+// propagated/graph-expanded fields, regardless of accumulated strength.
 func (pf PassageFields) TopFields(n int) PassageFields {
 	if len(pf) <= n {
 		return pf
@@ -120,8 +122,16 @@ func (pf PassageFields) TopFields(n int) PassageFields {
 	copy(sorted, pf)
 	for i := 0; i < len(sorted)-1; i++ {
 		for j := i + 1; j < len(sorted); j++ {
-			if sorted[j].Strength > sorted[i].Strength {
+			// Primary sort: direct evidence fields rank above propagated
+			if !sorted[i].IsDirectEvidence && sorted[j].IsDirectEvidence {
 				sorted[i], sorted[j] = sorted[j], sorted[i]
+				continue
+			}
+			if sorted[i].IsDirectEvidence == sorted[j].IsDirectEvidence {
+				// Secondary: within same evidence type, sort by strength (descending)
+				if sorted[j].Strength > sorted[i].Strength {
+					sorted[i], sorted[j] = sorted[j], sorted[i]
+				}
 			}
 		}
 	}

@@ -96,6 +96,7 @@ func runWholeTokenMatching(forms Forms, kb *knowledge.Knowledge) []Signal {
 					Lens:       lens.Lens,
 					Confidence: lens.Confidence,
 					Weight:     lens.BaseWeight,
+					IsDirect:   true, // Direct form evidence from knowledge base
 				})
 			}
 		}
@@ -132,6 +133,7 @@ func runNonLatinWholeTokenMatching(forms Forms, kb *knowledge.Knowledge) []Signa
 					Lens:       lens.Lens,
 					Confidence: lens.Confidence,
 					Weight:     lens.BaseWeight,
+					IsDirect:   true, // Direct form evidence from knowledge base
 				})
 			}
 		}

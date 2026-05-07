@@ -144,3 +144,577 @@ transmute_entries:
     lens: relational
     weight: 40
     notes: stagnation and growth address movement; growth does not claim a destination but acknowledges process
+
+  # Extended emotional transmutations for counsellor guidance.
+  # All mappings are data-backed with curated source/lens/confidence.
+
+  # Sadness/grief transmutations
+  - from: sadness
+    to: acceptance
+    kind: grounds_in
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 50
+    notes: sadness and acceptance address loss; acceptance does not deny sadness but contextualizes what remains
+
+  - from: grief
+    to: acceptance
+    kind: softens_through
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 60
+    notes: grief and acceptance address loss; acceptance does not erase grief but allows its movement
+
+  - from: grief
+    to: letting_go
+    kind: releases_into
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 50
+    notes: grief and letting-go address clinging; letting-go is not forgetting but releasing charge
+
+  # Loneliness/connection transmutations
+  - from: loneliness
+    to: connection
+    kind: transmutes_to
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 60
+    notes: loneliness and connection address relatedness; connection does not fill emptiness but acknowledges the field
+
+  - from: isolation
+    to: connection
+    kind: transmutes_to
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 60
+    notes: isolation and connection address boundaries; connection does not erase boundaries but bridges them
+
+  # Emptiness/peace transmutations
+  - from: emptiness
+    to: peace
+    kind: transmutes_to
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 50
+    notes: emptiness and peace address fullness; peace does not fill emptiness but rests within it
+
+  - from: emptiness
+    to: acceptance
+    kind: grounds_in
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 50
+    notes: emptiness and acceptance address self; acceptance does not deny emptiness but includes it
+
+  # Loss transmutations
+  - from: loss
+    to: acceptance
+    kind: softens_through
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 60
+    notes: loss and acceptance address absence; acceptance does not replace what is lost but honors what remains
+
+  - from: loss
+    to: letting_go
+    kind: releases_into
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 50
+    notes: loss and letting-go address clinging; letting-go is not denial but release
+
+  # Pain/healing transmutations
+  - from: pain
+    to: healing
+    kind: releases_into
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 60
+    notes: pain and healing address suffering; healing does not deny pain but transforms its meaning
+
+  - from: pain
+    to: peace
+    kind: softens_through
+    confidence: speculative
+    source: curated
+    lens: relational
+    weight: 40
+    notes: pain and peace address stillness; peace does not erase pain but offers rest within it
+
+  # Frustration transmutations
+  - from: frustration
+    to: patience
+    kind: grounds_in
+    confidence: speculative
+    source: curated
+    lens: relational
+    weight: 40
+    notes: frustration and patience address timing; patience does not deny frustration but allows space
+
+  - from: frustration
+    to: flow
+    kind: releases_into
+    confidence: speculative
+    source: curated
+    lens: relational
+    weight: 40
+    notes: frustration and flow address resistance; flow does not eliminate frustration but reroutes it
+
+  # Anger transmutations
+  - from: anger
+    to: peace
+    kind: transmutes_to
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 50
+    notes: anger and peace address disturbance; peace does not deny anger but resolves its cause
+
+  - from: anger
+    to: acceptance
+    kind: softens_through
+    confidence: speculative
+    source: curated
+    lens: relational
+    weight: 40
+    notes: anger and acceptance address resistance; acceptance does not justify anger but includes its cause
+
+  # Pride/ego transmutations
+  - from: pride
+    to: humility
+    kind: corrects_through
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 60
+    notes: pride and humility address self-positioning; humility does not negate worth but contextualizes it
+
+  - from: ego
+    to: being
+    kind: transmutes_to
+    confidence: speculative
+    source: curated
+    lens: relational
+    weight: 40
+    notes: ego and being address identity; being does not deny ego but includes its ground
+
+  - from: ego
+    to: acceptance
+    kind: grounds_in
+    confidence: speculative
+    source: curated
+    lens: relational
+    weight: 40
+    notes: ego and acceptance address self-image; acceptance does not reject ego but encompasses it
+
+  # Letting go/surrender transmutations
+  - from: letting_go
+    to: surrender
+    kind: softens_through
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 60
+    notes: letting-go and surrender address grip; surrender does not abandon letting-go but deepens it
+
+  - from: letting_go
+    to: peace
+    kind: releases_into
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 50
+    notes: letting-go and peace address attachment; peace does not require letting-go but arises from it
+
+  # Acceptance/surrender transmutations
+  - from: acceptance
+    to: peace
+    kind: transmutes_to
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 60
+    notes: acceptance and peace address resistance; peace does not require acceptance but includes it
+
+  - from: acceptance
+    to: trust
+    kind: releases_into
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 50
+    notes: acceptance and trust address control; trust does not replace acceptance but extends it
+
+  - from: surrender
+    to: trust
+    kind: releases_into
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 60
+    notes: surrender and trust address control; trust does not require surrender but affirms it
+
+  - from: surrender
+    to: peace
+    kind: transmutes_to
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 50
+    notes: surrender and peace address struggle; peace does not require surrender but arises from it
+
+  # Peace/calm transmutations
+  - from: peace
+    to: trust
+    kind: releases_into
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 50
+    notes: peace and trust address safety; trust does not create peace but verifies it
+
+  - from: calm
+    to: peace
+    kind: softens_through
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 60
+    notes: calm and peace address agitation; peace does not replace calm but extends it
+
+  - from: calm
+    to: stillness
+    kind: grounds_in
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 50
+    notes: calm and stillness address movement; stillness does not replace calm but deepens it
+
+  - from: stillness
+    to: peace
+    kind: transmutes_to
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 50
+    notes: stillness and peace address disturbance; peace does not require stillness but rests within it
+
+  # Trust/faith transmutations
+  - from: trust
+    to: faith
+    kind: releases_into
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 60
+    notes: trust and faith address certainty; faith does not replace trust but extends beyond it
+
+  - from: faith
+    to: hope
+    kind: grounds_in
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 50
+    notes: faith and hope address expectation; hope does not require faith but is supported by it
+
+  - from: faith
+    to: trust
+    kind: softens_through
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 50
+    notes: faith and trust address reliability; trust does not replace faith but grounds it
+
+  # Compassion/mercy transmutations
+  - from: compassion
+    to: mercy
+    kind: softens_through
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 60
+    notes: compassion and mercy address suffering; mercy does not replace compassion but tempers judgment
+
+  - from: mercy
+    to: forgiveness
+    kind: releases_into
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 60
+    notes: mercy and forgiveness address offense; forgiveness does not require mercy but extends it
+
+  - from: mercy
+    to: grace
+    kind: grounds_in
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 50
+    notes: mercy and grace address unworthiness; grace does not replace mercy but reveals its source
+
+  - from: grace
+    to: peace
+    kind: releases_into
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 50
+    notes: grace and peace address disturbance; peace does not replace grace but flows from it
+
+  # Gratitude/joy transmutations
+  - from: gratitude
+    to: joy
+    kind: releases_into
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 60
+    notes: gratitude and joy address appreciation; joy does not replace gratitude but amplifies it
+
+  - from: gratitude
+    to: love
+    kind: softens_through
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 50
+    notes: gratitude and love address giving; love does not replace gratitude but responds to it
+
+  - from: joy
+    to: love
+    kind: grounds_in
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 60
+    notes: joy and love address fullness; love does not replace joy but is revealed by it
+
+  - from: joy
+    to: gratitude
+    kind: softens_through
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 50
+    notes: joy and gratitude address appreciation; gratitude does not replace joy but sustains it
+
+  - from: bliss
+    to: joy
+    kind: softens_through
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 60
+    notes: bliss and joy address delight; joy does not replace bliss but grounds it
+
+  - from: bliss
+    to: peace
+    kind: releases_into
+    confidence: speculative
+    source: curated
+    lens: relational
+    weight: 40
+    notes: bliss and peace address disturbance; peace does not replace bliss but stabilizes it
+
+  # Confusion/clarity transmutations
+  - from: confusion
+    to: clarity
+    kind: corrects_through
+    confidence: speculative
+    source: curated
+    lens: relational
+    weight: 50
+    notes: confusion and clarity address understanding; clarity does not deny confusion but resolves it
+
+  - from: clarity
+    to: truth
+    kind: grounds_in
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 60
+    notes: clarity and truth address reality; truth does not replace clarity but verifies it
+
+  - from: clarity
+    to: wisdom
+    kind: releases_into
+    confidence: speculative
+    source: curated
+    lens: relational
+    weight: 40
+    notes: clarity and wisdom address understanding; wisdom does not replace clarity but applies it
+
+  # Healing/growth transmutations
+  - from: healing
+    to: growth
+    kind: releases_into
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 60
+    notes: healing and growth address change; growth does not replace healing but continues it
+
+  - from: healing
+    to: flow
+    kind: softens_through
+    confidence: speculative
+    source: curated
+    lens: relational
+    weight: 40
+    notes: healing and flow address blockage; flow does not replace healing but extends it
+
+  - from: growth
+    to: flow
+    kind: softens_through
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 60
+    notes: growth and flow address movement; flow does not replace growth but enables it
+
+  - from: growth
+    to: life
+    kind: grounds_in
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 50
+    notes: growth and life address vitality; life does not replace growth but sustains it
+
+  # Flexibility transmutations
+  - from: flexibility
+    to: flow
+    kind: grounds_in
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 60
+    notes: flexibility and flow address rigidity; flow does not replace flexibility but extends it
+
+  # Self-acceptance transmutations
+  - from: self_acceptance
+    to: love
+    kind: releases_into
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 60
+    notes: self-acceptance and love address self; love does not replace self-acceptance but flows from it
+
+  - from: self_acceptance
+    to: forgiveness
+    kind: softens_through
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 50
+    notes: self-acceptance and forgiveness address self-judgment; forgiveness does not replace self-acceptance but extends it
+
+  # Connection/transmutations
+  - from: connection
+    to: love
+    kind: grounds_in
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 60
+    notes: connection and love address relatedness; love does not replace connection but reveals it
+
+  - from: connection
+    to: presence
+    kind: releases_into
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 50
+    notes: connection and presence address now; presence does not replace connection but deepens it
+
+  # Openness/transmutations
+  - from: openness
+    to: presence
+    kind: grounds_in
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 60
+    notes: openness and presence address now; presence does not replace openness but inhabits it
+
+  - from: openness
+    to: trust
+    kind: releases_into
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 50
+    notes: openness and trust address safety; trust does not replace openness but arises from it
+
+  # Presence/transmutations
+  - from: presence
+    to: breath
+    kind: grounds_in
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 60
+    notes: presence and breath address now; breath does not replace presence but manifests it
+
+  - from: presence
+    to: being
+    kind: releases_into
+    confidence: plausible
+    source: curated
+    lens: relational
+    weight: 50
+    notes: presence and being address existence; being does not replace presence but is revealed through it
+
+  # Depression/despair transmutations
+  - from: depression
+    to: hope
+    kind: releases_into
+    confidence: speculative
+    source: curated
+    lens: relational
+    weight: 40
+    notes: depression and hope address future; hope does not deny depression but opens possibility
+
+  - from: depression
+    to: healing
+    kind: softens_through
+    confidence: speculative
+    source: curated
+    lens: relational
+    weight: 40
+    notes: depression and healing address heaviness; healing does not replace depression but addresses its cause
+
+  - from: despair
+    to: hope
+    kind: transmutes_to
+    confidence: speculative
+    source: curated
+    lens: relational
+    weight: 40
+    notes: despair and hope address darkness; hope does not deny despair but offers light within it
+
+  - from: despair
+    to: trust
+    kind: releases_into
+    confidence: speculative
+    source: curated
+    lens: relational
+    weight: 40
+    notes: despair and trust address safety; trust does not replace despair but provides ground within it

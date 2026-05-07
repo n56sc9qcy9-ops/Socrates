@@ -35,6 +35,7 @@ func runSoundChannel(forms Forms) ChannelResult {
 			Lens:       "sound",
 			Confidence: ConfidenceVerified,
 			Weight:     0.5,
+			IsDirect:   false, // Structural observation, not direct concept evidence
 		})
 	}
 
@@ -49,6 +50,7 @@ func runSoundChannel(forms Forms) ChannelResult {
 				Lens:       "sound",
 				Confidence: ConfidencePlausible,
 				Weight:     0.4,
+				IsDirect:   false, // Structural observation, not direct concept evidence
 			})
 		}
 	}

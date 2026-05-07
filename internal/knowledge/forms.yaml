@@ -449,11 +449,6 @@ fragments:
     confidence: curated
     weight: 70
 
-# Forms - curated whole-word matches (transmutations source concepts)
-forms:
-    # Entries that can be Counsellor/transmutation sources.
-    # These are words with form/concept pairs that activate correction fields.
-
 # Script words - exact whole-word matches for non-Latin scripts
 script_words:
   # Hebrew (Unicode codepoints)
@@ -597,3 +592,841 @@ script_words:
     meanings: [god, power, divine]
     confidence: verified
     weight: 80
+
+# Extended emotional/spiritual vocabulary
+# Covers ordinary natural passages for counsellor/transmutation activation.
+# All entries are data-backed with source/lens/confidence.
+forms:
+  # Fear/anxiety vocabulary
+  - form: "fear"
+    concept: fear
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "afraid"
+    concept: fear
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "anxious"
+    concept: fear
+    lens: english
+    confidence: verified
+    weight: 70
+
+  - form: "worry"
+    concept: fear
+    lens: english
+    confidence: plausible
+    weight: 60
+
+  - form: "scared"
+    concept: fear
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "tense"
+    concept: fear
+    lens: english
+    confidence: plausible
+    weight: 50
+
+  # Sadness/grief vocabulary
+  - form: "sad"
+    concept: sadness
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "sadness"
+    concept: sadness
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "grief"
+    concept: grief
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "sorrow"
+    concept: grief
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "sorrowful"
+    concept: grief
+    lens: english
+    confidence: verified
+    weight: 70
+
+  - form: "mourn"
+    concept: grief
+    lens: english
+    confidence: verified
+    weight: 70
+
+  - form: "lonely"
+    concept: loneliness
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "loneliness"
+    concept: loneliness
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "alone"
+    concept: isolation
+    lens: english
+    confidence: verified
+    weight: 70
+
+  - form: "isolated"
+    concept: isolation
+    lens: english
+    confidence: verified
+    weight: 70
+
+  - form: "emptiness"
+    concept: emptiness
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "empty"
+    concept: emptiness
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "void"
+    concept: emptiness
+    lens: english
+    confidence: plausible
+    weight: 70
+
+  - form: "hollow"
+    concept: emptiness
+    lens: english
+    confidence: plausible
+    weight: 60
+
+  - form: "lost"
+    concept: loss
+    lens: english
+    confidence: plausible
+    weight: 50
+
+  - form: "loss"
+    concept: loss
+    lens: english
+    confidence: verified
+    weight: 70
+
+  - form: "hurt"
+    concept: pain
+    lens: english
+    confidence: plausible
+    weight: 60
+
+  - form: "painful"
+    concept: pain
+    lens: english
+    confidence: plausible
+    weight: 60
+
+  - form: "pain"
+    concept: pain
+    lens: english
+    confidence: verified
+    weight: 70
+
+  # Guilt/shame vocabulary
+  - form: "guilt"
+    concept: guilt
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "guilty"
+    concept: guilt
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "shame"
+    concept: shame
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "ashamed"
+    concept: shame
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "regret"
+    concept: guilt
+    lens: english
+    confidence: plausible
+    weight: 60
+
+  - form: "remorse"
+    concept: guilt
+    lens: english
+    confidence: plausible
+    weight: 60
+
+  # Anger/resentment vocabulary
+  - form: "anger"
+    concept: anger
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "angry"
+    concept: anger
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "rage"
+    concept: anger
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "resentment"
+    concept: resentment
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "resentful"
+    concept: resentment
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "frustrated"
+    concept: frustration
+    lens: english
+    confidence: verified
+    weight: 70
+
+  - form: "frustration"
+    concept: frustration
+    lens: english
+    confidence: verified
+    weight: 70
+
+  - form: "bitter"
+    concept: resentment
+    lens: english
+    confidence: plausible
+    weight: 60
+
+  - form: "bitterness"
+    concept: resentment
+    lens: english
+    confidence: plausible
+    weight: 60
+
+  # Pride/ego vocabulary
+  - form: "pride"
+    concept: pride
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "proud"
+    concept: pride
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "ego"
+    concept: ego
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "arrogant"
+    concept: pride
+    lens: english
+    confidence: plausible
+    weight: 60
+
+  # Control/attachment vocabulary
+  - form: "control"
+    concept: control
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "controlled"
+    concept: control
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "controlling"
+    concept: control
+    lens: english
+    confidence: verified
+    weight: 70
+
+  - form: "attached"
+    concept: attachment
+    lens: english
+    confidence: plausible
+    weight: 60
+
+  - form: "attachment"
+    concept: attachment
+    lens: english
+    confidence: verified
+    weight: 70
+
+  - form: "grasping"
+    concept: grasping
+    lens: english
+    confidence: verified
+    weight: 70
+
+  - form: "clinging"
+    concept: attachment
+    lens: english
+    confidence: plausible
+    weight: 60
+
+  # Letting go/surrender vocabulary
+  - form: "letting"
+    concept: letting_go
+    lens: english
+    confidence: plausible
+    weight: 50
+
+  - form: "release"
+    concept: letting_go
+    lens: english
+    confidence: verified
+    weight: 70
+
+  - form: "surrender"
+    concept: surrender
+    lens: english
+    confidence: verified
+    weight: 70
+
+  - form: "surrendering"
+    concept: surrender
+    lens: english
+    confidence: verified
+    weight: 70
+
+  - form: "accept"
+    concept: acceptance
+    lens: english
+    confidence: plausible
+    weight: 50
+
+  - form: "acceptance"
+    concept: acceptance
+    lens: english
+    confidence: verified
+    weight: 70
+
+  - form: "accepting"
+    concept: acceptance
+    lens: english
+    confidence: plausible
+    weight: 50
+
+  - form: "peace"
+    concept: peace
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "peaceful"
+    concept: peace
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "calm"
+    concept: calm
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "calmness"
+    concept: calm
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "serene"
+    concept: peace
+    lens: english
+    confidence: plausible
+    weight: 70
+
+  - form: "still"
+    concept: stillness
+    lens: english
+    confidence: plausible
+    weight: 60
+
+  - form: "stillness"
+    concept: stillness
+    lens: english
+    confidence: plausible
+    weight: 60
+
+  - form: "quiet"
+    concept: calm
+    lens: english
+    confidence: plausible
+    weight: 50
+
+  - form: "rest"
+    concept: calm
+    lens: english
+    confidence: plausible
+    weight: 50
+
+  # Trust/faith vocabulary
+  - form: "trust"
+    concept: trust
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "faith"
+    concept: faith
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "belief"
+    concept: trust
+    lens: english
+    confidence: plausible
+    weight: 60
+
+  - form: "believing"
+    concept: trust
+    lens: english
+    confidence: plausible
+    weight: 60
+
+  # Love/compassion vocabulary
+  - form: "compassion"
+    concept: compassion
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "compassionate"
+    concept: compassion
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "mercy"
+    concept: mercy
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "grace"
+    concept: grace
+    lens: english
+    confidence: plausible
+    weight: 70
+
+  - form: "forgiveness"
+    concept: forgiveness
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "forgive"
+    concept: forgiveness
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "forgiving"
+    concept: forgiveness
+    lens: english
+    confidence: verified
+    weight: 70
+
+  - form: "gratitude"
+    concept: gratitude
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "grateful"
+    concept: gratitude
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "thankful"
+    concept: gratitude
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "thanks"
+    concept: gratitude
+    lens: english
+    confidence: plausible
+    weight: 60
+
+  # Hope/joy vocabulary
+  - form: "hope"
+    concept: hope
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "hopeful"
+    concept: hope
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "joy"
+    concept: joy
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "joyful"
+    concept: joy
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "happy"
+    concept: joy
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "happiness"
+    concept: joy
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "bliss"
+    concept: bliss
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "ecstasy"
+    concept: bliss
+    lens: english
+    confidence: plausible
+    weight: 70
+
+  - form: "blessed"
+    concept: grace
+    lens: english
+    confidence: plausible
+    weight: 60
+
+  # Clarity/confusion vocabulary
+  - form: "confusion"
+    concept: confusion
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "confused"
+    concept: confusion
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "clarity"
+    concept: clarity
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "clear"
+    concept: clarity
+    lens: english
+    confidence: plausible
+    weight: 60
+
+  - form: "lost"
+    concept: confusion
+    lens: english
+    confidence: plausible
+    weight: 50
+
+  - form: "overwhelmed"
+    concept: confusion
+    lens: english
+    confidence: plausible
+    weight: 60
+
+  - form: "stuck"
+    concept: stagnation
+    lens: english
+    confidence: plausible
+    weight: 50
+
+  # Flow/growth vocabulary
+  - form: "flow"
+    concept: flow
+    lens: english
+    confidence: verified
+    weight: 70
+
+  - form: "flowing"
+    concept: flow
+    lens: english
+    confidence: verified
+    weight: 70
+
+  - form: "growth"
+    concept: growth
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "healing"
+    concept: healing
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "heal"
+    concept: healing
+    lens: english
+    confidence: verified
+    weight: 70
+
+  - form: "healed"
+    concept: healing
+    lens: english
+    confidence: verified
+    weight: 70
+
+  - form: "stagnation"
+    concept: stagnation
+    lens: english
+    confidence: verified
+    weight: 70
+
+  - form: "stagnant"
+    concept: stagnation
+    lens: english
+    confidence: verified
+    weight: 70
+
+  - form: "rigid"
+    concept: rigidity
+    lens: english
+    confidence: plausible
+    weight: 60
+
+  - form: "rigidity"
+    concept: rigidity
+    lens: english
+    confidence: verified
+    weight: 70
+
+  - form: "flexibility"
+    concept: flexibility
+    lens: english
+    confidence: verified
+    weight: 70
+
+  - form: "flexible"
+    concept: flexibility
+    lens: english
+    confidence: verified
+    weight: 70
+
+  # Harmony/conflict vocabulary
+  - form: "harmony"
+    concept: harmony
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "conflict"
+    concept: conflict
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "conflicted"
+    concept: conflict
+    lens: english
+    confidence: verified
+    weight: 70
+
+  # Self-acceptance vocabulary
+  - form: "self_acceptance"
+    concept: self_acceptance
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "selfacceptance"
+    concept: self_acceptance
+    lens: english
+    confidence: verified
+    weight: 70
+
+  - form: "self-compassion"
+    concept: self_acceptance
+    lens: english
+    confidence: plausible
+    weight: 60
+
+  - form: "self_forgiveness"
+    concept: self_acceptance
+    lens: english
+    confidence: plausible
+    weight: 60
+
+  - form: "worthy"
+    concept: self_acceptance
+    lens: english
+    confidence: plausible
+    weight: 50
+
+  - form: "worth"
+    concept: self_acceptance
+    lens: english
+    confidence: plausible
+    weight: 50
+
+  # Presence/avoidance vocabulary
+  - form: "presence"
+    concept: presence
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "present"
+    concept: presence
+    lens: english
+    confidence: plausible
+    weight: 50
+
+  - form: "avoidance"
+    concept: avoidance
+    lens: english
+    confidence: verified
+    weight: 70
+
+  - form: "avoid"
+    concept: avoidance
+    lens: english
+    confidence: plausible
+    weight: 50
+
+  - form: "avoiding"
+    concept: avoidance
+    lens: english
+    confidence: plausible
+    weight: 50
+
+  # Connection/isolation vocabulary
+  - form: "connection"
+    concept: connection
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "connected"
+    concept: connection
+    lens: english
+    confidence: verified
+    weight: 70
+
+  - form: "disconnected"
+    concept: isolation
+    lens: english
+    confidence: plausible
+    weight: 60
+
+  # Depression/despair vocabulary
+  - form: "depression"
+    concept: depression
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "depressive"
+    concept: depression
+    lens: english
+    confidence: plausible
+    weight: 70
+
+  - form: "despair"
+    concept: despair
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "hopeless"
+    concept: despair
+    lens: english
+    confidence: plausible
+    weight: 60
+
+  - form: "desperate"
+    concept: despair
+    lens: english
+    confidence: plausible
+    weight: 60
+
+  # Patience/wisdom vocabulary
+  - form: "patience"
+    concept: patience
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "patient"
+    concept: patience
+    lens: english
+    confidence: verified
+    weight: 70
+
+  - form: "wisdom"
+    concept: wisdom
+    lens: english
+    confidence: verified
+    weight: 80
+
+  - form: "wise"
+    concept: wisdom
+    lens: english
+    confidence: plausible
+    weight: 60

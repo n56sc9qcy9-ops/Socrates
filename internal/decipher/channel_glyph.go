@@ -80,6 +80,7 @@ func analyzeLatinGlyphs(s string, kb *knowledge.Knowledge) []Signal {
 				Lens:       "glyph",
 				Confidence: spec.Confidence,
 				Weight:     spec.Weight,
+				IsDirect:   false,
 			})
 		}
 		// If no curated pattern exists for this repeated bigram, emit nothing
@@ -97,6 +98,7 @@ func analyzeLatinGlyphs(s string, kb *knowledge.Knowledge) []Signal {
 					Lens:       "glyph",
 					Confidence: p.Confidence,
 					Weight:     p.Weight,
+				IsDirect:   false,
 				})
 			}
 		}
@@ -115,6 +117,7 @@ func analyzeLatinGlyphs(s string, kb *knowledge.Knowledge) []Signal {
 						Lens:       "glyph",
 						Confidence: p.Confidence,
 						Weight:     p.Weight,
+				IsDirect:   false,
 					})
 				}
 			}
@@ -133,6 +136,7 @@ func analyzeLatinGlyphs(s string, kb *knowledge.Knowledge) []Signal {
 						Lens:       "glyph",
 						Confidence: p.Confidence,
 						Weight:     p.Weight,
+				IsDirect:   false,
 					})
 				}
 			}
@@ -167,6 +171,7 @@ func analyzeLatinGlyphs(s string, kb *knowledge.Knowledge) []Signal {
 						Lens:       "glyph",
 						Confidence: p.Confidence,
 						Weight:     p.Weight,
+				IsDirect:   false,
 					})
 					break
 				}
@@ -178,6 +183,7 @@ func analyzeLatinGlyphs(s string, kb *knowledge.Knowledge) []Signal {
 						Lens:       "glyph",
 						Confidence: p.Confidence,
 						Weight:     p.Weight,
+				IsDirect:   false,
 					})
 					break
 				}
@@ -215,6 +221,7 @@ func analyzeHebrewGlyphs(runes []rune, kb *knowledge.Knowledge) []Signal {
 				Lens:       "hebrew-glyph",
 				Confidence: p.Confidence,
 				Weight:     p.Weight,
+				IsDirect:   false,
 			})
 		} else {
 			// Unknown Hebrew letter
@@ -256,6 +263,7 @@ func analyzeDevanagariGlyphs(runes []rune, kb *knowledge.Knowledge) []Signal {
 				Lens:       "devanagari-glyph",
 				Confidence: p.Confidence,
 				Weight:     p.Weight,
+				IsDirect:   false,
 			})
 		}
 	}
@@ -296,6 +304,7 @@ func analyzeHanGlyphs(runes []rune, kb *knowledge.Knowledge) []Signal {
 				Lens:       "han-glyph",
 				Confidence: p.Confidence,
 				Weight:     p.Weight,
+				IsDirect:   false,
 			})
 		} else {
 			// Unknown Han character

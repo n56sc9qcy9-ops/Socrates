@@ -692,3 +692,117 @@ concepts:
     aliases: [anticipation, expectation, faith]
     neighbors: [future, trust, source]
 
+
+# Extended emotional/spiritual concepts for counsellor/transmutation activation.
+# Covers ordinary natural passages with data-backed form mappings.
+# All concepts are defined without hardcoded behavior in Go.
+
+  - id: anger
+    name: anger
+    aliases: [rage, fury, wrath]
+    neighbors: [fear, frustration, conflict]
+
+  - id: frustration
+    name: frustration
+    aliases: [irritation, annoyance, exasperation]
+    neighbors: [anger, control, stagnation]
+
+  - id: sadness
+    name: sadness
+    aliases: [unhappiness, melancholy, sorrow]
+    neighbors: [grief, isolation, loss]
+
+  - id: grief
+    name: grief
+    aliases: [mourning, bereavement, loss]
+    neighbors: [sadness, acceptance, letting_go]
+
+  - id: loneliness
+    name: loneliness
+    aliases: [solitude, abandonment, desolation]
+    neighbors: [isolation, separation, connection]
+
+  - id: emptiness
+    name: emptiness
+    aliases: [void, hollowness, vacancy]
+    neighbors: [isolation, loss, peace]
+
+  - id: loss
+    name: loss
+    aliases: [grief, deprivation, absence]
+    neighbors: [grief, letting_go, acceptance]
+
+  - id: pain
+    name: pain
+    aliases: [suffering, hurt, agony]
+    neighbors: [fear, isolation, healing]
+
+  - id: acceptance
+    name: acceptance
+    aliases: [approval, agreement, acknowledgment]
+    neighbors: [peace, trust, self_acceptance]
+
+  - id: peace
+    name: peace
+    aliases: [tranquility, serenity, calm]
+    neighbors: [calm, trust, harmony]
+
+  - id: calm
+    name: calm
+    aliases: [serenity, stillness, quietude]
+    neighbors: [peace, breath, presence]
+
+  - id: stillness
+    name: stillness
+    aliases: [quietude, tranquility, rest]
+    neighbors: [calm, presence, peace]
+
+  - id: faith
+    name: faith
+    aliases: [belief, confidence, conviction]
+    neighbors: [trust, hope, source]
+
+  - id: compassion
+    name: compassion
+    aliases: [empathy, sympathy, tenderness]
+    neighbors: [love, mercy, grace]
+
+  - id: grace
+    name: grace
+    aliases: [favor, blessing, elegance]
+    neighbors: [mercy, peace, source]
+
+  - id: gratitude
+    name: gratitude
+    aliases: [thankfulness, appreciation, gratefulness]
+    neighbors: [joy, love, presence]
+
+  - id: joy
+    name: joy
+    aliases: [happiness, delight, bliss]
+    neighbors: [love, gratitude, life]
+
+  - id: bliss
+    name: bliss
+    aliases: [ecstasy, rapture, felicity]
+    neighbors: [joy, love, peace]
+
+  - id: healing
+    name: healing
+    aliases: [recovery, restoration, mending]
+    neighbors: [growth, flow, peace]
+
+  - id: depression
+    name: depression
+    aliases: [despondency, melancholy, heaviness]
+    neighbors: [isolation, stagnation, despair]
+
+  - id: despair
+    name: despair
+    aliases: [hopelessness, despondency, anguish]
+    neighbors: [depression, isolation, loss]
+
+  - id: patience
+    name: patience
+    aliases: [endurance, forbearance, tolerance]
+    neighbors: [trust, presence, flow]
