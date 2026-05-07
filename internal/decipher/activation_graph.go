@@ -295,6 +295,7 @@ func BuildGraphFromEvidence(
 	}
 
 	// Phase 3: Add fuzzy match evidence to existing nodes
+	// Fuzzy matches are indirect - mark nodes as depth 1 if they're new
 	for _, match := range fuzzyMatches {
 		// Find the concept from the matched anchor
 		anchors := GetAllAnchors(kb)
@@ -307,18 +308,36 @@ func BuildGraphFromEvidence(
 		}
 
 		if matchedConcept != "" {
-			node := g.AddNode(matchedConcept, match.Weight, anchorConfidence(match.Weight))
-			evidence := EvidencePath{
-				SourceToken: match.InputForm,
-				SourceForm:  match.InputForm,
-				SourceType:  "fuzzy_match",
-				MatchForm:   match.AnchorForm,
-				MatchScore:  match.Weight,
-				Confidence:  anchorConfidence(match.Weight),
-				Weight:      match.Weight,
-				IsDirect:    false, // Fuzzy matches are indirect
+			// Check if this concept already exists in the graph (from direct evidence)
+			if existingNode, exists := g.Nodes[matchedConcept]; exists {
+				// Add fuzzy match as evidence to existing node
+				evidence := EvidencePath{
+					SourceToken: match.InputForm,
+					SourceForm:  match.InputForm,
+					SourceType:  "fuzzy_match",
+					MatchForm:   match.AnchorForm,
+					MatchScore:  match.Weight,
+					Confidence:  anchorConfidence(match.Weight),
+					Weight:      match.Weight,
+					IsDirect:    false,
+				}
+				existingNode.AddEvidence(evidence)
+			} else {
+				// New concept from fuzzy match - create as indirect (depth 1)
+				node := g.AddNode(matchedConcept, match.Weight, anchorConfidence(match.Weight))
+				node.Depth = 1 // Fuzzy matches are indirect
+				evidence := EvidencePath{
+					SourceToken: match.InputForm,
+					SourceForm:  match.InputForm,
+					SourceType:  "fuzzy_match",
+					MatchForm:   match.AnchorForm,
+					MatchScore:  match.Weight,
+					Confidence:  anchorConfidence(match.Weight),
+					Weight:      match.Weight,
+					IsDirect:    false,
+				}
+				node.AddEvidence(evidence)
 			}
-			node.AddEvidence(evidence)
 		}
 	}
 

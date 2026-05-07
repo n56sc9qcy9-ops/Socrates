@@ -517,9 +517,19 @@ concepts:
     
   - id: resentment
     name: resentment
-    aliases: [bitterness, grudging]
+    aliases: [grudging]
     neighbors: [fear, guilt, judgment]
+
+  - id: bitterness
+    name: bitterness
+    aliases: [acrimony]
+    neighbors: [resentment, anger, judgment]
     
+  - id: feeling
+    name: feeling
+    aliases: []
+    neighbors: [sadness, emptiness]
+
   - id: forgiveness
     name: forgiveness
     aliases: [pardon, release]

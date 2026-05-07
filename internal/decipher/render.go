@@ -309,6 +309,9 @@ func renderDebug(r Reading) string {
 		sb.WriteString(fmt.Sprintf("Passage Fields (%d total):\n", len(r.PassageFields)))
 		for _, field := range r.PassageFields {
 			depthStr := "direct"
+			if !field.IsDirectEvidence {
+				depthStr = "structural"
+			}
 			if field.Depth > 0 {
 				depthStr = fmt.Sprintf("depth-%d", field.Depth)
 			}

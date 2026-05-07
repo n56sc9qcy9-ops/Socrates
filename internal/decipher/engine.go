@@ -435,7 +435,7 @@ func generateConciseReading(input string, converging []Pattern, weakSignals []Pa
 	if len(converging) > 0 {
 		var themes []string
 		for _, p := range converging {
-			if p.Strength > 0.5 {
+			if p.Strength > 0.5 && patternHasDirectEvidence(p) {
 				themes = append(themes, p.Name)
 			}
 		}
@@ -448,7 +448,9 @@ func generateConciseReading(input string, converging []Pattern, weakSignals []Pa
 	if len(weakSignals) > 0 {
 		var weakThemes []string
 		for _, p := range weakSignals {
-			weakThemes = append(weakThemes, p.Name)
+			if patternHasDirectEvidence(p) {
+				weakThemes = append(weakThemes, p.Name)
+			}
 		}
 		if len(weakThemes) > 0 {
 			parts = append(parts, "Secondary resonance with "+strings.Join(weakThemes[:min(3, len(weakThemes))], ", ")+" (speculative).")
@@ -460,6 +462,15 @@ func generateConciseReading(input string, converging []Pattern, weakSignals []Pa
 	}
 
 	return strings.Join(parts, " ")
+}
+
+func patternHasDirectEvidence(p Pattern) bool {
+	for _, sig := range p.Signals {
+		if sig.IsDirect {
+			return true
+		}
+	}
+	return false
 }
 
 // min returns the minimum of two integers.

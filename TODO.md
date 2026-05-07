@@ -45,18 +45,19 @@ Completed (see `docs/TODO_ARCHIVE.md` and git history for detail):
 - CLI ergonomics cleanup, architecture readiness review, documentation consolidation.
 - Counsellor/transmutation fields: data-backed fields from transmute.yaml, --debug internals, tends-toward language, evidence paths with source/notes. Default concise; no hardcoded behavior.
 - Harmonic data model hardening: frequency profile entries and labels now reject arbitrary unknown keys by allowlist; reference-only sections remain intentionally exempt and documented.
+- Counsellor precision: natural-passage regression tests, direct field ranking over structural noise, deduplicated counsellor suggestions/evidence paths, neutral `feel` handling, structural debug labels, and concise prose alignment.
 - All acceptance criteria green. Readiness report at `docs/ARCHITECTURE_READINESS.md`.
 
 Current git status:
 
 ```text
-## main...origin/main [ahead 72]
+## main...origin/main [ahead 76]
 ```
 
 Key completed metrics (full detail in `docs/ARCHITECTURE_READINESS.md`):
 - Train field precision `0.39`, recall `1.00`, pass rate `8/8`.
 - Held-out field precision `0.27`, recall `0.62`, pass rate `5/8`.
-- Validation: 0 errors, 135 warnings (data quality warnings only).
+- Validation: 0 errors, 183 warnings (data quality warnings only).
 - Cross-script convergence: English, Norwegian, Hebrew, Chinese love on shared harmonic field.
 - Active channel diversity, precision-aware training, multi-concept fuzzy evidence: all verified.
 - Confidence is `verified`/`plausible`/`speculative`; provenance is `curated`/`traditional`/`human_review`/`physics`; `curated` is not confidence.
@@ -66,29 +67,31 @@ Key completed metrics (full detail in `docs/ARCHITECTURE_READINESS.md`):
 ## Current Next Task
 
 Task:
-**Counsellor precision — direct field evidence must outrank structural noise.**
+**Knowledge curation hygiene after counsellor expansion.**
 
 Architect review status:
 Harmonic data model hardening is accepted.
 
-Counsellor precision commit `e567fc5` is **not accepted yet**. It improves top-field ordering for the reviewed examples, but it does not satisfy the current task acceptance criteria.
+Counsellor precision is accepted after the follow-up fixes:
+- focused natural-passage regression tests exist
+- direct emotional/spiritual fields outrank structural observations in reviewed passages
+- counsellor suggestions and evidence paths deduplicate
+- neutral `feel` activates `feeling`, not `resentment`
+- structural fields render as structural in debug output
+- final prose no longer promotes structural-only signals
 
 Current blocker:
-- No regression tests were added or updated in `e567fc5`, despite the acceptance criterion requiring tests for natural passage field ranking and counsellor suggestion precision.
-- Counsellor suggestions can duplicate the same source-target-kind path. Example: `./bin/socrates "I feel afraid and disconnected from truth" --debug` currently shows `isolation --[transmutes_to]--> connection` twice in both suggestions and evidence paths.
-- Neutral self-reporting language can create a false direct counsellor source. Example: `feel` currently appears as `resentment` via a weak match to `bitterness`, producing a resentment -> forgiveness suggestion for `I feel afraid...`. This is not acceptable as direct emotional evidence.
-- Default prose still does not consistently reflect the improved top-field ranking. Example: `i feel sad and empty inside` shows top fields `sadness`, `emptiness`, `resentment`, but the final reading says `Activated concepts: emptiness, inward, action`.
-- Structural channels have been marked `IsDirect:false` at the signal level, but debug rendering still labels fields such as phonetic/glyph observations as `direct`. Clarify whether this is only display wording or a true evidence-classification leak, and fix the misleading output if needed.
+- The counsellor vocabulary expansion increased validation warnings from 135 to 183. There are still no validation errors, but new curation debt should be reduced before the next feature layer.
+- Many warnings are duplicate alias/canonical-ID overlaps introduced or exposed by the expanded emotional/spiritual vocabulary. These should be resolved by using relations/neighbors instead of aliases where the target is already a concept.
+- Keep the accepted counsellor behavior intact while cleaning data. Do not delete direct forms needed by the new natural-passage tests.
 
 Required investigation:
-- Add focused regression tests before further broad data expansion. Tests should lock the intended behavior for at least:
-  - `i feel sad and empty inside`: top passage fields include `sadness` and `emptiness` above structural observations, and no neutral `feel` -> `resentment` counsellor source appears.
-  - `lonely and afraid`: `loneliness` and `fear` outrank structural observations and produce non-duplicated counsellor suggestions.
-  - `I feel afraid and disconnected from truth`: `fear`, `isolation`, and `truth` are visible as primary fields; counsellor suggestions are deduplicated.
-- Fix counsellor suggestion/evidence-path deduplication by semantic identity such as `source|kind|target|confidence|lens`.
-- Fix or remove the `feel` false activation path. Prefer adjusting fuzzy threshold/gating for passage signals or adding a neutral `feeling` concept only if it does not become a transmutation source. Do not map generic `feel` to a contracted field.
-- Align default concise reading with `PassageFields.TopFields` or otherwise ensure the final prose does not re-promote structural noise after top-field sorting.
-- Keep the current direct-first behavior if tests prove it is the right generic ranking rule, but avoid relying on untested sorting alone.
+- Run `./bin/socrates knowledge validate` and group the 183 warnings by cause.
+- Prefer data-only fixes in `internal/knowledge/concepts.yaml` and `internal/knowledge/forms.yaml`.
+- Remove aliases that duplicate another concept's canonical ID when a relation/neighbor already expresses the connection.
+- Keep accepted forms such as `feel`, `sad`, `empty`, `lonely`, `afraid`, `disconnected`, and `truth` working in the natural-passage regression tests.
+- Do not hide warnings by weakening validation.
+- Rebuild before validation because active runtime knowledge is embedded.
 
 Rules (unchanged):
 - No hardcoded semantic word lists in production Go.
@@ -108,11 +111,10 @@ Reference:
 
 Acceptance Criteria:
 
-- Plain-language passages with direct concept evidence rank the direct fields above glyph/phonetic/orthographic structural observations.
-- Counsellor source fields activate only from direct or clearly evidence-supported passage fields; weak graph-only noise must not produce confident guidance.
-- Counsellor output shows source field, suggested correction field, relation kind, confidence, and evidence path in default or debug output.
-- Existing `transmute.yaml` mappings remain data-backed; no source-to-target correction mapping is hardcoded in Go.
-- New or updated tests cover natural passage field ranking and counsellor suggestion precision without relying on production word-specific branches.
+- Validation warning count is materially reduced from 183 without creating new validation categories.
+- No `unknown concepts` warnings.
+- No active form targets a missing concept.
+- Natural-passage counsellor precision tests still pass.
 - Existing harmonic core, training evaluation, review/apply workflow, validation, and cross-script convergence still pass.
 - `./bin/socrates knowledge validate` passes with no errors.
 - `go test ./...` passes.
@@ -121,7 +123,7 @@ Acceptance Criteria:
 
 ## Next After This
 
-After counsellor precision:
+After knowledge curation hygiene:
 - Extended script support (Arabic, Thai, etc.)
 - Harmonic/audio rendering layer
 - Consult `docs/ARCHITECTURE_READINESS.md` before major new feature layers

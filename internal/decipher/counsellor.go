@@ -99,6 +99,9 @@ func findTransmutationSources(passageFields PassageFields, kb *knowledge.Knowled
 func buildSuggestions(sources []TransmutationSource, kb *knowledge.Knowledge) []TransmutationSuggestion {
 	var suggestions []TransmutationSuggestion
 
+	// Deduplicate by semantic identity (source|kind|target|weight|confidence|lens)
+	seen := make(map[string]bool)
+
 	for _, src := range sources {
 		transmutations := kb.GetTransmutationsFrom(src.Concept)
 		for _, t := range transmutations {
@@ -108,6 +111,13 @@ func buildSuggestions(sources []TransmutationSource, kb *knowledge.Knowledge) []
 			if combinedStrength < counsellorMinCombinedStrength {
 				continue
 			}
+
+			// Deduplicate by semantic identity
+			dedupKey := src.Concept + "|" + t.Kind + "|" + t.To + "|" + string(t.Confidence) + "|" + t.Lens
+			if seen[dedupKey] {
+				continue
+			}
+			seen[dedupKey] = true
 
 			// Downgrade confidence for indirect evidence sources.
 			// Direct form/glyph/script evidence uses normal confidence.
@@ -123,6 +133,7 @@ func buildSuggestions(sources []TransmutationSource, kb *knowledge.Knowledge) []
 				}
 				// ConfidenceSpeculative stays speculative
 			}
+
 
 			suggestions = append(suggestions, TransmutationSuggestion{
 				SourceConcept:   src.Concept,
@@ -144,6 +155,9 @@ func buildSuggestions(sources []TransmutationSource, kb *knowledge.Knowledge) []
 func buildEvidencePaths(sources []TransmutationSource, kb *knowledge.Knowledge) []TransmutationEvidence {
 	var paths []TransmutationEvidence
 
+	// Deduplicate by semantic identity (source|kind|target)
+	seen := make(map[string]bool)
+
 	for _, src := range sources {
 		transmutations := kb.GetTransmutationsFrom(src.Concept)
 		for _, t := range transmutations {
@@ -151,6 +165,13 @@ func buildEvidencePaths(sources []TransmutationSource, kb *knowledge.Knowledge) 
 			if combinedStrength < counsellorMinCombinedStrength {
 				continue
 			}
+
+			// Deduplicate by semantic identity
+			dedupKey := src.Concept + "|" + t.Kind + "|" + t.To
+			if seen[dedupKey] {
+				continue
+			}
+			seen[dedupKey] = true
 
 			isDirect := src.Depth == 0 && src.IsDirectEvidence
 			paths = append(paths, TransmutationEvidence{

@@ -835,11 +835,17 @@ forms:
     confidence: plausible
     weight: 60
 
-  - form: "bitterness"
-    concept: resentment
+  - form: "feel"
+    concept: feeling
     lens: english
-    confidence: plausible
-    weight: 60
+    confidence: curated
+    weight: 80
+
+  - form: "bitterness"
+    concept: bitterness
+    lens: english
+    confidence: curated
+    weight: 80
 
   # Pride/ego vocabulary
   - form: "pride"

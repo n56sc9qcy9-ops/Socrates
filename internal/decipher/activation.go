@@ -135,21 +135,45 @@ type ActivatedConcept struct {
 }
 
 // AnalyzePassageTokens analyzes tokens for passage-level signals.
-// Uses generic concept activation via fuzzy matching against anchors.
+// Uses direct form matches from knowledge when available.
+// Fuzzy matching is only used as a fallback for tokens without curated forms.
 // Returns activated concepts - NO semantic bucket booleans.
 func AnalyzePassageTokens(tokens []string, kb *knowledge.Knowledge) []PassageSignal {
 	signals := make([]PassageSignal, 0)
 
-	// Get all known anchors for matching
+	// Get all known anchors for fuzzy fallback
 	anchors := GetAllAnchors(kb)
 
 	for _, token := range tokens {
-		// Generate candidate forms for this token
+		// First: check for direct form match in knowledge base
+		// If a token has ANY curated form, use it and skip fuzzy matching
+		// to prevent false positives from similar but unrelated words
+		matchedToken := ""
+		directForms := kb.GetFormsByText(token)
+		for _, form := range directForms {
+			// Use any curated form match (confidence affects signal level, not existence)
+			// Skip speculative forms to avoid noise
+			if form.Confidence != ConfidenceSpeculative {
+				signals = append(signals, PassageSignal{
+					Token:      token,
+					Concept:    form.Concept,
+					Weight:     float64(form.Weight),
+					Confidence: form.Confidence,
+					MatchForm:  token,
+					MatchScore: 1.0,
+				})
+				matchedToken = token
+				break
+			}
+		}
+		// If we found a direct form, skip fuzzy matching for this token
+		if matchedToken == token {
+			continue
+		}
+
+		// No direct match found - try fuzzy anchor matching
 		candidates, _ := GenerateCandidateForms(token)
-
-		// Try to match against known anchors
 		matches, _ := FuzzyMatchEvidence(candidates, anchors)
-
 		for _, match := range matches {
 			if match.Distance < 1.0 { // Only strong matches
 				// Find the concept from the matched anchor
