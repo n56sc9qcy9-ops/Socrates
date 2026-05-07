@@ -97,22 +97,23 @@ Architecture readiness refresh is accepted:
 - accepted warning debt remains explicit
 
 Current blocker:
-- Cross-script convergence is proven for English, Norwegian, Hebrew, and Chinese examples, but Sanskrit/Devanagari needs a focused first-class pass before broader language expansion.
-- The next implementation should apply the existing generic script/channel/data pattern to Sanskrit written in Devanagari only. Do not add Arabic or Thai in this task.
-- Keep script support evidence-first and data-backed. Do not hardcode word-specific meanings in Go.
+- Sanskrit/Devanagari commit `72194ec` is **not accepted yet**.
+- The ScriptWord channel correctly activates Sanskrit concepts, but those exact script-word concepts do not flow into `PassageFields`/harmonic field activation. Example: `./bin/socrates "प्राण" --debug` shows ScriptWord signals for `breath`, `life-force`, and `prana`, but `Passage Fields` contains only `unknown`, so the harmonic field is absent and the top fields do not show the direct Sanskrit meaning.
+- The same issue appears for `सत्य`: ScriptWord activates `truth`, but top fields show only `unknown`, while top concepts are graph neighbors (`light`, `word`, `being`). Channel evidence alone is not enough; Sanskrit must participate in the same first-class passage/harmonic field path as Latin emotional concepts.
+- Do not add Arabic or Thai in this task. Fix Sanskrit/Devanagari only.
 
 Required investigation:
-- Start with Sanskrit/Devanagari only.
-- Inspect existing script detection, glyph channel, forms/script_words schema, knowledge validation, and cross-script tests before editing.
-- Add minimal curated runtime knowledge for Sanskrit/Devanagari with confidence/source/lens labels.
-- Prefer a small seed set aligned with existing meaning-frequency fields, such as `ॐ`/`ओम्` (sacred sound), `प्राण` (breath/life-force), `सत्य` (truth), `आत्मन्` (self/being), `धर्म` (path/order/truth), and `अग्नि` (fire), but only include entries that fit the existing schema and concepts cleanly.
+- Inspect why `Engine.Analyze`/`AnalyzePassageFromTokens` loses exact ScriptWord concepts for non-Latin whole-word input.
+- Fix the generic activation path so exact ScriptWord signals can become direct passage fields and harmonic-field inputs without special-casing Sanskrit words.
 - Add tests proving:
-  - script detection recognizes Devanagari
-  - exact script word/glyph evidence activates the intended concept
-  - cross-script convergence reaches an existing shared field where curated data supports it
-  - unknown or weak script evidence does not create overconfident counsellor guidance
+  - `प्राण` has top passage fields including `breath` or `life-force`, not only `unknown`
+  - `सत्य` has top passage fields including `truth`
+  - a Sanskrit field with a frequency profile produces a harmonic field when curated profile data exists
+  - `कवि` remains weak/unknown and does not produce overconfident counsellor guidance
+  - existing Hebrew/Han ScriptWord behavior still passes
 - Keep default output concise and debug output evidence-rich.
-- Update docs only for Sanskrit/Devanagari support that is actually implemented.
+- Keep the existing Sanskrit tests, but strengthen them so they fail if evidence stays channel-only and never reaches passage fields.
+- Update docs only after Sanskrit/Devanagari is first-class through passage/harmonic activation.
 
 Rules (unchanged):
 - No hardcoded semantic word lists in production Go.
@@ -134,6 +135,9 @@ Acceptance Criteria:
 
 - Sanskrit/Devanagari is supported through generic detection/channel/data flow.
 - New script support is covered by tests.
+- Exact Devanagari ScriptWord meanings feed direct passage fields and, where frequency profiles exist, harmonic field activation.
+- Default output for known Sanskrit terms shows the Sanskrit meaning as a top field or activated concept, not only as a channel detail.
+- Unknown Devanagari input remains weak/speculative and does not produce counsellor guidance.
 - No production Go semantic word maps or word-specific branches are introduced.
 - New runtime knowledge validates with zero errors and labeled confidence/source/lens.
 - Existing harmonic core, natural-passage counsellor precision, training evaluation, review/apply workflow, validation, and existing cross-script convergence still pass.
