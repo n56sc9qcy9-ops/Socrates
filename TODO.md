@@ -69,7 +69,7 @@ Key completed metrics (full detail in `docs/ARCHITECTURE_READINESS.md`):
 ## Current Next Task
 
 Task:
-**Extended script support.**
+**Sanskrit/Devanagari support.**
 
 Architect review status:
 Harmonic data model hardening is accepted.
@@ -97,21 +97,22 @@ Architecture readiness refresh is accepted:
 - accepted warning debt remains explicit
 
 Current blocker:
-- Cross-script convergence is proven for English, Norwegian, Hebrew, and Chinese examples, but extended scripts such as Arabic and Thai are still future work.
-- The next implementation should apply the existing generic script/channel/data pattern to one additional script family first, then expand only after tests prove the pattern.
+- Cross-script convergence is proven for English, Norwegian, Hebrew, and Chinese examples, but Sanskrit/Devanagari needs a focused first-class pass before broader language expansion.
+- The next implementation should apply the existing generic script/channel/data pattern to Sanskrit written in Devanagari only. Do not add Arabic or Thai in this task.
 - Keep script support evidence-first and data-backed. Do not hardcode word-specific meanings in Go.
 
 Required investigation:
-- Start with Arabic script support unless a quick architecture read shows Thai is lower-risk.
+- Start with Sanskrit/Devanagari only.
 - Inspect existing script detection, glyph channel, forms/script_words schema, knowledge validation, and cross-script tests before editing.
-- Add minimal curated runtime knowledge for the selected script with confidence/source/lens labels.
+- Add minimal curated runtime knowledge for Sanskrit/Devanagari with confidence/source/lens labels.
+- Prefer a small seed set aligned with existing meaning-frequency fields, such as `ॐ`/`ओम्` (sacred sound), `प्राण` (breath/life-force), `सत्य` (truth), `आत्मन्` (self/being), `धर्म` (path/order/truth), and `अग्नि` (fire), but only include entries that fit the existing schema and concepts cleanly.
 - Add tests proving:
-  - script detection recognizes the selected script
+  - script detection recognizes Devanagari
   - exact script word/glyph evidence activates the intended concept
   - cross-script convergence reaches an existing shared field where curated data supports it
   - unknown or weak script evidence does not create overconfident counsellor guidance
 - Keep default output concise and debug output evidence-rich.
-- Update docs only where the new script is actually supported.
+- Update docs only for Sanskrit/Devanagari support that is actually implemented.
 
 Rules (unchanged):
 - No hardcoded semantic word lists in production Go.
@@ -131,7 +132,7 @@ Reference:
 
 Acceptance Criteria:
 
-- At least one additional script family is supported through generic detection/channel/data flow.
+- Sanskrit/Devanagari is supported through generic detection/channel/data flow.
 - New script support is covered by tests.
 - No production Go semantic word maps or word-specific branches are introduced.
 - New runtime knowledge validates with zero errors and labeled confidence/source/lens.
@@ -143,8 +144,9 @@ Acceptance Criteria:
 
 ## Next After This
 
-After extended script support:
-- Another script family if the first one is accepted
+After Sanskrit/Devanagari support:
+- Real-life Socrates testing before adding another script family
+- Arabic later if real-life testing supports adding it
 - Harmonic/audio rendering layer
 - Consult `docs/ARCHITECTURE_READINESS.md` before major new feature layers
 
