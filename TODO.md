@@ -69,21 +69,26 @@ Task:
 **Counsellor precision — direct field evidence must outrank structural noise.**
 
 Architect review status:
-Harmonic data model hardening is accepted based on Pi's committed allowlist correction.
+Harmonic data model hardening is accepted.
+
+Counsellor precision commit `e567fc5` is **not accepted yet**. It improves top-field ordering for the reviewed examples, but it does not satisfy the current task acceptance criteria.
 
 Current blocker:
-- The counsellor/transmutation layer exists, but ordinary natural passages can still be dominated by glyph, phonetic, fragment, or graph-propagated structural fields even when direct emotional/spiritual concept evidence is present.
-- Direct concept evidence from active knowledge must reliably outrank low-level structural observations in plain-language passages.
-- Inputs that plainly express contracted or balancing fields should activate those fields through data-backed forms, aliases, relations, and ranking weights, not through hardcoded Go marker maps or word-specific branches.
-- Counsellor suggestions must remain data-backed from `internal/knowledge/transmute.yaml`, confidence-labeled, evidence-traced, and non-authoritarian.
-- Socrates may suggest correction paths; it must not claim absolute truth about the person, diagnose, prophesy, or present symbolic resonance as proof.
+- No regression tests were added or updated in `e567fc5`, despite the acceptance criterion requiring tests for natural passage field ranking and counsellor suggestion precision.
+- Counsellor suggestions can duplicate the same source-target-kind path. Example: `./bin/socrates "I feel afraid and disconnected from truth" --debug` currently shows `isolation --[transmutes_to]--> connection` twice in both suggestions and evidence paths.
+- Neutral self-reporting language can create a false direct counsellor source. Example: `feel` currently appears as `resentment` via a weak match to `bitterness`, producing a resentment -> forgiveness suggestion for `I feel afraid...`. This is not acceptable as direct emotional evidence.
+- Default prose still does not consistently reflect the improved top-field ranking. Example: `i feel sad and empty inside` shows top fields `sadness`, `emptiness`, `resentment`, but the final reading says `Activated concepts: emptiness, inward, action`.
+- Structural channels have been marked `IsDirect:false` at the signal level, but debug rendering still labels fields such as phonetic/glyph observations as `direct`. Clarify whether this is only display wording or a true evidence-classification leak, and fix the misleading output if needed.
 
 Required investigation:
-- Reproduce current behavior for ordinary passages such as emotional/spiritual self-reporting and identify why direct fields lose to structural noise.
-- Inspect candidate generation, form matching, passage field scoring, graph propagation, and render ordering before changing weights or data.
-- Prefer fixes that improve generic evidence ranking and data coverage. Do not add example-specific behavior.
-- If active knowledge is missing ordinary forms or aliases for existing concepts, add concise data-backed entries with confidence/source/lens rather than Go logic.
-- If structural channels are over-weighted, adjust ranking/gating so direct verified/plausible concept evidence wins in ordinary passages.
+- Add focused regression tests before further broad data expansion. Tests should lock the intended behavior for at least:
+  - `i feel sad and empty inside`: top passage fields include `sadness` and `emptiness` above structural observations, and no neutral `feel` -> `resentment` counsellor source appears.
+  - `lonely and afraid`: `loneliness` and `fear` outrank structural observations and produce non-duplicated counsellor suggestions.
+  - `I feel afraid and disconnected from truth`: `fear`, `isolation`, and `truth` are visible as primary fields; counsellor suggestions are deduplicated.
+- Fix counsellor suggestion/evidence-path deduplication by semantic identity such as `source|kind|target|confidence|lens`.
+- Fix or remove the `feel` false activation path. Prefer adjusting fuzzy threshold/gating for passage signals or adding a neutral `feeling` concept only if it does not become a transmutation source. Do not map generic `feel` to a contracted field.
+- Align default concise reading with `PassageFields.TopFields` or otherwise ensure the final prose does not re-promote structural noise after top-field sorting.
+- Keep the current direct-first behavior if tests prove it is the right generic ranking rule, but avoid relying on untested sorting alone.
 
 Rules (unchanged):
 - No hardcoded semantic word lists in production Go.
