@@ -544,6 +544,27 @@ script_words:
     confidence: verified
     weight: 80
     
+  - script: devanagari
+    word: "अग्नि"
+    runes: [0x0905, 0x0917, 0x094D, 0x0928, 0x093F]
+    meanings: [fire, agni]
+    confidence: verified
+    weight: 80
+    
+  - script: devanagari
+    word: "सत्य"
+    runes: [0x0938, 0x0924, 0x094D, 0x092F]
+    meanings: [truth]
+    confidence: verified
+    weight: 80
+    
+  - script: devanagari
+    word: "धर्म"
+    runes: [0x0927, 0x0930, 0x094D, 0x092E]
+    meanings: [path]
+    confidence: verified
+    weight: 80
+    
   # Chinese (Han)
   - script: han
     word: "道"

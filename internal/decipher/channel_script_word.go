@@ -29,6 +29,7 @@ func runScriptWordChannel(forms Forms, kb *knowledge.Knowledge) ChannelResult {
 				Lens:       seed.Script + "-word",
 				Confidence: seed.Confidence,
 				Weight:     seed.Weight,
+				IsDirect:   true, // Exact script word match is direct evidence
 			})
 		}
 	}
