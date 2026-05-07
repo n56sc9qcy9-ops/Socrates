@@ -45,19 +45,19 @@ docs/                  Documentation
 - Evidence-first rendering (concise default, debug detail)
 - Counsellor/transmutation fields (data-backed, tends-toward language)
 - Channel semantics with cross-script convergence
-- Training/eval pipeline with train/held-out split
+- Training/eval pipeline
 - Natural-passage regression tests
 
 ## Known Metrics
 
 | Metric | Value |
 |--------|-------|
+| Train concept precision | 0.24 |
+| Train concept recall | 0.96 |
 | Train field precision | 0.39 |
 | Train field recall | 1.00 |
 | Train pass rate | 8/8 |
-| Held-out field precision | 0.27 |
-| Held-out field recall | 0.62 |
-| Held-out pass rate | 5/8 |
+| Held-out split | No examples in current `./bin/socrates train` run |
 | Validation warnings | 149 (1 category: data quality) |
 | Validation errors | 0 |
 | Canonical-ID alias warnings | 0 (removed by curation hygiene) |

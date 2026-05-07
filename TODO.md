@@ -52,12 +52,13 @@ Completed (see `docs/TODO_ARCHIVE.md` and git history for detail):
 Current git status:
 
 ```text
-## main...origin/main [ahead 78]
+## main...origin/main [ahead 80]
 ```
 
 Key completed metrics (full detail in `docs/ARCHITECTURE_READINESS.md`):
+- Train concept precision `0.24`, recall `0.96`.
 - Train field precision `0.39`, recall `1.00`, pass rate `8/8`.
-- Held-out field precision `0.27`, recall `0.62`, pass rate `5/8`.
+- Held-out split: no examples in current `./bin/socrates train` run.
 - Validation: 0 errors, 149 warnings (data quality warnings only).
 - Cross-script convergence: English, Norwegian, Hebrew, Chinese love on shared harmonic field.
 - Active channel diversity, precision-aware training, multi-concept fuzzy evidence: all verified.
@@ -68,7 +69,7 @@ Key completed metrics (full detail in `docs/ARCHITECTURE_READINESS.md`):
 ## Current Next Task
 
 Task:
-**Architecture readiness refresh after counsellor precision.**
+**Extended script support.**
 
 Architect review status:
 Harmonic data model hardening is accepted.
@@ -88,22 +89,29 @@ Knowledge curation hygiene is accepted:
 - canonical-ID alias warnings were removed by moving relationships to neighbors/relations
 - natural-passage counsellor precision tests still pass
 
+Architecture readiness refresh is accepted:
+- `docs/ARCHITECTURE_READINESS.md` reflects post-counsellor architecture
+- validation count is `149` warnings, `0` errors, one warning category
+- `./bin/socrates train` currently has 8/8 train examples and no held-out split in the default run
+- representative CLI behavior is documented
+- accepted warning debt remains explicit
+
 Current blocker:
-- `docs/ARCHITECTURE_READINESS.md` and the metrics in project docs are stale after harmonic hardening, counsellor precision, and curation hygiene.
-- Before assigning a large new feature layer, refresh the readiness report with current commands, validation count, warning categories, and representative CLI behavior.
-- This is a documentation/verification task, not a feature task.
+- Cross-script convergence is proven for English, Norwegian, Hebrew, and Chinese examples, but extended scripts such as Arabic and Thai are still future work.
+- The next implementation should apply the existing generic script/channel/data pattern to one additional script family first, then expand only after tests prove the pattern.
+- Keep script support evidence-first and data-backed. Do not hardcode word-specific meanings in Go.
 
 Required investigation:
-- Rebuild first with `make create`.
-- Run and record:
-  - `go test ./...`
-  - `go test ./internal/decipher -run 'NaturalPassage|Feel|Fuzzy|DirectVsStructural|Prose' -count=1`
-  - `./bin/socrates knowledge validate`
-  - `./bin/socrates train`
-  - representative CLI checks for `love truth light`, `i feel sad and empty inside`, `lonely and afraid`, and `I feel afraid and disconnected from truth`
-- Update `docs/ARCHITECTURE_READINESS.md` with current status, metrics, validation warnings, accepted warning debt, and the current next recommended feature direction.
-- Update README/TODO metrics only if they are stale and directly contradicted by the refreshed readiness report.
-- Do not edit runtime behavior unless a verification command reveals a blocker; if a blocker appears, stop and report it in `TODO.md` instead of papering over it.
+- Start with Arabic script support unless a quick architecture read shows Thai is lower-risk.
+- Inspect existing script detection, glyph channel, forms/script_words schema, knowledge validation, and cross-script tests before editing.
+- Add minimal curated runtime knowledge for the selected script with confidence/source/lens labels.
+- Add tests proving:
+  - script detection recognizes the selected script
+  - exact script word/glyph evidence activates the intended concept
+  - cross-script convergence reaches an existing shared field where curated data supports it
+  - unknown or weak script evidence does not create overconfident counsellor guidance
+- Keep default output concise and debug output evidence-rich.
+- Update docs only where the new script is actually supported.
 
 Rules (unchanged):
 - No hardcoded semantic word lists in production Go.
@@ -123,12 +131,11 @@ Reference:
 
 Acceptance Criteria:
 
-- `docs/ARCHITECTURE_READINESS.md` reflects the current post-counsellor architecture.
-- Current validation count/category is documented accurately.
-- Current train/held-out metrics are documented accurately.
-- Representative CLI checks are documented accurately.
-- Accepted residual warning debt is explicit and not hidden.
-- Existing harmonic core, natural-passage counsellor precision, training evaluation, review/apply workflow, validation, and cross-script convergence still pass.
+- At least one additional script family is supported through generic detection/channel/data flow.
+- New script support is covered by tests.
+- No production Go semantic word maps or word-specific branches are introduced.
+- New runtime knowledge validates with zero errors and labeled confidence/source/lens.
+- Existing harmonic core, natural-passage counsellor precision, training evaluation, review/apply workflow, validation, and existing cross-script convergence still pass.
 - `./bin/socrates knowledge validate` passes with no errors.
 - `go test ./...` passes.
 - Work is committed locally and not pushed.
@@ -136,8 +143,8 @@ Acceptance Criteria:
 
 ## Next After This
 
-After architecture readiness refresh:
-- Extended script support (Arabic, Thai, etc.)
+After extended script support:
+- Another script family if the first one is accepted
 - Harmonic/audio rendering layer
 - Consult `docs/ARCHITECTURE_READINESS.md` before major new feature layers
 
