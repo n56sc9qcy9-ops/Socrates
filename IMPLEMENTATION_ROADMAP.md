@@ -32,6 +32,24 @@ Preserved future goals:
 - harmonic/audio rendering of activation fields as listenable music
 - possible later storage, UI, light, or hardware interfaces
 
+## Long-Term Counsellor Vision
+
+Socrates' long-term aim is to help a person inspect a thought-field for resonance, dissonance, contraction, and possible correction paths. It should support a seeker in noticing where a thought pattern appears off balance, while never presenting symbolic resonance as absolute proof, medical advice, prophecy, or external authority.
+
+In this vision, truth is not ingested as an unexamined assertion. Truth enters Socrates as curated, inspectable knowledge: concepts, forms, relations, harmonic profiles, confidence labels, sources, lenses, and tests. A reading is trustworthy only to the degree that it can show the evidence paths that activated each field.
+
+The counsellor layer should eventually answer questions such as:
+
+- Which fields are active in this passage or thought?
+- Which active fields appear coherent, contracted, dissonant, unresolved, or weakly supported?
+- Which correction fields are suggested by curated transmutation relations?
+- What evidence, confidence, source, and lens produced each suggestion?
+- Which parts of the reading are verified, plausible, speculative, or unknown?
+
+The system must preserve human sovereignty. It may suggest "this activated field tends toward this correction path under this lens"; it must not say "this is the truth about you" or imply clinical, spiritual, or future certainty.
+
+Before UI, audio, hardware, or broad spiritual guidance work, the core must reliably activate obvious direct fields in ordinary passages. For example, plain-language emotional or spiritual input should not be dominated by low-level glyph, phonetic, or fragment noise when direct concept evidence is present. Field correction is not ready until source fields, target fields, confidence, evidence paths, and uncertainty render clearly by default or debug mode.
+
 Not active yet:
 
 - literal claims that meaning is scientifically proven to be frequency

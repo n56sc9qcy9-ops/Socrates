@@ -44,18 +44,19 @@ Completed (see `docs/TODO_ARCHIVE.md` and git history for detail):
 - Knowledge layout consolidation, oversized test split, production responsibility audit.
 - CLI ergonomics cleanup, architecture readiness review, documentation consolidation.
 - Counsellor/transmutation fields: data-backed fields from transmute.yaml, --debug internals, tends-toward language, evidence paths with source/notes. Default concise; no hardcoded behavior.
+- Harmonic data model hardening: frequency profile entries and labels now reject arbitrary unknown keys by allowlist; reference-only sections remain intentionally exempt and documented.
 - All acceptance criteria green. Readiness report at `docs/ARCHITECTURE_READINESS.md`.
 
 Current git status:
 
 ```text
-## main...origin/main [ahead 66]
+## main...origin/main [ahead 72]
 ```
 
 Key completed metrics (full detail in `docs/ARCHITECTURE_READINESS.md`):
 - Train field precision `0.39`, recall `1.00`, pass rate `8/8`.
 - Held-out field precision `0.27`, recall `0.62`, pass rate `5/8`.
-- Validation: 0 errors, 86 warnings (seed labels only).
+- Validation: 0 errors, 135 warnings (data quality warnings only).
 - Cross-script convergence: English, Norwegian, Hebrew, Chinese love on shared harmonic field.
 - Active channel diversity, precision-aware training, multi-concept fuzzy evidence: all verified.
 - Confidence is `verified`/`plausible`/`speculative`; provenance is `curated`/`traditional`/`human_review`/`physics`; `curated` is not confidence.
@@ -65,30 +66,32 @@ Key completed metrics (full detail in `docs/ARCHITECTURE_READINESS.md`):
 ## Current Next Task
 
 Task:
-**Harmonic data model hardening — NOT ACCEPTED YET.**
+**Counsellor precision — direct field evidence must outrank structural noise.**
 
 Architect review status:
-Not accepted yet. Pi added a useful blocklist for known dangerous float/EM/color fields, but this still is not strict unknown-field protection.
+Harmonic data model hardening is accepted based on Pi's committed allowlist correction.
 
 Current blocker:
-- The current pre-scan rejects a blocklist (`frequency_hz`, `pitch`, `color_rgb`, etc.), but arbitrary unknown frequency-profile fields still silently pass unless they happen to be on that blocklist.
-- Active `frequency_profiles[*]` must reject any unrecognized profile key, not only known-dangerous keys. Example fields such as `solfeggio_hz`, `carrier_frequency`, `tone_hz`, `chakra`, `planetary_frequency`, or `custom_harmonic_value` must fail until explicitly modeled.
-- Active `frequency_profiles[*].labels` must reject any unrecognized label key, not only invalid known labels.
-- Top-level structural keys may remain limited to an explicit allowlist (`frequency_profiles`, and any intentionally accepted reference-only sections such as `harmonic_systems`). Unknown top-level keys should either fail or be explicitly documented as reference-only with tests.
-- Prefer using a strict YAML decoder with known fields if available in the current YAML package. If not, the existing pre-scan must become an allowlist scanner for frequency profile entries, not a blocklist scanner.
-- Add loader-level regression tests for arbitrary unknown profile keys and unknown label keys, not just the original blocklist examples.
-- Update `HARMONIC_DATA_MODEL.md` so "unknown fields are rejected" means allowlist rejection, not blocklist rejection.
-- Commit the correction locally and report clean status, tests, validation, and the final strict-decoding/allowlist decision.
+- The counsellor/transmutation layer exists, but ordinary natural passages can still be dominated by glyph, phonetic, fragment, or graph-propagated structural fields even when direct emotional/spiritual concept evidence is present.
+- Direct concept evidence from active knowledge must reliably outrank low-level structural observations in plain-language passages.
+- Inputs that plainly express contracted or balancing fields should activate those fields through data-backed forms, aliases, relations, and ranking weights, not through hardcoded Go marker maps or word-specific branches.
+- Counsellor suggestions must remain data-backed from `internal/knowledge/transmute.yaml`, confidence-labeled, evidence-traced, and non-authoritarian.
+- Socrates may suggest correction paths; it must not claim absolute truth about the person, diagnose, prophesy, or present symbolic resonance as proof.
 
-Rules (unchanged, enforced by this hardening):
-- Do not store floating-point frequency values as meaning.
-- Integer harmonic fields may include integer vectors, integer ratios, Pythagorean triples, Phi integer sequences/approximants, geometry IDs, and integer-backed electromagnetic references.
-- Physical electromagnetic references must be clearly separated from symbolic correspondences.
-- No hardcoded concept-to-frequency, concept-to-color, concept-to-note, pitch, chakra, electromagnetic, or music mappings in production Go.
-- All harmonic mappings must live in curated data with source/lens/confidence.
-- Runtime evidence scores may remain decimal because they are ranking signals, not meaning identity.
-- Keep the model compact. Prefer a small schema with clear validation over many optional fields.
-- Do not mutate active knowledge from training or review artifacts.
+Required investigation:
+- Reproduce current behavior for ordinary passages such as emotional/spiritual self-reporting and identify why direct fields lose to structural noise.
+- Inspect candidate generation, form matching, passage field scoring, graph propagation, and render ordering before changing weights or data.
+- Prefer fixes that improve generic evidence ranking and data coverage. Do not add example-specific behavior.
+- If active knowledge is missing ordinary forms or aliases for existing concepts, add concise data-backed entries with confidence/source/lens rather than Go logic.
+- If structural channels are over-weighted, adjust ranking/gating so direct verified/plausible concept evidence wins in ordinary passages.
+
+Rules (unchanged):
+- No hardcoded semantic word lists in production Go.
+- No direct behavior for specific example passages.
+- No therapeutic, medical, prophetic, or absolute truth claims.
+- All correction mappings remain in curated data with source/lens/confidence.
+- Default output stays concise; detailed counsellor internals and evidence paths may be debug output.
+- Training/review artifacts must not silently mutate active runtime knowledge.
 
 Reference:
 - `docs/ARCHITECTURE_READINESS.md`
@@ -96,23 +99,24 @@ Reference:
 - `TRAINING_MODEL.md`
 - `HARMONIC_DATA_MODEL.md`
 - `FREQUENCY_MODEL.md`
+- `IMPLEMENTATION_ROADMAP.md` section "Long-Term Counsellor Vision"
 
 Acceptance Criteria:
 
-- Harmonic meaning identity remains integer-only.
-- Decimal values are allowed only for runtime evidence/scoring, not stored meaning identity.
-- Physical electromagnetic references are clearly separated from symbolic correspondence.
-- Validation rejects malformed harmonic identity data.
-- No concept-to-frequency/color/note/EM/chakra mapping is hardcoded in production Go.
-- Documentation clearly explains the schema boundary.
+- Plain-language passages with direct concept evidence rank the direct fields above glyph/phonetic/orthographic structural observations.
+- Counsellor source fields activate only from direct or clearly evidence-supported passage fields; weak graph-only noise must not produce confident guidance.
+- Counsellor output shows source field, suggested correction field, relation kind, confidence, and evidence path in default or debug output.
+- Existing `transmute.yaml` mappings remain data-backed; no source-to-target correction mapping is hardcoded in Go.
+- New or updated tests cover natural passage field ranking and counsellor suggestion precision without relying on production word-specific branches.
 - Existing harmonic core, training evaluation, review/apply workflow, validation, and cross-script convergence still pass.
+- `./bin/socrates knowledge validate` passes with no errors.
 - `go test ./...` passes.
 - Work is committed locally and not pushed.
 
 
 ## Next After This
 
-After harmonic data model hardening:
+After counsellor precision:
 - Extended script support (Arabic, Thai, etc.)
 - Harmonic/audio rendering layer
 - Consult `docs/ARCHITECTURE_READINESS.md` before major new feature layers
