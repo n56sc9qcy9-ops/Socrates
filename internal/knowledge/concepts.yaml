@@ -58,7 +58,7 @@ concepts:
 
   - id: love
     name: love
-    aliases: [affection, ahavah, ahava, agape, bliss, ananda]
+    aliases: [affection, ahavah, ahava, agape, ananda]
     neighbors: [heart, truth]
 
 
@@ -100,7 +100,6 @@ concepts:
 
   - id: water
     name: water
-    aliases: [flow]
     neighbors: [life, source]
 
 
@@ -143,7 +142,7 @@ concepts:
 
   - id: is_are
     name: is/are
-    aliases: [is_are, be, exist]
+    aliases: [be, exist]
     neighbors: [being, truth]
 
   - id: action
@@ -303,24 +302,24 @@ concepts:
 
   - id: instrument_of_thought
     name: instrument of thought
-    aliases: [instrument_of_thought, instrument-of-thought, organ]
+    aliases: [instrument-of-thought, organ]
     neighbors: [mind, body]
 
 
   # Orthographic concepts
   - id: consonant_heavy_orthography
     name: consonant-heavy orthography
-    aliases: [consonant_heavy_orthography, consonant-heavy-orthography]
+    aliases: [consonant-heavy-orthography]
     neighbors: [writing, language]
 
   - id: vowel_heavy_orthography
     name: vowel-heavy orthography
-    aliases: [vowel_heavy_orthography, vowel-heavy-orthography]
+    aliases: [vowel-heavy-orthography]
     neighbors: [writing, language]
 
   - id: repeated_letter_observation
     name: repeated-letter observation
-    aliases: [repeated_letter_observation, repeated-letter-observation]
+    aliases: [repeated-letter-observation]
     neighbors: [writing, pattern]
 
   - id: connection
@@ -332,12 +331,12 @@ concepts:
   # Missing concepts referenced in forms and glyphs
   - id: back_of_head
     name: back of head
-    aliases: [back_of_head, back-of-head]
+    aliases: [back-of-head]
     neighbors: [head, body]
 
   - id: heart_mind
     name: heart-mind
-    aliases: [heart_mind, heart-mind]
+    aliases: [heart-mind]
     neighbors: [heart, mind]
 
   - id: reason
@@ -371,7 +370,6 @@ concepts:
 
   - id: war
     name: war
-    aliases: [conflict]
     neighbors: [action, being]
 
 
@@ -552,17 +550,16 @@ concepts:
     
   - id: trust
     name: trust
-    aliases: [faith, confidence]
+    aliases: [confidence]
     neighbors: [love, source, truth]
     
   - id: guilt
     name: guilt
-    aliases: [shame, remorse]
+    aliases: [remorse]
     neighbors: [fear, judgment, past]
     
   - id: mercy
     name: mercy
-    aliases: [compassion, grace]
     neighbors: [love, forgiveness, truth]
     
   - id: shame
@@ -577,12 +574,12 @@ concepts:
     
   - id: attachment
     name: attachment
-    aliases: [clinging, grasping]
+    aliases: [clinging]
     neighbors: [desire, control, fear]
     
   - id: letting_go
     name: letting_go
-    aliases: [release, surrender]
+    aliases: [release]
     neighbors: [trust, presence, love]
     
   - id: control
@@ -592,7 +589,7 @@ concepts:
     
   - id: surrender
     name: surrender
-    aliases: [yielding, acceptance]
+    aliases: [yielding]
     neighbors: [trust, love, presence]
     
   - id: avoidance
@@ -612,17 +609,17 @@ concepts:
     
   - id: isolation
     name: isolation
-    aliases: [separation, aloneness]
+    aliases: [aloneness]
     neighbors: [fear, guilt, separation]
         
   - id: grasping
     name: grasping
-    aliases: [clinging, holding]
+    aliases: [clinging]
     neighbors: [attachment, desire, control]
     
   - id: openness
     name: openness
-    aliases: [receptivity, openness_to]
+    aliases: [receptivity]
     neighbors: [trust, presence, breath]
     
   - id: confusion
@@ -649,7 +646,6 @@ concepts:
     name: conflict
     aliases: [struggle, tension]
     neighbors: [separation, fear, power]
-    
   - id: harmony
     name: harmony
     aliases: [agreement, concord]
@@ -657,7 +653,7 @@ concepts:
     
   - id: stagnation
     name: stagnation
-    aliases: [stillness, inactivity]
+    aliases: [inactivity]
     neighbors: [fear, past, attachment]
 
 
@@ -673,7 +669,7 @@ concepts:
     
   - id: future
     name: future
-    aliases: [time, ahead, after]
+    aliases: [ahead, after]
     neighbors: [time, presence, hope]
     
   - id: desire
@@ -699,7 +695,7 @@ concepts:
     
   - id: hope
     name: hope
-    aliases: [anticipation, expectation, faith]
+    aliases: [anticipation, expectation]
     neighbors: [future, trust, source]
 
 
@@ -724,7 +720,7 @@ concepts:
 
   - id: grief
     name: grief
-    aliases: [mourning, bereavement, loss]
+    aliases: [mourning, bereavement]
     neighbors: [sadness, acceptance, letting_go]
 
   - id: loneliness
@@ -739,7 +735,7 @@ concepts:
 
   - id: loss
     name: loss
-    aliases: [grief, deprivation, absence]
+    aliases: [deprivation, absence]
     neighbors: [grief, letting_go, acceptance]
 
   - id: pain
@@ -749,32 +745,30 @@ concepts:
 
   - id: acceptance
     name: acceptance
-    aliases: [approval, agreement, acknowledgment]
     neighbors: [peace, trust, self_acceptance]
 
   - id: peace
     name: peace
-    aliases: [tranquility, serenity, calm]
+    aliases: [tranquility, serenity]
     neighbors: [calm, trust, harmony]
 
   - id: calm
     name: calm
-    aliases: [serenity, stillness, quietude]
+    aliases: [serenity, quietude]
     neighbors: [peace, breath, presence]
 
   - id: stillness
     name: stillness
-    aliases: [quietude, tranquility, rest]
+    aliases: [quietude, tranquility]
     neighbors: [calm, presence, peace]
 
   - id: faith
     name: faith
-    aliases: [belief, confidence, conviction]
+    aliases: [belief, confidence]
     neighbors: [trust, hope, source]
 
   - id: compassion
     name: compassion
-    aliases: [empathy, sympathy, tenderness]
     neighbors: [love, mercy, grace]
 
   - id: grace
@@ -789,7 +783,7 @@ concepts:
 
   - id: joy
     name: joy
-    aliases: [happiness, delight, bliss]
+    aliases: [happiness, delight]
     neighbors: [love, gratitude, life]
 
   - id: bliss
