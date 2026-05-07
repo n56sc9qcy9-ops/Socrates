@@ -50,11 +50,12 @@ Completed (see `docs/TODO_ARCHIVE.md` and git history for detail):
 - All acceptance criteria green. Readiness report at `docs/ARCHITECTURE_READINESS.md`.
 - Sanskrit/Devanagari support: exact Devanagari ScriptWord meanings now participate in the generic passage-field and harmonic-field path; known terms such as `प्राण`, `सत्य`, and `ॐ` activate direct verified fields where curated data exists, while unknown Devanagari such as `कवि` remains weak/speculative.
 - Real-life Socrates testing: `docs/REAL_LIFE_TESTING.md` covers 22 seeker-style passages across emotional, spiritual, Sanskrit seed, mixed, edge-case, and infrastructure checks. The report is accepted with three follow-up observations: transliterated Sanskrit gaps, preposition noise, and a possible future resentment false-negative curation gap.
+- Transliterated Sanskrit curation: Latin `dharma`, `satya`, `karma`, and `jnana` now activate curated concepts; mixed `I practice dharma every day` surfaces `path`; `satya is the foundation of all practice` surfaces `truth`; prose rendering now follows top direct fields instead of graph-expanded or structural noise.
 
 Current git status:
 
 ```text
-## main...origin/main [ahead 87]
+## main...origin/main [ahead 91]
 ```
 
 Key completed metrics (full detail in `docs/ARCHITECTURE_READINESS.md`):
@@ -71,37 +72,37 @@ Key completed metrics (full detail in `docs/ARCHITECTURE_READINESS.md`):
 ## Current Next Task
 
 Task:
-**Curate transliterated Sanskrit forms.**
+**Preposition handling for standalone structural fragments.**
 
 Architect review status:
-Real-life testing is accepted:
-- `docs/REAL_LIFE_TESTING.md` exists and is committed
-- 22 passages were tested across plain emotional, spiritual alignment, Sanskrit seeds, mixed Sanskrit/English, edge cases, and infrastructure checks
-- direct emotional/spiritual evidence generally outranks structural noise
-- known Sanskrit seed terms remain first-class through passage/harmonic fields
-- unknown `कवि` remains weak/speculative
-- tests, validation, and training remained green
+Transliterated Sanskrit curation is accepted:
+- `dharma` activates `path` directly
+- `satya` activates `truth` directly
+- `karma` activates `action` directly
+- `jnana` activates `wisdom` directly
+- mixed `I practice dharma every day` surfaces `path` ahead of structural noise
+- prose alignment now uses top direct passage fields so readings no longer promote graph-expanded concepts over direct semantic evidence
+- structural debug labels now distinguish direct, structural, and depth-N fields correctly
+- `I feel` does not activate `resentment`
+- validation has zero errors, `go test ./...` passes, and train passes 14/14 examples
 
 Current blocker:
-- Mixed English/Sanskrit passages fail for common Latin transliterations that are not yet in curated data. `prana` and `agni` work because they already exist in `forms.yaml`; `dharma`, `satya`, `karma`, and `jnana` do not.
-- This is a knowledge curation task, not a code architecture task.
-- Do not add new parser behavior, new fuzzy rules, new runtime channels, audio rendering, or broad new knowledge during this task.
+- Common standalone prepositions can still activate structural fragment fields too strongly. Example: `There is a deep longing in my heart` promotes `inward`/`into` from standalone `in`, while the intended emotional field `longing` is not yet represented.
+- This is a ranking/filtering task. Keep it generic and evidence-based.
+- Do not hardcode the example passage. Do not remove meaningful fragment behavior inside real words.
 
 Required investigation:
-- Add curated Latin transliteration entries in `internal/knowledge/forms.yaml` for:
-  - `dharma` -> `path`
-  - `satya` -> `truth`
-  - `karma` -> an existing appropriate concept only if a defensible existing concept exists; otherwise document why it is deferred
-  - `jnana` -> an existing appropriate concept only if a defensible existing concept exists; otherwise document why it is deferred
-- Use existing data shape: source, lens, confidence, and weight must be explicit.
-- Prefer conservative confidence. If the mapping is traditional but broad, use `plausible`; use `verified` only when the current knowledge conventions clearly justify it.
-- Do not create new concepts unless absolutely necessary. If a needed concept is absent, defer that form with a note instead of expanding the ontology casually.
-- Add focused tests proving mixed English/Sanskrit inputs activate the curated transliterated form directly:
-  - `I practice dharma every day` should surface `path`
-  - `satya is the foundation of all practice` should surface `truth`
-  - any added `karma`/`jnana` mapping must have a test
-- Preserve existing Devanagari behavior for `धर्म`, `सत्य`, `प्राण`, and unknown `कवि`.
-- Update `docs/REAL_LIFE_TESTING.md` only if the observed mixed-passage limitation changes materially.
+- Inspect how fragment and glyph/bigram channels treat standalone tokens such as `in`, `on`, `at`, `to`, `of`, `is`, `the`, `and`, and similar high-frequency function words.
+- Reduce or suppress structural fragment/bigram weight when a match comes from a standalone preposition/function word, while preserving:
+  - direct curated forms such as `inward` if the full word is present
+  - meaningful fragments inside larger words
+  - direct semantic evidence from curated emotional/spiritual forms
+- Add regression tests for:
+  - `There is a deep longing in my heart` should not rank `inward`/`into` above direct emotional evidence if such evidence exists
+  - standalone `in` should not become an overconfident top semantic field
+  - known direct passages such as `I feel sad and empty inside`, `I seek truth and clarity`, `dharma`, and `satya` remain stable
+- If `longing` itself is not represented in curated knowledge, do not add it in this task unless the smallest safe fix requires a narrowly documented form entry. Prefer solving the generic preposition weighting first.
+- Keep debug output transparent: suppressed or weakened structural signals may still be visible in debug if useful, but they must not dominate concise prose.
 
 Rules (unchanged):
 - No hardcoded semantic word lists in production Go.
@@ -121,12 +122,11 @@ Reference:
 
 Acceptance Criteria:
 
-- Curated transliterated Sanskrit form entries are added only where there is a defensible existing target concept.
-- `dharma` activates `path` directly in mixed English/Sanskrit passage analysis.
-- `satya` activates `truth` directly in mixed English/Sanskrit passage analysis.
-- `karma` and `jnana` are either curated with tests or explicitly deferred with a short reason.
-- Devanagari Sanskrit seed behavior remains unchanged.
-- Unknown Devanagari input remains weak/speculative.
+- Standalone function words no longer create overconfident top fields through fragment/bigram structural matches.
+- Meaningful fragments inside larger words still work.
+- Direct curated forms still outrank structural channels.
+- Existing Sanskrit transliteration and Devanagari tests remain green.
+- Existing counsellor precision tests remain green.
 - No broad new knowledge area or runtime channel is introduced.
 - No production Go semantic word maps or word-specific branches are introduced.
 - `./bin/socrates knowledge validate` passes with no errors.
@@ -136,8 +136,7 @@ Acceptance Criteria:
 
 ## Next After This
 
-After transliterated Sanskrit curation:
-- Preposition handling for standalone fragments such as `in`
+After preposition handling:
 - Harmonic/audio rendering layer
 - Consult `docs/ARCHITECTURE_READINESS.md` before major new feature layers
 
