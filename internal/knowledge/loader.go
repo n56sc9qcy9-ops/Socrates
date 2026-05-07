@@ -264,7 +264,7 @@ func (l *Loader) loadFrequencies(kb *KnowledgeBuilder) error {
 	// Fields like frequency_hz: 528.0, pitch: 432.0, color_rgb: [...], or
 	// em_band_id: ... must not silently pass through YAML unmarshaling.
 	if unknown, err := hasUnknownFreqFields(data); err == nil && len(unknown) > 0 {
-		return fmt.Errorf("frequencies.yaml contains unknown harmonic identity fields: %v; model these explicitly or remove", unknown)
+		return fmt.Errorf("frequencies.yaml contains unknown fields not in the frequency profile allowlist: %v", unknown)
 	}
 
 	var doc frequenciesDoc
@@ -621,24 +621,26 @@ func (e FrequencyProfileEntry) ToFrequencyProfile() FrequencyProfile {
 }
 
 // ============================================================
-// Strict Frequency Field Detection
+// Strict Frequency Field Detection — Allowlist Validation
 // ============================================================
 //
 // The harmonic meaning-frequency model is strictly integer-based.
 // Float values (frequency_hz, pitch, color_rgb, em_band_id) are NOT modeled
 // and must NOT silently pass through the YAML loader.
 //
-// This section implements a pre-unmarshaling scan that detects these fields
-// and returns an error before any silent data corruption can occur.
+// VALIDATION RULE: Only modeled keys are accepted inside frequency profile
+// entries. Every field must be explicitly in knownFreqProfileKeys.
+// Unknown keys are rejected, not silently passed through.
 //
 // CRITICAL: YAML silently ignores unknown fields when unmarshaling into a
 // typed struct. A field like `frequency_hz: 528.0` in the YAML would simply
-// be dropped by yaml.Unmarshal, making it impossible to detect after the fact.
-// Therefore we scan the raw YAML before unmarshaling.
+// be dropped by yaml.Unmarshal. We scan the raw YAML first and reject any
+// field not in the allowlist before unmarshaling.
 
-// floatHarmonicKeys are unmodeled float-meaning fields that must be rejected.
-// These represent physical float measurements that do NOT belong in the
-// integer harmonic meaning-frequency substrate.
+// floatHarmonicKeys is the deny list for common float-harmonic field names.
+// These are the most likely float-meaning fields. The primary protection is
+// the allowlist: any field not in knownFreqProfileKeys is rejected.
+// This deny list remains as a secondary signal for error messages.
 var floatHarmonicKeys = map[string]bool{
 	"frequency_hz":    true,
 	"frequency_hertz": true,
@@ -657,10 +659,14 @@ var floatHarmonicKeys = map[string]bool{
 	"wavelength":      true,
 }
 
-// structuralDocKeys are document-level structural keys (not profile fields).
+// structuralDocKeys are document-level structural keys (not profile entry fields).
+// These are container keys that hold entries — entries are scanned for frequency
+// profile fields; structural-container-specific fields are not validated against
+// the frequency profile allowlist. Only frequency_profiles[*] entries are validated.
 var structuralDocKeys = map[string]bool{
-	"frequency_profiles": true,
-	"harmonic_systems":   true,
+	"frequency_profiles":      true, // entries are validated against knownFreqProfileKeys
+	"archetype_definitions":   true, // reference section — skipped for profile validation
+	"harmonic_systems":        true, // reference section — skipped for profile validation
 }
 
 // knownFreqProfileKeys are modeled fields within a frequency profile entry.
@@ -690,13 +696,18 @@ func hasUnknownFreqFields(data []byte) ([]string, error) {
 	if err := yaml.Unmarshal(data, &raw); err != nil {
 		return nil, err
 	}
-	return scanForUnknownFreqFields(raw, ""), nil
+	return scanForUnknownFreqFields(raw, "", ""), nil
 }
 
 // scanForUnknownFreqFields recursively scans a parsed YAML node.
 // path is the dot-separated path to the current node.
-// Returns paths to any unmodeled float-harmonic fields found.
-func scanForUnknownFreqFields(node interface{}, path string) []string {
+// containerKey is the top-level structural key we're inside ("frequency_profiles",
+// "archetype_definitions", "harmonic_systems", or "" at document root).
+//
+// Allowlist validation (knownFreqProfileKeys) is applied ONLY to entries inside
+// frequency_profiles[*]. Other structural sections are reference data with their
+// own schemas and are not validated against the frequency profile allowlist.
+func scanForUnknownFreqFields(node interface{}, path, containerKey string) []string {
 	var unknown []string
 
 	switch v := node.(type) {
@@ -704,8 +715,6 @@ func scanForUnknownFreqFields(node interface{}, path string) []string {
 		for key, val := range v {
 			isStructural := structuralDocKeys[key]
 			isKnownField := knownFreqProfileKeys[key]
-			isFloatHarmonic := floatHarmonicKeys[key]
-
 			var fullPath string
 			if path == "" {
 				fullPath = key
@@ -713,23 +722,26 @@ func scanForUnknownFreqFields(node interface{}, path string) []string {
 				fullPath = path + "." + key
 			}
 
-			if isStructural && path == "" {
-				// Top-level structural key (e.g., "frequency_profiles")
-				unknown = append(unknown, scanForUnknownFreqFields(val, fullPath)...)
+			if isStructural {
+				// Top-level structural container: recurse with the container key set.
+				unknown = append(unknown, scanForUnknownFreqFields(val, fullPath, key)...)
 			} else if isKnownField {
-				// Known field - recurse but don't flag
-				unknown = append(unknown, scanForUnknownFreqFields(val, fullPath)...)
-			} else if isFloatHarmonic {
-				// Unmodeled float-harmonic field - this is an error
-				unknown = append(unknown, fullPath)
+				// Known field — recurse to check nested structures
+				unknown = append(unknown, scanForUnknownFreqFields(val, fullPath, containerKey)...)
 			} else {
-				// Unknown key - recurse to find nested float-harmonic fields
-				unknown = append(unknown, scanForUnknownFreqFields(val, fullPath)...)
+				// Unknown field — reject it if inside a frequency_profiles entry.
+				// Fields inside archetype_definitions, harmonic_systems etc. are not
+				// validated against the frequency profile allowlist.
+				if containerKey == "frequency_profiles" {
+					unknown = append(unknown, fullPath)
+				}
 			}
 		}
 	case []interface{}:
+		// Array inside a structural container. Each item is scanned; containerKey
+		// is preserved so we know which section we're validating.
 		for i, item := range v {
-			unknown = append(unknown, scanForUnknownFreqFields(item, path+"["+itoa(i)+"]")...)
+			unknown = append(unknown, scanForUnknownFreqFields(item, path+"["+itoa(i)+"]", containerKey)...)
 		}
 	}
 

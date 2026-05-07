@@ -943,13 +943,9 @@ func TestFloatHarmonicFieldsRejected(t *testing.T) {
 			shouldErr: false,
 		},
 		{
-			name: "harmonic_systems_structural_key_allowed",
-			yaml: `harmonic_systems:
-  - id: equal_temperament
-    description: 12-tone equal division
-    base_ratio: [12, 1]
-frequency_profiles:
-  - meaning_frequency_id: test-structural
+			name: "top_level_frequency_profiles_key_required",
+			yaml: `frequency_profiles:
+  - meaning_frequency_id: test-require-key
     concepts: [truth]
     vector: [1, 2, 1]
     ratio: [1, 1]
@@ -957,6 +953,92 @@ frequency_profiles:
     weight: 80
 `,
 			shouldErr: false,
+		},
+		// Allowlist validation: ANY unknown field is rejected, not just float-harmonic ones.
+		// Future fields like solfeggio_hz, chakra, carrier_frequency, tone_hz must fail.
+		{
+			name: "solfeggio_hz_rejected_any_future_field",
+			yaml: `frequency_profiles:
+  - meaning_frequency_id: test-solfeggio
+    concepts: [truth]
+    vector: [1, 2, 1]
+    ratio: [1, 1]
+    solfeggio_hz: 528
+`,
+			shouldErr:   true,
+			errContains: "solfeggio_hz",
+		},
+		{
+			name: "chakra_rejected",
+			yaml: `frequency_profiles:
+  - meaning_frequency_id: test-chakra
+    concepts: [truth]
+    vector: [1, 2, 1]
+    ratio: [1, 1]
+    chakra: root
+`,
+			shouldErr:   true,
+			errContains: "chakra",
+		},
+		{
+			name: "carrier_frequency_rejected",
+			yaml: `frequency_profiles:
+  - meaning_frequency_id: test-carrier
+    concepts: [truth]
+    vector: [1, 2, 1]
+    ratio: [1, 1]
+    carrier_frequency: 440
+`,
+			shouldErr:   true,
+			errContains: "carrier_frequency",
+		},
+		{
+			name: "tone_hz_rejected",
+			yaml: `frequency_profiles:
+  - meaning_frequency_id: test-tone
+    concepts: [truth]
+    vector: [1, 2, 1]
+    ratio: [1, 1]
+    tone_hz: 432
+`,
+			shouldErr:   true,
+			errContains: "tone_hz",
+		},
+		{
+			name: "custom_harmonic_value_rejected",
+			yaml: `frequency_profiles:
+  - meaning_frequency_id: test-custom
+    concepts: [truth]
+    vector: [1, 2, 1]
+    ratio: [1, 1]
+    custom_harmonic_value: 7.83
+`,
+			shouldErr:   true,
+			errContains: "custom_harmonic_value",
+		},
+		{
+			name: "note_name_rejected",
+			yaml: `frequency_profiles:
+  - meaning_frequency_id: test-note-name
+    concepts: [truth]
+    vector: [1, 2, 1]
+    ratio: [1, 1]
+    note_name: C
+`,
+			shouldErr:   true,
+			errContains: "note_name",
+		},
+		{
+			name: "hex_frequency_rejected",
+			yaml: `frequency_profiles:
+  - meaning_frequency_id: test-hex
+    concepts: [truth]
+    vector: [1, 2, 1]
+    ratio: [1, 1]
+    hex_frequency: 0x1B8
+`,
+			shouldErr:   true,
+			errContains: "hex_frequency",
 		},
 	}
 
