@@ -76,11 +76,12 @@ func DetectScript(s string) ScriptType {
 // Forms holds generated forms from input processing.
 type Forms struct {
 	Normalized   string
-	Script       ScriptType
-	Tokens       []string
-	Runes        []rune
-	PhoneticKeys []string
-	Fragments    []FragmentPath
+	Original      string   // Original input string (preserved before tokenization)
+	Script        ScriptType
+	Tokens        []string
+	Runes         []rune
+	PhoneticKeys  []string
+	Fragments     []FragmentPath
 }
 
 // FragmentPath represents a possible split of the input into fragments.

@@ -52,8 +52,17 @@ func (e *Engine) Analyze(input string) Reading {
 	directConcepts := extractDirectConcepts(channels)
 	conceptExpansions := ExpandConcepts(directConcepts, 0.4, e.Knowledge)
 
-	// Analyze passage-level convergence using the activation graph
-	passageSignals := AnalyzePassageTokens(forms.Tokens, e.Knowledge)
+	// Analyze passage-level convergence using the activation graph.
+	// For non-Latin scripts, analyze the whole input string so whole-word script word
+	// matches can flow through passage/harmonic field activation. Latin scripts use
+	// tokens (word-level split) so the existing behavior is preserved.
+	var passageTokens []string
+	if forms.Script != ScriptLatin {
+		passageTokens = []string{forms.Original}
+	} else {
+		passageTokens = forms.Tokens
+	}
+	passageSignals := AnalyzePassageTokens(passageTokens, e.Knowledge)
 
 	// Build and propagate through the activation graph
 	activationGraph := BuildGraphFromEvidence(channels, passageSignals, fuzzyMatches, conceptExpansions, e.Knowledge)

@@ -20,11 +20,12 @@ func GenerateForms(input string) Forms {
 
 	return Forms{
 		Normalized:   normalized,
-		Script:       script,
-		Tokens:       tokens,
-		Runes:        runes,
-		PhoneticKeys: phoneticKeys,
-		Fragments:    fragments,
+		Original:      input,
+		Script:        script,
+		Tokens:        tokens,
+		Runes:         runes,
+		PhoneticKeys:  phoneticKeys,
+		Fragments:     fragments,
 	}
 }
 
@@ -47,17 +48,15 @@ func normalizeForForms(s string) string {
 }
 
 // tokenize splits input into tokens (words for Latin, characters for others).
+// Non-Latin scripts: keep whole string as single token so whole-word lookup works.
 func tokenize(s string) []string {
 	script := DetectScript(s)
 	if script == ScriptLatin {
 		return strings.Fields(s)
 	}
-	// For non-Latin scripts, treat each character as a token
-	tokens := make([]string, 0, len(s))
-	for _, r := range s {
-		tokens = append(tokens, string(r))
-	}
-	return tokens
+	// For non-Latin scripts, treat the entire string as one token
+	// This enables whole-word lookup in AnalyzePassageTokens via GetFormsByText.
+	return []string{s}
 }
 
 // generatePhoneticKeys creates sound-based representations.

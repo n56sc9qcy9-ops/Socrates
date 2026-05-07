@@ -223,8 +223,15 @@ func AnalyzePassageFromTokens(tokens []string, kb *knowledge.Knowledge) PassageF
 		channels := RunAllChannels(forms, kb)
 		allChannels = append(allChannels, channels...)
 
-		// Analyze passage tokens for this single token
-		signals := AnalyzePassageTokens(forms.Tokens, kb)
+		// Analyze passage tokens for this single token.
+		// For non-Latin scripts, analyze the whole string for whole-word lookup.
+		var passageTokens []string
+		if forms.Script != ScriptLatin {
+			passageTokens = []string{forms.Original}
+		} else {
+			passageTokens = forms.Tokens
+		}
+		signals := AnalyzePassageTokens(passageTokens, kb)
 
 		// Mark signals with original token as source
 		for _, sig := range signals {
