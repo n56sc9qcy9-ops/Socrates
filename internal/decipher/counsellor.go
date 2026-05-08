@@ -112,8 +112,10 @@ func buildSuggestions(sources []TransmutationSource, kb *knowledge.Knowledge) []
 				continue
 			}
 
-			// Deduplicate by semantic identity
-			dedupKey := src.Concept + "|" + t.Kind + "|" + t.To + "|" + string(t.Confidence) + "|" + t.Lens
+			// Deduplicate by semantic identity (consistent with evidence paths)
+			// Use source|kind|target as the canonical dedup key.
+			// Confidence/lens variations on same core relation are suppressed.
+			dedupKey := src.Concept + "|" + t.Kind + "|" + t.To
 			if seen[dedupKey] {
 				continue
 			}

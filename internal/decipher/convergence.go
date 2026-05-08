@@ -73,9 +73,23 @@ func findTopConcepts(activated []ActivatedConcept, n int) []ActivatedConcept {
 // findTopConceptsWithFields returns the top N concepts, preferring concepts
 // that appear in the top passage fields when available.
 // Priority: direct evidence > in-field > by strength.
+// hasOnlyStandaloneEvidence is a helper to check if an ActivatedConcept
+// only has evidence from standalone preposition/function word tokens.
+func hasOnlyStandaloneEvidence(ac ActivatedConcept) bool {
+	return ac.HasOnlyStandaloneEvidence
+}
+
 func findTopConceptsWithFields(activated []ActivatedConcept, topFields []string, n int) []ActivatedConcept {
-	if len(activated) <= n {
-		return activated
+	// Filter out standalone-only concepts (from prepositions/function words)
+	genuineConcepts := make([]ActivatedConcept, 0)
+	for _, ac := range activated {
+		if !hasOnlyStandaloneEvidence(ac) {
+			genuineConcepts = append(genuineConcepts, ac)
+		}
+	}
+
+	if len(genuineConcepts) <= n {
+		return genuineConcepts
 	}
 
 	// Build a set of top field concept IDs for fast lookup
@@ -85,8 +99,8 @@ func findTopConceptsWithFields(activated []ActivatedConcept, topFields []string,
 	}
 
 	// Sort: direct evidence first, then in-field, then by strength descending
-	sorted := make([]ActivatedConcept, len(activated))
-	copy(sorted, activated)
+	sorted := make([]ActivatedConcept, len(genuineConcepts))
+	copy(sorted, genuineConcepts)
 
 	sort.Slice(sorted, func(i, j int) bool {
 		// 1. Direct evidence first

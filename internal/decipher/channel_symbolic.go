@@ -42,6 +42,10 @@ func runSymbolicChannel(forms Forms, kb *knowledge.Knowledge) ChannelResult {
 		})
 	}
 
+	// Apply weight reduction for signals from standalone tokens
+	// to prevent function words from creating overconfident structural fields.
+	signals = applyStandaloneWeightReduction(signals)
+
 	score := calculateChannelScore(signals)
 
 	return ChannelResult{

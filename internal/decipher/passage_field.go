@@ -114,21 +114,53 @@ func (pf PassageFields) GetField(concept string) *PassageField {
 // Primary sort: IsDirectEvidence (direct > structural).
 // Secondary sort: Depth (depth-0 > depth-1+), then strength descending.
 // This ensures genuine semantic signals outrank graph-expanded structural noise.
+// TopFields returns the top N fields, prioritizing direct concept evidence.
+// Primary sort: IsDirectEvidence (direct > structural).
+// Secondary sort: Depth (depth-0 > depth-1+), then strength descending.
+// This ensures genuine semantic signals outrank graph-expanded structural noise.
+// Standalone-only fields (from prepositions/function words) are EXCLUDED from top results.
+// If there are fewer genuine fields than n, return only the genuine fields
+// (don't pad with standalone-only fields from function words).
 func (pf PassageFields) TopFields(n int) PassageFields {
 	if len(pf) <= n {
 		return pf
 	}
 
-	sorted := make(PassageFields, len(pf))
-	copy(sorted, pf)
+	// First filter: separate genuine fields from standalone-only fields
+	// Standalone-only fields come from prepositions/function words and should be demoted.
+	genuineFields := make(PassageFields, 0)
+	for _, f := range pf {
+		if f.IsDirectEvidence && f.HasOnlyStandaloneDirectEvidence() {
+			// Skip standalone-only fields entirely
+			continue
+		}
+		genuineFields = append(genuineFields, f)
+	}
+
+	// Sort genuine fields by quality: direct first, then by depth and strength
+	genuineSorted := sortFieldsByQuality(genuineFields)
+
+	// Return up to n genuine fields; if fewer, that's fine (no padding with standalone-only)
+	if len(genuineSorted) <= n {
+		return genuineSorted
+	}
+	return genuineSorted[:n]
+}
+
+// sortFieldsByQuality sorts fields by quality: direct evidence first,
+// then by depth ascending, then by strength descending.
+func sortFieldsByQuality(fields PassageFields) PassageFields {
+	sorted := make(PassageFields, len(fields))
+	copy(sorted, fields)
+
 	for i := 0; i < len(sorted)-1; i++ {
 		for j := i + 1; j < len(sorted); j++ {
-			// Primary: IsDirectEvidence (direct before structural)
 			swap := false
+			// Primary: direct evidence first
 			if !sorted[i].IsDirectEvidence && sorted[j].IsDirectEvidence {
 				swap = true
 			} else if sorted[i].IsDirectEvidence == sorted[j].IsDirectEvidence {
-				// Same directness: depth ascending (depth-0 before depth-1+)
+				// Same directness: depth ascending
 				if sorted[i].Depth > sorted[j].Depth {
 					swap = true
 				} else if sorted[i].Depth == sorted[j].Depth {
@@ -143,7 +175,7 @@ func (pf PassageFields) TopFields(n int) PassageFields {
 			}
 		}
 	}
-	return sorted[:n]
+	return sorted
 }
 
 // HasOnlyStandaloneDirectEvidence returns true if this field's only direct evidence

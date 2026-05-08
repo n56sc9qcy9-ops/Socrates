@@ -4,6 +4,43 @@ import (
 	"socrates/internal/knowledge"
 )
 
+// standaloneWeightMultiplier reduces the weight of signals from standalone function words.
+// This prevents short prepositions/function words from creating overconfident structural
+// fields through fragment/bigram matching (e.g., standalone "in" should not dominate
+// with "inward"/"into" fields when used as a preposition).
+const standaloneWeightMultiplier = 0.1
+
+// applyStandaloneWeightReduction reduces weights for signals from standalone tokens.
+// Returns a new slice with adjusted weights; original signals are unchanged.
+func applyStandaloneWeightReduction(signals []Signal) []Signal {
+	if len(signals) == 0 {
+		return signals
+	}
+
+	// Check if any signal is from a standalone token
+	hasStandalone := false
+	for _, sig := range signals {
+		if sig.IsStandaloneToken {
+			hasStandalone = true
+			break
+		}
+	}
+	if !hasStandalone {
+		return signals
+	}
+
+	// Apply reduction to signals from standalone tokens
+	reduced := make([]Signal, len(signals))
+	for i, sig := range signals {
+		reduced[i] = sig
+		if sig.IsStandaloneToken {
+			reduced[i].Weight = sig.Weight * standaloneWeightMultiplier
+			reduced[i].IsStandaloneToken = true // Keep flag for downstream
+		}
+	}
+	return reduced
+}
+
 // runFragmentChannel analyzes fragment paths.
 // For Latin script: includes exact whole-token matching.
 // For non-Latin scripts: fragment matching is not applicable (see runScriptWordChannel).
@@ -34,8 +71,9 @@ func runFragmentChannel(forms Forms, kb *knowledge.Knowledge) ChannelResult {
 	signals = append(signals, nonLatinSignals...)
 
 	// Second: fragment path analysis (knowledge base only).
-	// Fragment matches from standalone tokens are flagged as IsStandaloneToken
-	// so downstream ranking can suppress structural noise from function words.
+	// Fragment matches from standalone tokens are flagged as IsStandaloneToken.
+	// After collecting all signals, apply weight reduction for standalone token signals
+	// to prevent function words from creating overconfident structural fields.
 	for _, path := range forms.Fragments {
 		for _, part := range path.Parts {
 			// Determine if this part came from a standalone token.
@@ -79,6 +117,10 @@ func runFragmentChannel(forms Forms, kb *knowledge.Knowledge) ChannelResult {
 			}
 		}
 	}
+
+	// Apply weight reduction for signals from standalone tokens
+	// to prevent function words from creating overconfident structural fields.
+	signals = applyStandaloneWeightReduction(signals)
 
 	score := calculateChannelScore(signals)
 

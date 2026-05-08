@@ -132,11 +132,12 @@ func (ps PassageSignal) EvidenceID() string {
 
 // ActivatedConcept represents a concept activated through form matching.
 type ActivatedConcept struct {
-	Concept           string
-	Strength         float64
-	Sources          []string // tokens that activated this concept
-	Confidence       string
-	IsDirectEvidence bool     // true if activation has direct (not graph-propagated) evidence
+	Concept               string
+	Strength              float64
+	Sources               []string // tokens that activated this concept
+	Confidence            string
+	IsDirectEvidence      bool     // true if activation has direct (not graph-propagated) evidence
+	HasOnlyStandaloneEvidence bool // true if only standalone-token evidence (prepositions/function words)
 }
 
 // AnalyzePassageTokens analyzes tokens for passage-level signals.
@@ -149,9 +150,21 @@ func AnalyzePassageTokens(tokens []string, kb *knowledge.Knowledge) []PassageSig
 	// Get all known anchors for fuzzy fallback
 	anchors := GetAllAnchors(kb)
 
+	// Standalone token weight multiplier - reduces weights for standalone function words
+	// to prevent prepositions from creating overconfident structural fields.
+	const standaloneWeightMultiplier = 0.1
+
 	for _, token := range tokens {
 		// Track if this token is a standalone preposition/function word.
 		isStandalone := IsPrepositionOrFunctionWord(token)
+
+		// Calculate weight multiplier for standalone tokens.
+		// This reduces the influence of function words that would otherwise
+		// dominate through exact form matches (e.g., "in" -> "inward").
+		weightMultiplier := 1.0
+		if isStandalone {
+			weightMultiplier = standaloneWeightMultiplier
+		}
 
 		// First: check for direct form match in knowledge base
 		// If a token has ANY curated form, use it and skip fuzzy matching
@@ -166,7 +179,7 @@ func AnalyzePassageTokens(tokens []string, kb *knowledge.Knowledge) []PassageSig
 				signals = append(signals, PassageSignal{
 					Token:              token,
 					Concept:            form.Concept,
-					Weight:             float64(form.Weight),
+					Weight:             float64(form.Weight) * weightMultiplier,
 					Confidence:         form.Confidence,
 					MatchForm:          token,
 					MatchScore:         1.0,

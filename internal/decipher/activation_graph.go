@@ -653,12 +653,14 @@ func (g *ActivationGraph) ToConvergenceResult() ConvergenceResult {
 				break
 			}
 		}
+		hasOnlyStandalone := hasOnlyStandaloneDirectEvidence(node)
 		topConcepts[i] = ActivatedConcept{
-			Concept:           node.Concept,
-			Strength:         node.Strength,
-			Confidence:       node.Confidence,
-			IsDirectEvidence: isDirect,
-		}
+				Concept:                   node.Concept,
+				Strength:                 node.Strength,
+				Confidence:               node.Confidence,
+				IsDirectEvidence:         isDirect,
+				HasOnlyStandaloneEvidence: hasOnlyStandalone,
+			}
 	}
 
 	// Collect all activated concepts
@@ -688,7 +690,8 @@ func (g *ActivationGraph) ToConvergenceResult() ConvergenceResult {
 			Strength:         node.Strength,
 			Sources:          sources,
 			Confidence:       node.Confidence,
-			IsDirectEvidence: isDirect,
+			IsDirectEvidence:         isDirect,
+			HasOnlyStandaloneEvidence: hasOnlyStandaloneDirectEvidence(node),
 		})
 	}
 
@@ -705,6 +708,25 @@ func (g *ActivationGraph) ToConvergenceResult() ConvergenceResult {
 		TopConcepts:       topConcepts,
 		RelationPaths:     paths,
 	}
+}
+
+// =============================================================================
+// Helper Functions
+// =============================================================================
+
+// hasOnlyStandaloneDirectEvidence checks if all direct evidence for a node
+// comes from standalone preposition/function word tokens.
+func hasOnlyStandaloneDirectEvidence(node *ActivationNode) bool {
+	hasDirect := false
+	for _, ev := range node.EvidencePaths() {
+		if ev.IsDirect {
+			hasDirect = true
+			if !ev.IsStandaloneToken {
+				return false // Found genuine direct evidence
+			}
+		}
+	}
+	return hasDirect // true only if all direct evidence is standalone-token
 }
 
 // =============================================================================
