@@ -52,11 +52,12 @@ Completed (see `docs/TODO_ARCHIVE.md` and git history for detail):
 - Real-life Socrates testing: `docs/REAL_LIFE_TESTING.md` covers 22 seeker-style passages across emotional, spiritual, Sanskrit seed, mixed, edge-case, and infrastructure checks. The report is accepted with three follow-up observations: transliterated Sanskrit gaps, preposition noise, and a possible future resentment false-negative curation gap.
 - Transliterated Sanskrit curation: Latin `dharma`, `satya`, `karma`, and `jnana` now activate curated concepts; mixed `I practice dharma every day` surfaces `path`; `satya is the foundation of all practice` surfaces `truth`; prose rendering now follows top direct fields instead of graph-expanded or structural noise.
 - Direct-evidence/rendering support fix: `truth` single-token input now renders as direct evidence, Evidence and Top Fields display are aligned, graph propagation uses source/base strength to avoid repeated-token inflation, and repeated-token accumulation is regression-tested.
+- Preposition/function-word handling: standalone-only structural signals are demoted from Top Fields and prose themes; `in` no longer presents `inward`/`into`/`one` as the concise reading; `There is a deep longing in my heart` now leads with emotional fields instead of preposition-derived fields.
 
 Current git status:
 
 ```text
-## main...origin/main [ahead 93]
+## main...origin/main [ahead 96]
 ```
 
 Key completed metrics (full detail in `docs/ARCHITECTURE_READINESS.md`):
@@ -73,44 +74,40 @@ Key completed metrics (full detail in `docs/ARCHITECTURE_READINESS.md`):
 ## Current Next Task
 
 Task:
-**Preposition handling for standalone structural fragments.**
+**Harmonic/audio rendering foundation.**
 
 Architect review status:
-Supporting fix `5d9892d` is accepted as partial infrastructure:
-- single-token `truth` is direct evidence again
-- Evidence and Top Fields render from the same top-field ordering
-- repeated-token accumulation is bounded by source/base strength propagation
-- Pi reports all tests pass
-
-Preposition handling is not accepted yet:
-- `in` still produces top fields `inward`, `into`, and `one`
-- `There is a deep longing in my heart` still ranks `inward` and `into` above `pain`
-- the concise reading still promotes `inward` for that passage
-- the current standalone-token flags are present, but ranking/suppression has not yet used them enough to satisfy the task
+Preposition/function-word handling is accepted:
+- standalone function-word signals are weighted down and marked so they can be filtered from top user-facing fields
+- standalone-only patterns are excluded from prose theme identification
+- `./bin/socrates "in"` no longer presents `inward`, `into`, or `one` in the concise reading
+- `./bin/socrates "There is a deep longing in my heart"` leads with `pain`, `bitterness`, and `desire`, not `inward`/`into`
+- `./bin/socrates "truth"` still shows `truth` as the main theme
+- `./bin/socrates "I feel sad and empty inside"` still leads with `feeling`, `sadness`, and `emptiness`
+- Sanskrit transliteration and Devanagari direct fields remain stable in representative checks
+- Pi reports `go test ./...` passes and knowledge validation has zero errors
 
 Current blocker:
-- Common standalone prepositions can still activate structural fragment fields too strongly. Example: `There is a deep longing in my heart` promotes `inward`/`into` from standalone `in`, while the intended emotional field `longing` is not yet represented.
-- This is a ranking/filtering task. Keep it generic and evidence-based.
-- Do not hardcode the example passage. Do not remove meaningful fragment behavior inside real words.
-- The next fix must actually change ranking/output behavior for standalone function-word signals, not only tag them.
+- Socrates can compute integer harmonic fields, but it cannot yet render them into any user-facing tone, interval, chord, color swatch, or simple melody representation.
+- The next layer should expose harmonic field data without inventing floating-point meaning claims or hardcoded concept-to-audio behavior.
 
 Required investigation:
-- Inspect how fragment and glyph/bigram channels treat standalone tokens such as `in`, `on`, `at`, `to`, `of`, `is`, `the`, `and`, and similar high-frequency function words.
-- Reduce or suppress structural fragment/bigram weight when a match comes from a standalone preposition/function word, while preserving:
-  - direct curated forms such as `inward` if the full word is present
-  - meaningful fragments inside larger words
-  - direct semantic evidence from curated emotional/spiritual forms
-- Add regression tests for:
-  - `There is a deep longing in my heart` should not rank `inward`/`into` above direct emotional evidence if such evidence exists
-  - standalone `in` should not become an overconfident top semantic field
-  - known direct passages such as `I feel sad and empty inside`, `I seek truth and clarity`, `dharma`, and `satya` remain stable
-- If `longing` itself is not represented in curated knowledge, do not add it in this task unless the smallest safe fix requires a narrowly documented form entry. Prefer solving the generic preposition weighting first.
-- Keep debug output transparent: suppressed or weakened structural signals may still be visible in debug if useful, but they must not dominate concise prose.
-- Re-check representative outputs before committing:
-  - `./bin/socrates "in"` should not present `inward`/`into`/`one` as strong top semantic fields
-  - `./bin/socrates "There is a deep longing in my heart"` should no longer lead with `inward`/`into`
-  - `./bin/socrates "truth"` should still show `truth` as direct
-  - `./bin/socrates "I feel sad and empty inside"` should still lead with direct emotional fields
+- Inspect current harmonic output structures and renderer paths before adding behavior.
+- Add a first rendering layer that converts existing `HarmonicField` data into a deterministic, inspectable representation such as:
+  - tone vector rows
+  - ratio labels
+  - interval/chord descriptors
+  - integer note IDs already present in `frequency_profiles`
+  - integer color/field labels already present in `frequency_profiles`
+- Keep this as textual or structured output first. Do not require actual audio playback yet unless the existing CLI already has a safe place for it.
+- Do not add concept-specific audio mappings in Go. Rendering must derive from curated frequency profiles and integer labels.
+- Do not introduce floating-point frequency values as meaning. If a pitch preview is added later, it must be clearly a rendering choice, not the stored meaning.
+- Add tests proving:
+  - known harmonic inputs such as `truth`, `प्राण`, `dharma`, and `love` produce stable render descriptors
+  - unknown/weak inputs do not produce authoritative renderings
+  - rendering output is deterministic
+  - existing harmonic field calculation remains unchanged
+- Default output may show a concise harmonic summary; debug output may show full render internals.
 
 Rules (unchanged):
 - No hardcoded semantic word lists in production Go.
@@ -130,13 +127,13 @@ Reference:
 
 Acceptance Criteria:
 
-- Standalone function words no longer create overconfident top fields through fragment/bigram structural matches.
-- Meaningful fragments inside larger words still work.
-- Direct curated forms still outrank structural channels.
-- Existing Sanskrit transliteration and Devanagari tests remain green.
-- Existing counsellor precision tests remain green.
+- A deterministic harmonic render descriptor exists for harmonic fields.
+- Render descriptors are derived only from existing integer harmonic field data and curated frequency profiles.
+- Known harmonic inputs produce stable descriptors in tests.
+- Weak/unknown inputs do not produce authoritative render descriptors.
+- No concept-to-audio/color/frequency hardcoding is introduced in production Go.
+- No floating-point meaning-frequency storage is introduced.
 - No broad new knowledge area or runtime channel is introduced.
-- No production Go semantic word maps or word-specific branches are introduced.
 - `./bin/socrates knowledge validate` passes with no errors.
 - `go test ./...` passes.
 - Work is committed locally and not pushed.
@@ -144,8 +141,9 @@ Acceptance Criteria:
 
 ## Next After This
 
-After preposition handling:
-- Harmonic/audio rendering layer
+After harmonic rendering foundation:
+- Private app/UI workflow for personal journaling
+- Saved reflection sessions and field history
 - Consult `docs/ARCHITECTURE_READINESS.md` before major new feature layers
 
 ## Nice To Have Later
