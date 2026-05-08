@@ -53,11 +53,12 @@ Completed (see `docs/TODO_ARCHIVE.md` and git history for detail):
 - Transliterated Sanskrit curation: Latin `dharma`, `satya`, `karma`, and `jnana` now activate curated concepts; mixed `I practice dharma every day` surfaces `path`; `satya is the foundation of all practice` surfaces `truth`; prose rendering now follows top direct fields instead of graph-expanded or structural noise.
 - Direct-evidence/rendering support fix: `truth` single-token input now renders as direct evidence, Evidence and Top Fields display are aligned, graph propagation uses source/base strength to avoid repeated-token inflation, and repeated-token accumulation is regression-tested.
 - Preposition/function-word handling: standalone-only structural signals are demoted from Top Fields and prose themes; `in` no longer presents `inward`/`into`/`one` as the concise reading; `There is a deep longing in my heart` now leads with emotional fields instead of preposition-derived fields.
+- Harmonic rendering foundation: `HarmonicField` now converts to deterministic render descriptors with tone vectors, integer ratios, integer note/color/field labels, relationship descriptors, and concept-to-tone source trace. This is textual/structured only; no audio playback was added.
 
 Current git status:
 
 ```text
-## main...origin/main [ahead 96]
+## main...origin/main [ahead 98]
 ```
 
 Key completed metrics (full detail in `docs/ARCHITECTURE_READINESS.md`):
@@ -74,40 +75,41 @@ Key completed metrics (full detail in `docs/ARCHITECTURE_READINESS.md`):
 ## Current Next Task
 
 Task:
-**Harmonic/audio rendering foundation.**
+**Expose harmonic render descriptors in CLI/debug output.**
 
 Architect review status:
-Preposition/function-word handling is accepted:
-- standalone function-word signals are weighted down and marked so they can be filtered from top user-facing fields
-- standalone-only patterns are excluded from prose theme identification
-- `./bin/socrates "in"` no longer presents `inward`, `into`, or `one` in the concise reading
-- `./bin/socrates "There is a deep longing in my heart"` leads with `pain`, `bitterness`, and `desire`, not `inward`/`into`
-- `./bin/socrates "truth"` still shows `truth` as the main theme
-- `./bin/socrates "I feel sad and empty inside"` still leads with `feeling`, `sadness`, and `emptiness`
-- Sanskrit transliteration and Devanagari direct fields remain stable in representative checks
-- Pi reports `go test ./...` passes and knowledge validation has zero errors
+Harmonic rendering foundation is accepted:
+- `internal/decipher/harmonic_render.go` adds `RenderDescriptor`, tone descriptors, relationship descriptors, and source trace entries
+- descriptors are deterministic and derived from existing `HarmonicField` tone/profile data
+- vectors and ratios remain integer data
+- labels use integer note/color/field IDs already present in frequency profiles
+- output is textual/structured only; no audio playback was added
+- tests cover descriptor conversion, nil handling, string rendering, relationship descriptions, source trace deduplication, integer vector/ratio shape, and archetype names
+- Pi reports all tests pass
 
 Current blocker:
-- Socrates can compute integer harmonic fields, but it cannot yet render them into any user-facing tone, interval, chord, color swatch, or simple melody representation.
-- The next layer should expose harmonic field data without inventing floating-point meaning claims or hardcoded concept-to-audio behavior.
+- The render descriptor exists as a code-level foundation, but the CLI does not yet expose it in default or debug output.
+- A user still sees the older `HarmonicField(...)` summary unless they are reading code/tests.
+- The next task should make render descriptors visible and useful without turning them into audio playback yet.
 
 Required investigation:
-- Inspect current harmonic output structures and renderer paths before adding behavior.
-- Add a first rendering layer that converts existing `HarmonicField` data into a deterministic, inspectable representation such as:
-  - tone vector rows
-  - ratio labels
-  - interval/chord descriptors
-  - integer note IDs already present in `frequency_profiles`
-  - integer color/field labels already present in `frequency_profiles`
-- Keep this as textual or structured output first. Do not require actual audio playback yet unless the existing CLI already has a safe place for it.
-- Do not add concept-specific audio mappings in Go. Rendering must derive from curated frequency profiles and integer labels.
-- Do not introduce floating-point frequency values as meaning. If a pitch preview is added later, it must be clearly a rendering choice, not the stored meaning.
+- Inspect `render.go`, `engine.go`, and current harmonic field rendering.
+- Wire the existing `RenderDescriptor` into CLI rendering:
+  - default output should remain concise, for example one extra `Render:` line when a harmonic field exists
+  - debug output may show the full `RenderDescriptorToString` block
+  - unknown/weak inputs should not show authoritative render descriptors
+- Keep the distinction clear:
+  - `Harmonic:` is the computed field
+  - `Render:` is a deterministic textual representation of that field
+  - this is not audio playback and not a physical frequency claim
+- Do not add concept-specific audio, color, pitch, or frequency branches in Go.
+- Do not add floating-point meaning-frequency storage.
 - Add tests proving:
-  - known harmonic inputs such as `truth`, `प्राण`, `dharma`, and `love` produce stable render descriptors
-  - unknown/weak inputs do not produce authoritative renderings
-  - rendering output is deterministic
-  - existing harmonic field calculation remains unchanged
-- Default output may show a concise harmonic summary; debug output may show full render internals.
+  - default output for known harmonic inputs includes a concise render summary
+  - debug output includes vector, ratio, integer labels, relationships, and source trace
+  - unknown/weak inputs do not show render output
+  - existing concise output remains readable and not bloated
+  - descriptor tests from the foundation remain green
 
 Rules (unchanged):
 - No hardcoded semantic word lists in production Go.
@@ -127,10 +129,10 @@ Reference:
 
 Acceptance Criteria:
 
-- A deterministic harmonic render descriptor exists for harmonic fields.
-- Render descriptors are derived only from existing integer harmonic field data and curated frequency profiles.
-- Known harmonic inputs produce stable descriptors in tests.
-- Weak/unknown inputs do not produce authoritative render descriptors.
+- Known harmonic inputs expose a concise render summary in default CLI output.
+- Debug output exposes full deterministic render descriptor internals.
+- Render output is derived only from existing integer harmonic field data and curated frequency profiles.
+- Weak/unknown inputs do not show authoritative render output.
 - No concept-to-audio/color/frequency hardcoding is introduced in production Go.
 - No floating-point meaning-frequency storage is introduced.
 - No broad new knowledge area or runtime channel is introduced.
@@ -141,7 +143,7 @@ Acceptance Criteria:
 
 ## Next After This
 
-After harmonic rendering foundation:
+After CLI render exposure:
 - Private app/UI workflow for personal journaling
 - Saved reflection sessions and field history
 - Consult `docs/ARCHITECTURE_READINESS.md` before major new feature layers
