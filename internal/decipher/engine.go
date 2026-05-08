@@ -453,10 +453,11 @@ func generateConciseReading(input string, converging []Pattern, weakSignals []Pa
 	}
 
 	// Identify main themes from converging patterns
+	// Exclude standalone-only patterns (from prepositions/function words)
 	if len(converging) > 0 {
 		var themes []string
 		for _, p := range converging {
-			if p.Strength > 0.5 && patternHasDirectEvidence(p) {
+			if p.Strength > 0.5 && patternHasDirectEvidence(p) && !patternIsStandaloneOnly(p) {
 				themes = append(themes, p.Name)
 			}
 		}
@@ -466,10 +467,11 @@ func generateConciseReading(input string, converging []Pattern, weakSignals []Pa
 	}
 
 	// Add notes about weak signals
+	// Exclude standalone-only patterns from weak signal themes
 	if len(weakSignals) > 0 {
 		var weakThemes []string
 		for _, p := range weakSignals {
-			if patternHasDirectEvidence(p) {
+			if patternHasDirectEvidence(p) && !patternIsStandaloneOnly(p) {
 				weakThemes = append(weakThemes, p.Name)
 			}
 		}
@@ -483,6 +485,21 @@ func generateConciseReading(input string, converging []Pattern, weakSignals []Pa
 	}
 
 	return strings.Join(parts, " ")
+}
+
+// patternIsStandaloneOnly returns true if all signals in the pattern come from
+// standalone preposition/function word tokens. Such patterns should be demoted.
+func patternIsStandaloneOnly(p Pattern) bool {
+	if len(p.Signals) == 0 {
+		return false
+	}
+	for _, sig := range p.Signals {
+		if sig.IsDirect && !sig.IsStandaloneToken {
+			return false // Found genuine direct evidence (not standalone)
+		}
+	}
+	// All direct signals are from standalone tokens
+	return true
 }
 
 func patternHasDirectEvidence(p Pattern) bool {
